@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 export const fetchProducts = async (params = {}) => {
   const query = new URLSearchParams(params).toString();

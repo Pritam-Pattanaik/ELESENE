@@ -40,11 +40,17 @@ app.get('/', (req, res) => {
 // Database sync and server start
 const PORT = process.env.PORT || 3000;
 
-sequelize.sync({ alter: true }).then(() => {
-  console.log('Database connected and synced');
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Database connection and server start
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  sequelize.sync({ alter: true }).then(() => {
+    console.log('Database connected and synced');
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Failed to sync database:', err);
   });
-}).catch(err => {
-  console.error('Failed to sync database:', err);
-});
+}
+
+// Export for Vercel
+module.exports = app;
