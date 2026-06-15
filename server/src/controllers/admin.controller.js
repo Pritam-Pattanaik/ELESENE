@@ -1,0 +1,776 @@
+const { Product, Category, ProductVariant, ProductImage, Order, OrderItem, User, Coupon, Address, Review } = require('../models');
+const { Op, fn, col, literal } = require('sequelize');
+const sequelize = require('../config/db');
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+
+// @desc    Get dashboard analytics
+// @route   GET /api/admin/dashboard
+const getDashboard = async (req, res) => {
+  try {
+    // Total revenue (paid orders only)
+    const revenueResult = await Order.findOne({
+      attributes: [[fn('COALESCE', fn('SUM', col('total_amount')), 0), 'totalRevenue']],
+      where: { payment_status: 'paid' },
+      raw: true,
+    });
+
+    // Total orders
+    const totalOrders = await Order.count();
+
+    // Total customers
+    const totalCustomers = await User.count({ where: { role: 'customer' } });
+
+    // Active products
+    const activeProducts = await Product.count({ where: { is_active: true } });
+
+    // Pending orders
+    const pendingOrders = await Order.count({ where: { status: 'pending' } });
+
+    // Recent orders
+    const recentOrders = await Order.findAll({
+      include: [{ model: User, attributes: ['full_name', 'email'] }],
+      order: [['created_at', 'DESC']],
+      limit: 10,
+    });
+
+    // Top products by order count
+    const topProducts = await OrderItem.findAll({
+      attributes: [
+        'product_id',
+        [fn('SUM', col('quantity')), 'total_sold'],
+        [fn('SUM', col('total_price')), 'total_revenue'],
+      ],
+      include: [{ model: Product, attributes: ['name', 'slug', 'base_price'] }],
+      group: ['product_id', 'Product.id'],
+      order: [[fn('SUM', col('quantity')), 'DESC']],
+      limit: 5,
+      raw: false,
+    });
+
+    // Monthly revenue (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyRevenue = await Order.findAll({
+      attributes: [
+        [fn('date_trunc', 'month', col('created_at')), 'month'],
+        [fn('COALESCE', fn('SUM', col('total_amount')), 0), 'revenue'],
+        [fn('COUNT', col('id')), 'order_count'],
+      ],
+      where: {
+        payment_status: 'paid',
+        created_at: { [Op.gte]: sixMonthsAgo },
+      },
+      group: [fn('date_trunc', 'month', col('created_at'))],
+      order: [[fn('date_trunc', 'month', col('created_at')), 'ASC']],
+      raw: true,
+    });
+
+    res.json({
+      success: true,
+      dashboard: {
+        totalRevenue: parseFloat(revenueResult.totalRevenue) || 0,
+        totalOrders,
+        totalCustomers,
+        activeProducts,
+        pendingOrders,
+        recentOrders,
+        topProducts,
+        monthlyRevenue,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ═══════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════
+
+// @desc    Create a product
+// @route   POST /api/admin/products
+const createProduct = async (req, res) => {
+  try {
+    const { name, slug, description, base_price, sale_price, category_id, sku, brand, material, care_instructions, is_featured, is_trending, tags, meta_title, meta_description } = req.body;
+
+    const product = await Product.create({
+      name, slug, description, base_price, sale_price, category_id, sku, brand,
+      material, care_instructions, is_featured, is_trending, tags, meta_title, meta_description
+    });
+
+    res.status(201).json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get all products (admin — includes inactive)
+// @route   GET /api/admin/products
+const getAdminProducts = async (req, res) => {
+  try {
+    const { page = 1, limit = 15, search, status, category } = req.query;
+    const offset = (page - 1) * limit;
+
+    let whereClause = {};
+
+    if (search) {
+      whereClause[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { sku: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    if (status === 'active') whereClause.is_active = true;
+    if (status === 'inactive') whereClause.is_active = false;
+    if (status === 'featured') whereClause.is_featured = true;
+    if (status === 'trending') whereClause.is_trending = true;
+
+    if (category) whereClause.category_id = category;
+
+    const { count, rows } = await Product.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: ProductImage, as: 'images', attributes: ['id', 'image_url', 'is_primary'] },
+        { model: Category, attributes: ['name', 'slug'] },
+        { model: ProductVariant, as: 'variants', attributes: ['id', 'size', 'color', 'stock_quantity', 'additional_price'] },
+      ],
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      distinct: true,
+    });
+
+    res.json({
+      success: true,
+      products: rows,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get single product
+// @route   GET /api/admin/products/:id
+const getAdminProduct = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: [
+        { model: ProductVariant, as: 'variants' },
+        { model: ProductImage, as: 'images' },
+        { model: Category, attributes: ['id', 'name', 'slug'] },
+      ],
+    });
+
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    res.json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update product
+// @route   PUT /api/admin/products/:id
+const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    const allowedFields = ['name', 'slug', 'description', 'base_price', 'sale_price', 'category_id', 'sku', 'brand', 'material', 'care_instructions', 'is_active', 'is_featured', 'is_trending', 'tags', 'meta_title', 'meta_description'];
+
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) product[field] = req.body[field];
+    });
+
+    await product.save();
+
+    res.json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete product (soft-delete)
+// @route   DELETE /api/admin/products/:id
+const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    product.is_active = false;
+    await product.save();
+
+    res.json({ success: true, message: 'Product deactivated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Upload product images
+// @route   POST /api/admin/products/:id/images
+const uploadProductImages = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: 'No files uploaded' });
+    }
+
+    const imagePromises = req.files.map(file => {
+      const imageUrl = `/uploads/${file.filename}`;
+      return ProductImage.create({
+        product_id: product.id,
+        image_url: imageUrl,
+        is_primary: req.files.indexOf(file) === 0
+      });
+    });
+
+    const savedImages = await Promise.all(imagePromises);
+
+    res.json({ success: true, images: savedImages });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete product image
+// @route   DELETE /api/admin/products/:id/images/:imageId
+const deleteProductImage = async (req, res) => {
+  try {
+    const image = await ProductImage.findOne({
+      where: { id: req.params.imageId, product_id: req.params.id },
+    });
+    if (!image) return res.status(404).json({ success: false, message: 'Image not found' });
+
+    await image.destroy();
+    res.json({ success: true, message: 'Image deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Create product variant
+// @route   POST /api/admin/products/:id/variants
+const createVariant = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+    const { size, color, color_hex, stock_quantity, sku_variant, weight_grams, additional_price } = req.body;
+
+    const variant = await ProductVariant.create({
+      product_id: product.id,
+      size, color, color_hex, stock_quantity, sku_variant, weight_grams, additional_price,
+    });
+
+    res.status(201).json({ success: true, variant });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update product variant
+// @route   PUT /api/admin/products/:id/variants/:variantId
+const updateVariant = async (req, res) => {
+  try {
+    const variant = await ProductVariant.findOne({
+      where: { id: req.params.variantId, product_id: req.params.id },
+    });
+    if (!variant) return res.status(404).json({ success: false, message: 'Variant not found' });
+
+    const fields = ['size', 'color', 'color_hex', 'stock_quantity', 'sku_variant', 'weight_grams', 'additional_price'];
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) variant[field] = req.body[field];
+    });
+
+    await variant.save();
+    res.json({ success: true, variant });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete product variant
+// @route   DELETE /api/admin/products/:id/variants/:variantId
+const deleteVariant = async (req, res) => {
+  try {
+    const variant = await ProductVariant.findOne({
+      where: { id: req.params.variantId, product_id: req.params.id },
+    });
+    if (!variant) return res.status(404).json({ success: false, message: 'Variant not found' });
+
+    await variant.destroy();
+    res.json({ success: true, message: 'Variant deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════
+// CATEGORIES
+// ═══════════════════════════════════════
+
+// @desc    Create a category
+// @route   POST /api/admin/categories
+const createCategory = async (req, res) => {
+  try {
+    const { name, slug, parent_id, description, image_url, sort_order } = req.body;
+
+    const category = await Category.create({
+      name, slug, parent_id, description, image_url, sort_order
+    });
+
+    res.status(201).json({ success: true, category });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get all categories (admin — includes inactive)
+// @route   GET /api/admin/categories
+const getAdminCategories = async (req, res) => {
+  try {
+    const categories = await Category.findAll({
+      order: [['sort_order', 'ASC']],
+      include: [{ model: Product, attributes: ['id'] }],
+    });
+
+    // Add product count
+    const categoriesWithCount = categories.map(cat => ({
+      ...cat.toJSON(),
+      productCount: cat.Products ? cat.Products.length : 0,
+    }));
+
+    res.json({ success: true, categories: categoriesWithCount });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update category
+// @route   PUT /api/admin/categories/:id
+const updateCategory = async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
+
+    const fields = ['name', 'slug', 'parent_id', 'description', 'image_url', 'is_active', 'sort_order'];
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) category[field] = req.body[field];
+    });
+
+    await category.save();
+    res.json({ success: true, category });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete category (soft)
+// @route   DELETE /api/admin/categories/:id
+const deleteCategory = async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
+
+    category.is_active = false;
+    await category.save();
+    res.json({ success: true, message: 'Category deactivated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════
+// ORDERS
+// ═══════════════════════════════════════
+
+// @desc    Get all orders (admin)
+// @route   GET /api/admin/orders
+const getAdminOrders = async (req, res) => {
+  try {
+    const { page = 1, limit = 15, status, payment_status, search, from, to } = req.query;
+    const offset = (page - 1) * limit;
+
+    let whereClause = {};
+
+    if (status) whereClause.status = status;
+    if (payment_status) whereClause.payment_status = payment_status;
+
+    if (search) {
+      whereClause[Op.or] = [
+        { order_number: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    if (from || to) {
+      whereClause.created_at = {};
+      if (from) whereClause.created_at[Op.gte] = new Date(from);
+      if (to) whereClause.created_at[Op.lte] = new Date(to);
+    }
+
+    const { count, rows } = await Order.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: User, attributes: ['full_name', 'email', 'phone'] },
+        { model: OrderItem, include: [{ model: Product, attributes: ['name', 'slug'] }] },
+        { model: Address, as: 'shippingAddress' },
+      ],
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      distinct: true,
+    });
+
+    res.json({
+      success: true,
+      orders: rows,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get single order
+// @route   GET /api/admin/orders/:id
+const getAdminOrder = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ['full_name', 'email', 'phone'] },
+        { model: OrderItem, include: [{ model: Product }, { model: ProductVariant }] },
+        { model: Address, as: 'shippingAddress' },
+      ],
+    });
+
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update order status
+// @route   PUT /api/admin/orders/:id/status
+const updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    const { status } = req.body;
+    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'];
+    
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    order.status = status;
+    if (status === 'shipped') order.shipped_at = new Date();
+    if (status === 'delivered') order.delivered_at = new Date();
+
+    await order.save();
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update tracking number
+// @route   PUT /api/admin/orders/:id/tracking
+const updateOrderTracking = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    order.tracking_number = req.body.tracking_number;
+    await order.save();
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════
+
+// @desc    Get all users
+// @route   GET /api/admin/users
+const getAdminUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 15, search, role } = req.query;
+    const offset = (page - 1) * limit;
+
+    let whereClause = {};
+
+    if (search) {
+      whereClause[Op.or] = [
+        { full_name: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    if (role) whereClause.role = role;
+
+    const { count, rows } = await User.findAndCountAll({
+      where: whereClause,
+      attributes: { exclude: ['password_hash', 'firebase_uid'] },
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    });
+
+    res.json({
+      success: true,
+      users: rows,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get single user with orders
+// @route   GET /api/admin/users/:id
+const getAdminUser = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id, {
+      attributes: { exclude: ['password_hash', 'firebase_uid'] },
+      include: [
+        { model: Order, order: [['created_at', 'DESC']], limit: 10 },
+        { model: Address },
+      ],
+    });
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update user role (superadmin only)
+// @route   PUT /api/admin/users/:id/role
+const updateUserRole = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const { role } = req.body;
+    const validRoles = ['customer', 'admin', 'superadmin'];
+
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: `Invalid role. Must be one of: ${validRoles.join(', ')}` });
+    }
+
+    // Prevent removing the last superadmin
+    if (user.role === 'superadmin' && role !== 'superadmin') {
+      const superadminCount = await User.count({ where: { role: 'superadmin' } });
+      if (superadminCount <= 1) {
+        return res.status(400).json({ success: false, message: 'Cannot remove the last superadmin' });
+      }
+    }
+
+    user.role = role;
+    await user.save();
+    res.json({ success: true, user: { id: user.id, email: user.email, role: user.role } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════
+// COUPONS
+// ═══════════════════════════════════════
+
+// @desc    Get all coupons
+// @route   GET /api/admin/coupons
+const getAdminCoupons = async (req, res) => {
+  try {
+    const coupons = await Coupon.findAll({
+      order: [['valid_until', 'DESC']],
+    });
+    res.json({ success: true, coupons });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Create coupon
+// @route   POST /api/admin/coupons
+const createCoupon = async (req, res) => {
+  try {
+    const { code, type, value, min_order_value, max_discount, usage_limit, per_user_limit, valid_from, valid_until, applicable_categories, applicable_products } = req.body;
+
+    const coupon = await Coupon.create({
+      code: code.toUpperCase(),
+      type, value, min_order_value, max_discount, usage_limit, per_user_limit,
+      valid_from, valid_until, applicable_categories, applicable_products,
+    });
+
+    res.status(201).json({ success: true, coupon });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update coupon
+// @route   PUT /api/admin/coupons/:id
+const updateCoupon = async (req, res) => {
+  try {
+    const coupon = await Coupon.findByPk(req.params.id);
+    if (!coupon) return res.status(404).json({ success: false, message: 'Coupon not found' });
+
+    const fields = ['code', 'type', 'value', 'min_order_value', 'max_discount', 'usage_limit', 'per_user_limit', 'valid_from', 'valid_until', 'is_active', 'applicable_categories', 'applicable_products'];
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) coupon[field] = req.body[field];
+    });
+
+    await coupon.save();
+    res.json({ success: true, coupon });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete coupon (soft)
+// @route   DELETE /api/admin/coupons/:id
+const deleteCoupon = async (req, res) => {
+  try {
+    const coupon = await Coupon.findByPk(req.params.id);
+    if (!coupon) return res.status(404).json({ success: false, message: 'Coupon not found' });
+
+    coupon.is_active = false;
+    await coupon.save();
+    res.json({ success: true, message: 'Coupon deactivated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════
+// REVIEWS
+// ═══════════════════════════════════════
+
+// @desc    Get all reviews
+// @route   GET /api/admin/reviews
+const getAdminReviews = async (req, res) => {
+  try {
+    const { page = 1, limit = 15, approved } = req.query;
+    const offset = (page - 1) * limit;
+    let whereClause = {};
+    if (approved !== undefined) whereClause.is_approved = approved === 'true';
+
+    const { count, rows } = await Review.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: Product, attributes: ['name', 'slug'] },
+        { model: User, attributes: ['full_name', 'email'] },
+      ],
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      distinct: true,
+    });
+
+    res.json({
+      success: true,
+      reviews: rows,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Approve/reject review
+// @route   PUT /api/admin/reviews/:id
+const updateReview = async (req, res) => {
+  try {
+    const review = await Review.findByPk(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    if (req.body.is_approved !== undefined) review.is_approved = req.body.is_approved;
+    await review.save();
+    res.json({ success: true, review });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete review
+// @route   DELETE /api/admin/reviews/:id
+const deleteReview = async (req, res) => {
+  try {
+    const review = await Review.findByPk(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    await review.destroy();
+    res.json({ success: true, message: 'Review deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+module.exports = {
+  // Dashboard
+  getDashboard,
+  // Products
+  createProduct,
+  getAdminProducts,
+  getAdminProduct,
+  updateProduct,
+  deleteProduct,
+  uploadProductImages,
+  deleteProductImage,
+  createVariant,
+  updateVariant,
+  deleteVariant,
+  // Categories
+  createCategory,
+  getAdminCategories,
+  updateCategory,
+  deleteCategory,
+  // Orders
+  getAdminOrders,
+  getAdminOrder,
+  updateOrderStatus,
+  updateOrderTracking,
+  // Users
+  getAdminUsers,
+  getAdminUser,
+  updateUserRole,
+  // Coupons
+  getAdminCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  // Reviews
+  getAdminReviews,
+  updateReview,
+  deleteReview,
+};
