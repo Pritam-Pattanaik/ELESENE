@@ -95,11 +95,35 @@ const getDashboard = async (req, res) => {
 // @route   POST /api/admin/products
 const createProduct = async (req, res) => {
   try {
-    const { name, slug, description, base_price, sale_price, category_id, sku, brand, material, care_instructions, is_featured, is_trending, tags, meta_title, meta_description } = req.body;
+    const { name, slug, description, base_price, price, sale_price, category_id, sku, brand, material, care_instructions, is_featured, is_trending, tags, meta_title, meta_description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Product name is required' });
+    }
+
+    const finalBasePrice = base_price !== undefined ? parseFloat(base_price) : (price !== undefined ? parseFloat(price) : 0);
+    const finalSlug = (slug && slug.trim())
+      ? slug.trim().toLowerCase()
+      : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    const finalSku = (sku && sku.trim()) ? sku.trim() : `SKU-${Date.now()}`;
 
     const product = await Product.create({
-      name, slug, description, base_price, sale_price, category_id, sku, brand,
-      material, care_instructions, is_featured, is_trending, tags, meta_title, meta_description
+      name,
+      slug: finalSlug,
+      description: description || '',
+      base_price: finalBasePrice,
+      sale_price: sale_price ? parseFloat(sale_price) : null,
+      category_id: category_id || null,
+      sku: finalSku,
+      brand: brand || 'ELESENE',
+      material: material || null,
+      care_instructions: care_instructions || null,
+      is_featured: !!is_featured,
+      is_trending: !!is_trending,
+      tags: tags || [],
+      meta_title: meta_title || name,
+      meta_description: meta_description || description || ''
     });
 
     res.status(201).json({ success: true, product });
@@ -117,19 +141,21 @@ const getAdminProducts = async (req, res) => {
 
     let whereClause = {};
 
-    if (search) {
+    if (search && search !== 'undefined') {
       whereClause[Op.or] = [
         { name: { [Op.iLike]: `%${search}%` } },
         { sku: { [Op.iLike]: `%${search}%` } },
       ];
     }
 
-    if (status === 'active') whereClause.is_active = true;
-    if (status === 'inactive') whereClause.is_active = false;
-    if (status === 'featured') whereClause.is_featured = true;
-    if (status === 'trending') whereClause.is_trending = true;
+    if (status && status !== 'undefined') {
+      if (status === 'active') whereClause.is_active = true;
+      if (status === 'inactive') whereClause.is_active = false;
+      if (status === 'featured') whereClause.is_featured = true;
+      if (status === 'trending') whereClause.is_trending = true;
+    }
 
-    if (category) whereClause.category_id = category;
+    if (category && category !== 'undefined') whereClause.category_id = category;
 
     const { count, rows } = await Product.findAndCountAll({
       where: whereClause,
@@ -213,10 +239,29 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// @desc    Toggle product featured status
+// @route   PATCH /api/admin/products/:id/featured
+const toggleFeaturedProduct = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    
+    product.is_featured = req.body.is_featured !== undefined ? req.body.is_featured : !product.is_featured;
+    await product.save();
+    
+    res.json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Upload product images
 // @route   POST /api/admin/products/:id/images
 const uploadProductImages = async (req, res) => {
   try {
+    const fs = require('fs');
+    const path = require('path');
+
     const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
@@ -224,12 +269,68 @@ const uploadProductImages = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No files uploaded' });
     }
 
-    const imagePromises = req.files.map(file => {
-      const imageUrl = `/uploads/${file.filename}`;
+    const uploadDir = path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const hasValidSupabase = () => {
+      const url = process.env.SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+      if (!url || !key) return false;
+      if (url.includes('placeholder') || url.includes('your-project') || url.includes('example')) return false;
+      if (key.includes('placeholder') || key.includes('your_') || key.includes('example')) return false;
+      return true;
+    };
+
+    const supabase = require('../config/supabase');
+    const useSupabase = hasValidSupabase();
+
+    const imagePromises = req.files.map(async (file, index) => {
+      let imageUrl;
+
+      if (useSupabase && file.buffer) {
+        try {
+          const fileExt = file.originalname.split('.').pop();
+          const fileName = `${product.id}/${Date.now()}-${Math.round(Math.random() * 1E9)}.${fileExt}`;
+
+          const { data, error } = await supabase.storage
+            .from('product-images')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+              upsert: true
+            });
+
+          if (!error && data) {
+            const { data: publicUrlData } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(fileName);
+
+            imageUrl = publicUrlData.publicUrl;
+          }
+        } catch (supabaseError) {
+          console.warn('Supabase image upload failed, using disk fallback:', supabaseError.message);
+        }
+      }
+
+      // Fallback to disk if Supabase failed or was not configured
+      if (!imageUrl) {
+        let filename = file.filename;
+        if (!filename) {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const ext = path.extname(file.originalname) || '.jpg';
+          filename = `${uniqueSuffix}${ext}`;
+          if (file.buffer) {
+            fs.writeFileSync(path.join(uploadDir, filename), file.buffer);
+          }
+        }
+        imageUrl = `/uploads/${filename}`;
+      }
+
       return ProductImage.create({
         product_id: product.id,
         image_url: imageUrl,
-        is_primary: req.files.indexOf(file) === 0
+        is_primary: index === 0
       });
     });
 
@@ -467,24 +568,45 @@ const getAdminOrder = async (req, res) => {
 // @desc    Update order status
 // @route   PUT /api/admin/orders/:id/status
 const updateOrderStatus = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const order = await Order.findByPk(req.params.id);
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    const order = await Order.findByPk(req.params.id, { transaction: t });
+    if (!order) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
 
     const { status } = req.body;
     const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'];
     
     if (!validStatuses.includes(status)) {
+      await t.rollback();
       return res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    // If changing to cancelled from non-cancelled status, restore stock
+    if (status === 'cancelled' && order.status !== 'cancelled') {
+      const orderItems = await OrderItem.findAll({ where: { order_id: order.id }, transaction: t });
+      for (const item of orderItems) {
+        if (item.variant_id) {
+          const variant = await ProductVariant.findByPk(item.variant_id, { transaction: t, lock: t.LOCK.UPDATE });
+          if (variant) {
+            variant.stock_quantity += item.quantity;
+            await variant.save({ transaction: t });
+          }
+        }
+      }
     }
 
     order.status = status;
     if (status === 'shipped') order.shipped_at = new Date();
     if (status === 'delivered') order.delivered_at = new Date();
 
-    await order.save();
+    await order.save({ transaction: t });
+    await t.commit();
     res.json({ success: true, order });
   } catch (error) {
+    await t.rollback();
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -518,7 +640,7 @@ const getAdminUsers = async (req, res) => {
 
     let whereClause = {};
 
-    if (search) {
+    if (search && search !== 'undefined') {
       whereClause[Op.or] = [
         { full_name: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } },
@@ -526,7 +648,7 @@ const getAdminUsers = async (req, res) => {
       ];
     }
 
-    if (role) whereClause.role = role;
+    if (role && role !== 'undefined') whereClause.role = role;
 
     const { count, rows } = await User.findAndCountAll({
       where: whereClause,
@@ -745,6 +867,7 @@ module.exports = {
   getAdminProduct,
   updateProduct,
   deleteProduct,
+  toggleFeaturedProduct,
   uploadProductImages,
   deleteProductImage,
   createVariant,

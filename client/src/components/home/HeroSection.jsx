@@ -1,77 +1,252 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+
+
+const heroFeatures = [
+  {
+    icon: (
+      <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m9-9H3m15.364 6.364l-12.728-12.728m0 12.728L17.364 5.636" />
+      </svg>
+    ),
+    title: 'EXCLUSIVE DESIGNS',
+    desc: 'Limited pieces for the connoisseur'
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+    ),
+    title: 'ARTISAN CRAFTED',
+    desc: 'Handcrafted in Italian ateliers'
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3 3" />
+      </svg>
+    ),
+    title: 'SUSTAINABLE LUXURY',
+    desc: 'Ethical materials, timeless impact'
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    ),
+    title: 'PRIVATE EXPERIENCE',
+    desc: 'Bespoke service for discerning clients'
+  }
+];
 
 const HeroSection = () => {
-  const [isVideoDone, setIsVideoDone] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isMounted, setIsMounted]   = useState(false); // whole-section fade-in on route change
+  const [videoReady, setVideoReady] = useState(false); // video fades in once playable (no flash)
   const videoRef = useRef(null);
+  const heroRef  = useRef(null);
 
-  // Fallback in case the video can't play or end event fails
+  // Trigger fade-in on next frame after mount so the section never snaps in
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isVideoDone) setIsVideoDone(true);
-    }, 8000); // Max 8 seconds wait just in case
-    return () => clearTimeout(timer);
-  }, [isVideoDone]);
+    const id = requestAnimationFrame(() => setIsMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Pause background video when scrolled out of view to save GPU decoding
+  useEffect(() => {
+    const video = videoRef.current;
+    const hero  = heroRef.current;
+    if (!video || !hero) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-noir">
+    <section
+      ref={heroRef}
+      className="relative min-h-screen w-full bg-noir pt-24 pb-16 flex flex-col justify-between overflow-hidden"
+      style={{
+        opacity: isMounted ? 1 : 0,
+        transition: 'opacity 0.55s ease-out',
+        willChange: 'opacity',
+      }}
+    >
       
-      {/* Background Video */}
+      {/* Background Video — fades in only once ready, no image flash */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-        <video 
+        <video
           ref={videoRef}
-          autoPlay 
-          muted 
-          playsInline 
-          onEnded={() => setIsVideoDone(true)}
-          className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover opacity-80"
+          autoPlay
+          muted
+          loop
+          playsInline
+          fetchPriority="high"
+          onCanPlay={() => setVideoReady(true)}
+          className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
+          style={{
+            opacity: videoReady ? 0.9 : 0,
+            transition: 'opacity 1.2s ease-in-out',
+            willChange: 'opacity',
+          }}
         >
           <source src="/Woman_walking_on_city_street_202605051557.mp4" type="video/mp4" />
         </video>
-        {/* Very light overlay to allow video to be clear */}
-        <div className="absolute inset-0 bg-gradient-to-b from-noir/50 via-noir/10 to-noir/80 pointer-events-none" />
+
+        {/* Soft Golden Ivory Vignette Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-noir via-noir/75 to-transparent pointer-events-none w-full md:w-3/5 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-noir via-transparent to-noir/40 pointer-events-none z-10" />
       </div>
 
-      <div className="absolute inset-0 z-10 w-full max-w-[1800px] mx-auto px-4 md:px-12 flex justify-between items-center pointer-events-none overflow-hidden">
+      {/* Main Grid Content */}
+      <div className="relative z-20 max-w-[1450px] mx-auto px-4 sm:px-6 md:px-12 w-full my-auto grid lg:grid-cols-12 gap-8 items-center min-h-[560px]">
         
-        {/* ELE sliding from left */}
-        <motion.div
-          initial={{ x: "-100vw", opacity: 0 }}
-          animate={isVideoDone ? { x: 0, opacity: 1 } : { x: "-100vw", opacity: 0 }}
-          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-        >
-          <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-display font-bold text-white tracking-normal drop-shadow-lg leading-none">ELE</h1>
-        </motion.div>
-        
-        {/* SENE sliding from right */}
-        <motion.div
-          initial={{ x: "100vw", opacity: 0 }}
-          animate={isVideoDone ? { x: 0, opacity: 1 } : { x: "100vw", opacity: 0 }}
-          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-        >
-          <h1 className="text-[clamp(3.5rem,10vw,10rem)] font-display font-bold text-white tracking-normal drop-shadow-lg leading-none">SENE</h1>
-        </motion.div>
-        
+        {/* Left Editorial Copy */}
+        <div className="lg:col-span-7 space-y-6 max-w-2xl">
+          
+          <motion.div
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-2"
+          >
+            <span className="text-xs font-futura font-bold tracking-[0.35em] text-ivory/70 uppercase block">
+              AUTUMN / WINTER 2026
+            </span>
+            <div className="w-12 h-[2px] bg-gold" />
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-display-hero text-ivory font-normal leading-[1.08] tracking-tight uppercase"
+          >
+            HAUTE COUTURE <br />
+            <span className="font-display font-bold text-ivory">REDEFINED</span>
+          </motion.h1>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="space-y-2 pt-2 border-l-2 border-gold pl-4"
+          >
+            <p className="text-base md:text-lg font-display italic text-ivory/80 font-medium">
+              Where structural precision meets fluid elegance.
+            </p>
+            <p className="text-xs font-futura font-bold tracking-[0.25em] text-ivory/70 uppercase">
+              Milan • Paris • Florence Ateliers
+            </p>
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="flex flex-wrap items-center gap-3 sm:gap-4 pt-4"
+          >
+            <Link 
+              to="/shop"
+              data-cursor="SHOP"
+              className="inline-flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-3.5 sm:py-4 bg-ivory text-white hover:bg-gold hover:text-noir rounded-xl text-[11px] sm:text-xs font-futura font-bold tracking-[0.2em] uppercase transition-all duration-300 shadow-xl hover:shadow-gold/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <span>EXPLORE COLLECTION</span>
+              <span>→</span>
+            </Link>
+
+            <Link 
+              to="/lookbook"
+              data-cursor="VIEW"
+              className="inline-flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-3.5 sm:py-4 glass-subtle border border-white/25 text-ivory hover:border-gold/50 hover:text-gold rounded-xl text-[11px] sm:text-xs font-futura font-bold tracking-[0.2em] uppercase backdrop-blur-md transition-all duration-300 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <span>DISCOVER LOOKBOOK</span>
+              <span>📖</span>
+            </Link>
+          </motion.div>
+
+        </div>
+
       </div>
 
-      {/* Social Icons floating in the banner */}
-      <div className="absolute bottom-12 right-8 md:right-16 z-20 flex gap-6 text-white/50">
-        <a href="#" className="hover:text-white transition-colors duration-300">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
-          </svg>
-        </a>
-        <a href="#" className="hover:text-white transition-colors duration-300">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-          </svg>
-        </a>
-        <a href="#" className="hover:text-white transition-colors duration-300">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.258 2.656 7.914 6.48 9.294-.09-.79-.17-2.006.036-2.868.188-.795 1.215-5.143 1.215-5.143s-.31-.621-.31-1.539c0-1.442.836-2.517 1.876-2.517.886 0 1.314.665 1.314 1.463 0 .891-.568 2.222-.86 3.456-.245 1.032.518 1.872 1.535 1.872 1.843 0 3.262-1.944 3.262-4.75 0-2.484-1.785-4.223-4.327-4.223-2.951 0-4.685 2.213-4.685 4.5 0 .892.343 1.85.772 2.373.085.103.097.195.07.306-.086.353-.28 1.14-.317 1.303-.049.213-.162.258-.382.155-1.427-.67-2.318-2.775-2.318-4.468 0-3.64 2.645-6.98 7.633-6.98 3.998 0 7.106 2.85 7.106 6.643 0 3.978-2.507 7.177-5.992 7.177-1.168 0-2.268-.607-2.643-1.325l-.718 2.733c-.26 1.002-.962 2.256-1.434 3.023A9.972 9.972 0 0012 22c5.523 0 10-4.477 10-10s-4.477-10-10-10z" clipRule="evenodd" />
-          </svg>
-        </a>
+      {/* Floating 4-Pillar Bottom Banner */}
+      <div className="relative z-20 max-w-[1380px] mx-auto px-4 sm:px-6 w-full mt-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.8 }}
+          className="glass-card glass-shimmer p-4 sm:p-6 md:p-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/20"
+        >
+          {heroFeatures.map((feat) => (
+            <div key={feat.title} className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-4 first:pt-0 first:px-0">
+              <div className="w-12 h-12 rounded-xl glass-gold flex items-center justify-center shrink-0 border border-gold/25">
+                {feat.icon}
+              </div>
+              <div>
+                <h4 className="text-xs font-futura font-bold text-ivory tracking-widest uppercase">
+                  {feat.title}
+                </h4>
+                <p className="text-[11px] text-ivory/70 font-futura font-light mt-0.5 leading-snug">
+                  {feat.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
+
+      {/* Cinema Fullscreen Video Modal */}
+      <AnimatePresence>
+        {isVideoModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/20 z-10 bg-black"
+            >
+              <button 
+                onClick={() => setIsVideoModalOpen(false)}
+                aria-label="Close video modal"
+                className="absolute top-4 right-6 text-white hover:text-gold text-3xl font-bold z-20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                &times;
+              </button>
+              <video 
+                autoPlay 
+                controls 
+                className="w-full h-full object-cover"
+              >
+                <source src="/Woman_walking_on_city_street_202605051557.mp4" type="video/mp4" />
+              </video>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </section>
   );

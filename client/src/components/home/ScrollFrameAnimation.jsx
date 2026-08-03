@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent, useInView } from 'framer-motion';
 import './ScrollFrameAnimation.css';
 
 /* ─── Default Feature data ─── */
@@ -48,13 +48,17 @@ const FeatureCard = ({ feature, progress }) => {
   const fadeOut = Math.min(1, Math.max(0, (end - progress) / (end - mid)));
   const opacity = Math.min(fadeIn, fadeOut);
 
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+
   // Slide from offset to 0
-  const slideDistance = 60;
+  const slideDistance = prefersReducedMotion ? 0 : 60;
   const translateX = feature.side === 'left'
     ? -slideDistance + slideDistance * fadeIn
     : slideDistance - slideDistance * fadeIn;
 
-  const translateY = 10 - 10 * fadeIn;
+  const translateY = prefersReducedMotion ? 0 : (10 - 10 * fadeIn);
 
   if (opacity <= 0.01) return null;
 

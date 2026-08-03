@@ -11,6 +11,7 @@ const {
   getAdminProduct,
   updateProduct,
   deleteProduct,
+  toggleFeaturedProduct,
   uploadProductImages,
   deleteProductImage,
   createVariant,
@@ -53,6 +54,7 @@ router.post('/products', createProduct);
 router.get('/products/:id', getAdminProduct);
 router.put('/products/:id', updateProduct);
 router.delete('/products/:id', deleteProduct);
+router.patch('/products/:id/featured', toggleFeaturedProduct);
 router.post('/products/:id/images', upload.array('images', 5), uploadProductImages);
 router.delete('/products/:id/images/:imageId', deleteProductImage);
 router.post('/products/:id/variants', createVariant);
@@ -72,15 +74,15 @@ router.put('/orders/:id/status', updateOrderStatus);
 router.put('/orders/:id/tracking', updateOrderTracking);
 
 // Users
-router.get('/users', getAdminUsers);
-router.get('/users/:id', getAdminUser);
-router.put('/users/:id/role', protect, superAdmin, updateUserRole);
+router.get('/users', superAdmin, getAdminUsers);
+router.get('/users/:id', superAdmin, getAdminUser);
+router.put('/users/:id/role', superAdmin, updateUserRole);
 
 // Coupons
-router.get('/coupons', getAdminCoupons);
-router.post('/coupons', createCoupon);
-router.put('/coupons/:id', updateCoupon);
-router.delete('/coupons/:id', deleteCoupon);
+router.get('/coupons', superAdmin, getAdminCoupons);
+router.post('/coupons', superAdmin, createCoupon);
+router.put('/coupons/:id', superAdmin, updateCoupon);
+router.delete('/coupons/:id', superAdmin, deleteCoupon);
 
 // Reviews
 router.get('/reviews', getAdminReviews);

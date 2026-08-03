@@ -4,19 +4,36 @@ import useAuthStore from '../../store/authStore';
 
 const roleColors = { customer: 'blue', admin: 'gold', superadmin: 'purple' };
 
+const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="admin-modal-overlay" onClick={onCancel}>
+      <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+        <div className="admin-modal-header">
+          <h3>{title}</h3>
+          <button className="admin-btn-icon" onClick={onCancel}>✕</button>
+        </div>
+        <div className="admin-modal-body">
+          <p style={{ margin: '8px 0', fontSize: '0.95rem', color: 'var(--admin-text)' }}>{message}</p>
+        </div>
+        <div className="admin-modal-footer">
+          <button className="admin-btn admin-btn-secondary" onClick={onCancel}>Cancel</button>
+          <button className="admin-btn admin-btn-primary" onClick={onConfirm}>Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const UserManagement = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [confirmData, setConfirmData] = useState(null); // { userId, role }
   const { data, isLoading, error } = useAdminUsers({ page, limit: 15, search: search || undefined, role: roleFilter || undefined });
   const roleMut = useUpdateUserRole();
   const { user: currentUser } = useAuthStore();
   const isSuperAdmin = currentUser?.role === 'superadmin';
-
-  const handleRoleChange = async (userId, role) => {
-    if (!confirm(`Change role to ${role}?`)) return;
-    try { await roleMut.mutateAsync({ id: userId, role }); } catch (err) { alert(err.message); }
-  };
 
   if (isLoading) return <div className="admin-loading"><span className="admin-spinner" /> Loading users...</div>;
   if (error) return <div className="admin-login-error">Error: {error.message}</div>;
@@ -54,7 +71,12 @@ const UserManagement = () => {
                   <td>{new Date(u.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                   {isSuperAdmin && (
                     <td style={{ textAlign: 'right' }}>
-                      <select className="admin-status-select" value={u.role} onChange={e => handleRoleChange(u.id, e.target.value)} disabled={u.id === currentUser.id}>
+                      <select 
+                        className="admin-status-select" 
+                        value={u.role} 
+                        onChange={e => setConfirmData({ userId: u.id, role: e.target.value })} 
+                        disabled={u.id === currentUser.id}
+                      >
                         <option value="customer">Customer</option>
                         <option value="admin">Admin</option>
                         <option value="superadmin">Super Admin</option>
@@ -75,6 +97,22 @@ const UserManagement = () => {
           <button className="admin-btn admin-btn-secondary admin-btn-sm" disabled={page >= (data?.totalPages || 1)} onClick={() => setPage(p => p + 1)}>Next →</button>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={!!confirmData}
+        title="Change User Role"
+        message={`Are you sure you want to change this user's role to ${confirmData?.role === 'superadmin' ? 'Super Admin' : confirmData?.role === 'admin' ? 'Admin' : 'Customer'}?`}
+        onConfirm={async () => {
+          const { userId, role } = confirmData;
+          setConfirmData(null);
+          try { 
+            await roleMut.mutateAsync({ id: userId, role }); 
+          } catch (err) { 
+            alert(err.message); 
+          }
+        }}
+        onCancel={() => setConfirmData(null)}
+      />
     </div>
   );
 };

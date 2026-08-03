@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useAdminProducts, useAdminCategories, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../../api/admin';
+import { useAdminProducts, useAdminCategories, useCreateProduct, useUpdateProduct, useDeleteProduct, createVariant, updateVariant } from '../../api/admin';
 import { uploadProductImages, deleteProductImage } from '../../api/admin';
 import { useQueryClient } from '@tanstack/react-query';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const ProductModal = ({ product, categories, onClose, onSave, saving }) => {
   const isEdit = !!product;
@@ -121,12 +122,29 @@ const ProductManagement = () => {
   const deleteMut = useDeleteProduct();
   const qc = useQueryClient();
 
-  const handleSave = async (form) => {
+  const handleSave = async (form, variants) => {
     try {
+      let savedProduct;
       if (editProduct) {
-        await updateMut.mutateAsync({ id: editProduct.id, ...form });
+        const result = await updateMut.mutateAsync({ id: editProduct.id, ...form });
+        savedProduct = result.product;
       } else {
-        await createMut.mutateAsync(form);
+        const result = await createMut.mutateAsync(form);
+        savedProduct = result.product;
+      }
+      // Save variants if any were provided
+      if (variants && savedProduct?.id) {
+        for (const v of variants) {
+          if (!v.size && !v.color) continue; // skip blank rows
+          try {
+            if (v.id) {
+              await updateVariant({ productId: savedProduct.id, variantId: v.id, size: v.size, color: v.color, color_hex: v.color_hex, stock_quantity: Number(v.stock_quantity || 0), additional_price: Number(v.additional_price || 0) });
+            } else {
+              await createVariant({ productId: savedProduct.id, size: v.size, color: v.color, color_hex: v.color_hex, stock_quantity: Number(v.stock_quantity || 0), additional_price: Number(v.additional_price || 0), sku_variant: (form.sku || savedProduct.sku || 'VAR') + '-' + v.size + '-' + (v.color || '').replace(/\s+/g, '') });
+            }
+          } catch (ve) { console.warn('Variant save error:', ve.message); }
+        }
+        qc.invalidateQueries({ queryKey: ['admin-products'] });
       }
       setShowModal(false);
       setEditProduct(null);
@@ -203,7 +221,7 @@ const ProductManagement = () => {
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 40, height: 52, borderRadius: 4, overflow: 'hidden', background: 'var(--admin-surface-hover)', flexShrink: 0 }}>
-                        {p.images?.[0] && <img src={`http://localhost:3000${p.images[0].image_url}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                        {p.images?.[0] && <img src={getImageUrl(p.images[0].image_url)} alt={p.name ? `${p.name} preview` : 'Product thumbnail'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" decoding="async" />}
                       </div>
                       <div>
                         <div className="primary-cell">{p.name}</div>
@@ -252,7 +270,7 @@ const ProductManagement = () => {
               <div className="admin-image-grid">
                 {imageModal.images?.map(img => (
                   <div key={img.id} className="admin-image-thumb">
-                    <img src={`http://localhost:3000${img.image_url}`} alt="" />
+                    <img src={getImageUrl(img.image_url)} alt={imageModal.name ? `${imageModal.name} image thumbnail` : 'Product image thumbnail'} loading="lazy" decoding="async" />
                     <button onClick={() => handleDeleteImage(imageModal.id, img.id)}>✕</button>
                   </div>
                 ))}

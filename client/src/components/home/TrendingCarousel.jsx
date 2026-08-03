@@ -62,6 +62,8 @@ const TrendingCarousel = () => {
                   src={item.img} 
                   alt={item.name} 
                   className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                  loading="lazy"
+                  decoding="async"
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-noir/80 via-transparent to-transparent opacity-60" />

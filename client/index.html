@@ -9,10 +9,195 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Italiana&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body>
+    <!-- HTML-only preloader to ensure instant rendering before React is loaded -->
+    <div id="initial-loader" class="initial-loader-container">
+      <style>
+        .initial-loader-container {
+          position: fixed;
+          inset: 0;
+          background-color: #0A0A0A;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 99999;
+          overflow: hidden;
+          pointer-events: auto;
+        }
+        .curtain-panel-top, .curtain-panel-bottom {
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 50%;
+          background-color: #0A0A0A;
+          z-index: 1;
+          transition: transform 0.9s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .curtain-panel-top {
+          top: 0;
+          border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+        }
+        .curtain-panel-bottom {
+          bottom: 0;
+          border-top: 1px solid rgba(201, 168, 76, 0.2);
+        }
+        .initial-loader-container.fade-out .curtain-panel-top {
+          transform: translateY(-100%);
+        }
+        .initial-loader-container.fade-out .curtain-panel-bottom {
+          transform: translateY(100%);
+        }
+        .initial-loader-container.fade-out .initial-loader-content {
+          opacity: 0;
+          transform: scale(1.08);
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .initial-loader-container.fade-out {
+          pointer-events: none;
+        }
+        .initial-loader-glow {
+          position: absolute;
+          width: 450px;
+          height: 450px;
+          border-radius: 50%;
+          background: rgba(201, 168, 76, 0.12);
+          filter: blur(120px);
+          pointer-events: none;
+          z-index: 2;
+        }
+        @media (min-width: 768px) {
+          .initial-loader-glow {
+            width: 750px;
+            height: 750px;
+          }
+        }
+        .initial-loader-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 24px;
+          z-index: 10;
+          text-align: center;
+          padding: 0 16px;
+          margin: auto;
+          transition: opacity 0.5s ease;
+        }
+        .initial-loader-crest {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-family: 'Space Grotesk', 'Inter', sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.45em;
+          color: #C9A84C;
+          text-transform: uppercase;
+        }
+        .initial-loader-line {
+          width: 48px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.5));
+        }
+        .initial-loader-line.right {
+          background: linear-gradient(270deg, transparent, rgba(201, 168, 76, 0.5));
+        }
+        .initial-loader-logo {
+          font-family: 'Playfair Display', 'Georgia', serif;
+          font-size: 3.5rem;
+          font-weight: 700;
+          color: #FAF9F6;
+          text-transform: uppercase;
+          letter-spacing: 0.25em;
+          animation: initial-premium-glow 2.2s ease-in-out infinite;
+          user-select: none;
+          pointer-events: none;
+        }
+        @media (min-width: 640px) {
+          .initial-loader-logo {
+            font-size: 4.5rem;
+            letter-spacing: 0.3em;
+          }
+        }
+        @media (min-width: 1024px) {
+          .initial-loader-logo {
+            font-size: 6rem;
+            letter-spacing: 0.3em;
+          }
+        }
+        .initial-loader-tagline {
+          font-family: 'Italiana', serif;
+          font-size: 20px;
+          color: #C9A84C;
+          letter-spacing: 0.4em;
+          font-style: italic;
+          user-select: none;
+          pointer-events: none;
+          margin-top: -6px;
+        }
+        .initial-loader-bar {
+          width: 256px;
+          height: 3px;
+          background-color: rgba(250, 249, 246, 0.1);
+          border: 1px solid rgba(201, 168, 76, 0.3);
+          position: relative;
+          overflow: hidden;
+          border-radius: 9999px;
+          margin-top: 16px;
+        }
+        @media (min-width: 640px) {
+          .initial-loader-bar {
+            width: 320px;
+          }
+        }
+        .initial-loader-progress {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, #B89553, #C9A84C, #B8963A);
+          box-shadow: 0 0 15px #C9A84C;
+          animation: initial-premium-progress 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        }
+        @keyframes initial-premium-progress {
+          0% { left: -40%; width: 40%; }
+          50% { left: 30%; width: 60%; }
+          100% { left: 100%; width: 40%; }
+        }
+        @keyframes initial-premium-glow {
+          0%, 100% {
+            opacity: 0.75;
+            letter-spacing: 0.28em;
+            text-shadow: 0 0 15px rgba(201, 168, 76, 0.15);
+          }
+          50% {
+            opacity: 1;
+            letter-spacing: 0.33em;
+            text-shadow: 0 0 35px rgba(201, 168, 76, 0.35);
+          }
+        }
+      </style>
+      <div class="curtain-panel-top"></div>
+      <div class="curtain-panel-bottom"></div>
+      <div class="initial-loader-glow"></div>
+      <div class="initial-loader-content">
+        <div class="initial-loader-crest">
+          <div class="initial-loader-line"></div>
+          <span>HAUTE COUTURE • PARIS • MUMBAI</span>
+          <div class="initial-loader-line right"></div>
+        </div>
+        <div class="initial-loader-logo">ELESENE</div>
+        <div class="initial-loader-tagline">ATELIER HAUTE COUTURE</div>
+        <div class="initial-loader-bar">
+          <div class="initial-loader-progress"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
+
   </body>
 </html>

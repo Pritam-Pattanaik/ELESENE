@@ -1,13 +1,22 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+require('../config/env')
 
-// Use Neon in production, local PostgreSQL for development
 const isProduction = process.env.NODE_ENV === 'production';
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_8aG3ohpbFnZD@ep-lively-salad-aoedxv9p-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const useNeon = isProduction || process.env.USE_NEON === 'true';
+
+if (useNeon && !process.env.DATABASE_URL) {
+  throw new Error("FATAL: DATABASE_URL environment variable is required in production or when USE_NEON is true.");
+}
+
+if (isProduction && !process.env.JWT_SECRET) {
+  throw new Error("FATAL: JWT_SECRET environment variable is required in production mode.");
+}
+
+const DATABASE_URL = process.env.DATABASE_URL;
 
 let sequelize;
 
-if (isProduction || process.env.USE_NEON === 'true') {
+if (useNeon) {
   // Neon PostgreSQL (cloud)
   sequelize = new Sequelize(DATABASE_URL, {
     dialect: 'postgres',

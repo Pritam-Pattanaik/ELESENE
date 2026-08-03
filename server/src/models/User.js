@@ -43,6 +43,28 @@ const User = sequelize.define('User', {
   is_verified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  reset_password_token: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+  reset_password_expires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  verification_token: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+  verification_token_expires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  tokenVersion: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false,
+    field: 'token_version',
   }
 }, {
   tableName: 'users',

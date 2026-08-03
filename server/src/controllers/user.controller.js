@@ -1,4 +1,4 @@
-const { User, Address, Wishlist, Product, ProductVariant, ProductImage } = require('../models');
+const { User, Address, Wishlist, Product, ProductVariant, ProductImage, Notification } = require('../models');
 
 // @desc    Get user profile
 // @route   GET /api/user/profile
@@ -157,21 +157,25 @@ const addToWishlist = async (req, res) => {
   try {
     const { product_id, variant_id } = req.body;
     
-    const exists = await Wishlist.findOne({
-      where: { user_id: req.user.id, product_id, variant_id: variant_id || null }
-    });
-
-    if (exists) {
-      return res.status(400).json({ success: false, message: 'Item already in wishlist' });
+    if (!product_id) {
+      return res.status(400).json({ success: false, message: 'product_id is required' });
     }
 
-    const wishlistItem = await Wishlist.create({
-      user_id: req.user.id,
-      product_id,
-      variant_id: variant_id || null
+    const product = await Product.findByPk(product_id).catch(() => null);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const [wishlistItem, created] = await Wishlist.findOrCreate({
+      where: { user_id: req.user.id, product_id: product.id, variant_id: variant_id || null },
+      defaults: { user_id: req.user.id, product_id: product.id, variant_id: variant_id || null }
     });
 
-    res.status(201).json({ success: true, wishlistItem });
+    res.status(created ? 201 : 200).json({ 
+      success: true, 
+      wishlistItem, 
+      message: created ? 'Item added to wishlist' : 'Item already in wishlist' 
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -183,12 +187,134 @@ const removeFromWishlist = async (req, res) => {
   try {
     const wishlistItem = await Wishlist.findOne({ where: { id: req.params.id, user_id: req.user.id } });
     
-    if (!wishlistItem) {
-      return res.status(404).json({ success: false, message: 'Item not found in wishlist' });
+    if (wishlistItem) {
+      await wishlistItem.destroy();
     }
 
-    await wishlistItem.destroy();
     res.json({ success: true, message: 'Item removed from wishlist' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Remove from wishlist by product id
+// @route   DELETE /api/user/wishlist/product/:product_id
+const removeFromWishlistByProduct = async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    if (product_id) {
+      await Wishlist.destroy({ where: { user_id: req.user.id, product_id } }).catch(() => null);
+    }
+    
+    res.json({ success: true, message: 'Item removed from wishlist' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get user notifications
+// @route   GET /api/user/notifications
+const getNotifications = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, unread_only = 'false' } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    const where = { user_id: req.user.id };
+    if (unread_only === 'true') {
+      where.is_read = false;
+    }
+
+    const { rows: notifications, count: total } = await Notification.findAndCountAll({
+      where,
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset,
+    });
+
+    const unreadCount = await Notification.count({
+      where: { user_id: req.user.id, is_read: false }
+    });
+
+    res.json({ 
+      success: true, 
+      notifications, 
+      unreadCount,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Mark notification as read
+// @route   PUT /api/user/notifications/:id/read
+const markNotificationRead = async (req, res) => {
+  try {
+    const notification = await Notification.findOne({ 
+      where: { id: req.params.id, user_id: req.user.id } 
+    });
+    
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    notification.is_read = true;
+    notification.read_at = new Date();
+    await notification.save();
+
+    const unreadCount = await Notification.count({
+      where: { user_id: req.user.id, is_read: false }
+    });
+
+    res.json({ success: true, notification, unreadCount });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Mark all notifications as read
+// @route   PUT /api/user/notifications/read-all
+const markAllNotificationsRead = async (req, res) => {
+  try {
+    await Notification.update(
+      { is_read: true, read_at: new Date() },
+      { where: { user_id: req.user.id, is_read: false } }
+    );
+
+    const unreadCount = await Notification.count({
+      where: { user_id: req.user.id, is_read: false }
+    });
+
+    res.json({ success: true, unreadCount });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete notification
+// @route   DELETE /api/user/notifications/:id
+const deleteNotification = async (req, res) => {
+  try {
+    const notification = await Notification.findOne({ 
+      where: { id: req.params.id, user_id: req.user.id } 
+    });
+    
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    await notification.destroy();
+
+    const unreadCount = await Notification.count({
+      where: { user_id: req.user.id, is_read: false }
+    });
+
+    res.json({ success: true, unreadCount });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -203,5 +329,10 @@ module.exports = {
   deleteAddress,
   getWishlist,
   addToWishlist,
-  removeFromWishlist
+  removeFromWishlist,
+  removeFromWishlistByProduct,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification
 };

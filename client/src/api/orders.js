@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getCustomerToken } from './authHelper';
 import useCartStore from '../store/cartStore';
 
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 const getHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = getCustomerToken();
   const sessionId = useCartStore.getState().sessionId;
   const headers = { 'Content-Type': 'application/json' };
   
@@ -50,6 +51,26 @@ export const verifyPayment = async (data) => {
   });
   if (!response.ok) throw new Error('Payment verification failed');
   return response.json();
+};
+
+export const getUserOrders = async () => {
+  const response = await fetch(`${API_URL}/orders`, { headers: getHeaders() });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || 'Failed to fetch orders');
+  return data.orders || [];
+};
+
+export const applyCoupon = async (data) => {
+  const response = await fetch(`${API_URL}/orders/apply-coupon`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  const resData = await response.json();
+  if (!response.ok || !resData.success) {
+    throw new Error(resData.message || 'Failed to apply coupon');
+  }
+  return resData;
 };
 
 // Hooks

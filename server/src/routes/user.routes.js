@@ -10,7 +10,12 @@ const {
   deleteAddress,
   getWishlist,
   addToWishlist,
-  removeFromWishlist
+  removeFromWishlist,
+  removeFromWishlistByProduct,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification
 } = require('../controllers/user.controller');
 
 // All routes require authentication
@@ -29,6 +34,13 @@ router.delete('/addresses/:id', deleteAddress);
 // Wishlist
 router.get('/wishlist', getWishlist);
 router.post('/wishlist', addToWishlist);
+router.delete('/wishlist/product/:product_id', removeFromWishlistByProduct); // Must come BEFORE /:id
 router.delete('/wishlist/:id', removeFromWishlist);
+
+// Notifications
+router.get('/notifications', getNotifications);
+router.put('/notifications/:id/read', markNotificationRead);
+router.put('/notifications/read-all', markAllNotificationsRead);
+router.delete('/notifications/:id', deleteNotification);
 
 module.exports = router;

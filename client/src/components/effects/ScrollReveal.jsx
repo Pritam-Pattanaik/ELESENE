@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 
 /**
  * ScrollReveal — wraps children and animates them into view on scroll.
@@ -49,10 +49,19 @@ const ScrollReveal = ({
 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once, amount });
+  const shouldReduceMotion = useReducedMotion();
 
   const preset = presets[variant] || presets['fade-up'];
 
   const MotionTag = motion[as] || motion.div;
+
+  const targetHidden = shouldReduceMotion 
+    ? { opacity: 0, x: 0, y: 0, scale: 1, filter: 'blur(0px)' }
+    : preset.hidden;
+
+  const targetVisible = shouldReduceMotion
+    ? { opacity: 1, x: 0, y: 0, scale: 1, filter: 'blur(0px)' }
+    : preset.visible;
 
   return (
     <MotionTag
@@ -60,12 +69,12 @@ const ScrollReveal = ({
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       variants={{
-        hidden: preset.hidden,
+        hidden: targetHidden,
         visible: {
-          ...preset.visible,
+          ...targetVisible,
           transition: {
-            duration,
-            delay,
+            duration: shouldReduceMotion ? 0 : duration,
+            delay: shouldReduceMotion ? 0 : delay,
             ease: [0.16, 1, 0.3, 1],
           },
         },

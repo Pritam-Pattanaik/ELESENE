@@ -13,6 +13,7 @@ const Review = require('./Review');
 const Coupon = require('./Coupon');
 const Wishlist = require('./Wishlist');
 const Address = require('./Address');
+const Notification = require('./Notification');
 
 // User Relationships
 User.hasMany(Address, { foreignKey: 'user_id' });
@@ -76,6 +77,9 @@ Review.belongsTo(Order, { foreignKey: 'order_id' });
 Wishlist.belongsTo(Product, { foreignKey: 'product_id' });
 Wishlist.belongsTo(ProductVariant, { foreignKey: 'variant_id' });
 
+User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -90,5 +94,6 @@ module.exports = {
   Review,
   Coupon,
   Wishlist,
-  Address
+  Address,
+  Notification
 };

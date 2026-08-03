@@ -87,9 +87,21 @@ const addToCart = async (req, res) => {
 const updateCartItem = async (req, res) => {
   try {
     const { quantity } = req.body;
-    const cartItem = await CartItem.findByPk(req.params.id);
+    const cartItem = await CartItem.findByPk(req.params.id, {
+      include: [{ model: Cart }]
+    });
 
     if (!cartItem) return res.status(404).json({ success: false, message: 'Item not found' });
+
+    // Assert ownership
+    const userId = req.user?.id;
+    const sessionId = req.headers['x-session-id'];
+    const isUserOwner = userId && cartItem.Cart && cartItem.Cart.user_id === userId;
+    const isSessionOwner = sessionId && cartItem.Cart && cartItem.Cart.session_id === sessionId;
+
+    if (!isUserOwner && !isSessionOwner) {
+      return res.status(403).json({ success: false, message: 'Forbidden: You do not own this cart item' });
+    }
 
     cartItem.quantity = quantity;
     await cartItem.save();
@@ -104,8 +116,21 @@ const updateCartItem = async (req, res) => {
 // @route   DELETE /api/cart/items/:id
 const removeFromCart = async (req, res) => {
   try {
-    const cartItem = await CartItem.findByPk(req.params.id);
+    const cartItem = await CartItem.findByPk(req.params.id, {
+      include: [{ model: Cart }]
+    });
+
     if (!cartItem) return res.status(404).json({ success: false, message: 'Item not found' });
+
+    // Assert ownership
+    const userId = req.user?.id;
+    const sessionId = req.headers['x-session-id'];
+    const isUserOwner = userId && cartItem.Cart && cartItem.Cart.user_id === userId;
+    const isSessionOwner = sessionId && cartItem.Cart && cartItem.Cart.session_id === sessionId;
+
+    if (!isUserOwner && !isSessionOwner) {
+      return res.status(403).json({ success: false, message: 'Forbidden: You do not own this cart item' });
+    }
 
     await cartItem.destroy();
     res.json({ success: true, message: 'Item removed from cart' });

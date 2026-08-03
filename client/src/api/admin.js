@@ -1,10 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '../store/authStore';
+import { getAdminToken } from './authHelper';
 
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
+const buildQueryString = (params = {}) => {
+  const cleanParams = {};
+  Object.keys(params).forEach((key) => {
+    if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+      cleanParams[key] = params[key];
+    }
+  });
+  return new URLSearchParams(cleanParams).toString();
+};
+
+
 const getHeaders = () => {
-  const token = useAuthStore.getState().token;
+  const token = getAdminToken();
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -32,7 +44,7 @@ export const useDashboard = () =>
 
 // Products
 export const fetchAdminProducts = (params = {}) => {
-  const q = new URLSearchParams(params).toString();
+  const q = buildQueryString(params);
   return adminFetch(`/admin/products?${q}`);
 };
 export const fetchAdminProduct = (id) => adminFetch(`/admin/products/${id}`);
@@ -43,7 +55,7 @@ export const updateProduct = ({ id, ...data }) =>
 export const deleteProduct = (id) =>
   adminFetch(`/admin/products/${id}`, { method: 'DELETE' });
 export const uploadProductImages = async (id, files) => {
-  const token = useAuthStore.getState().token;
+  const token = getAdminToken();
   const formData = new FormData();
   files.forEach((f) => formData.append('images', f));
   const res = await fetch(`${API_URL}/admin/products/${id}/images`, {
@@ -77,7 +89,7 @@ export const deleteCategory = (id) =>
 
 // Orders
 export const fetchAdminOrders = (params = {}) => {
-  const q = new URLSearchParams(params).toString();
+  const q = buildQueryString(params);
   return adminFetch(`/admin/orders?${q}`);
 };
 export const fetchAdminOrder = (id) => adminFetch(`/admin/orders/${id}`);
@@ -88,7 +100,7 @@ export const updateOrderTracking = ({ id, tracking_number }) =>
 
 // Users
 export const fetchAdminUsers = (params = {}) => {
-  const q = new URLSearchParams(params).toString();
+  const q = buildQueryString(params);
   return adminFetch(`/admin/users?${q}`);
 };
 export const fetchAdminUser = (id) => adminFetch(`/admin/users/${id}`);

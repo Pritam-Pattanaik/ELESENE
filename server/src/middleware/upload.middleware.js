@@ -2,12 +2,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure uploads directory exists for local development
+// Ensure uploads directory exists unconditionally
 const uploadDir = path.join(__dirname, '../../uploads');
-if (process.env.NODE_ENV !== 'production') {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Local Disk Storage
@@ -21,11 +19,21 @@ const diskStorage = multer.diskStorage({
   }
 });
 
-// Mock Cloud Storage (Memory) for Production Prep
-// In a real scenario, this would use multer-google-storage or multer-s3
+// Memory Storage for Supabase uploads
 const memoryStorage = multer.memoryStorage();
 
-const storage = process.env.NODE_ENV === 'production' ? memoryStorage : diskStorage;
+// Check if valid, non-placeholder Supabase credentials exist
+const hasValidSupabase = () => {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  if (!url || !key) return false;
+  if (url.includes('placeholder') || url.includes('your-project') || url.includes('example')) return false;
+  if (key.includes('placeholder') || key.includes('your_') || key.includes('example')) return false;
+  return true;
+};
+
+const useSupabase = hasValidSupabase();
+const storage = useSupabase ? memoryStorage : diskStorage;
 
 const fileFilter = (req, file, cb) => {
   const filetypes = /jpg|jpeg|png|webp|avif/;
