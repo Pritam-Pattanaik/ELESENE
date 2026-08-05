@@ -6,6 +6,11 @@ import { getImageUrl } from '../../utils/imageUrl';
 
 const ProductModal = ({ product, categories, onClose, onSave, saving }) => {
   const isEdit = !!product;
+  const initialImage = product?.images?.find(img => img.is_primary)?.image_url || product?.images?.[0]?.image_url || '';
+  const [imageUrlInput, setImageUrlInput] = useState(initialImage);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviewUrl, setFilePreviewUrl] = useState('');
+
   const [form, setForm] = useState({
     name: product?.name || '', slug: product?.slug || '', description: product?.description || '',
     base_price: product?.base_price || '', sale_price: product?.sale_price || '',
@@ -15,10 +20,19 @@ const ProductModal = ({ product, categories, onClose, onSave, saving }) => {
     is_active: product?.is_active ?? true, is_featured: product?.is_featured ?? false,
     is_trending: product?.is_trending ?? false,
     meta_title: product?.meta_title || '', meta_description: product?.meta_description || '',
+    image_url: initialImage
   });
 
   const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
   const autoSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      setFilePreviewUrl(URL.createObjectURL(files[0]));
+    }
+  };
 
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
@@ -38,6 +52,33 @@ const ProductModal = ({ product, categories, onClose, onSave, saving }) => {
               <input className="admin-input" value={form.slug} onChange={e => handleChange('slug', e.target.value)} required />
             </div>
           </div>
+
+          <div className="admin-form-group">
+            <label className="admin-label">Product Image (HTTPS URL or Upload Image)</label>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <input
+                className="admin-input"
+                placeholder="Paste Image URL (e.g. https://images.unsplash.com/...)"
+                value={imageUrlInput}
+                onChange={e => { setImageUrlInput(e.target.value); handleChange('image_url', e.target.value); }}
+              />
+              <label className="admin-btn admin-btn-secondary" style={{ cursor: 'pointer', shrink: 0, whiteSpace: 'nowrap' }}>
+                📷 Upload File
+                <input type="file" multiple accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+              </label>
+            </div>
+            {(filePreviewUrl || imageUrlInput) && (
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 50, height: 65, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--admin-border)', flexShrink: 0 }}>
+                  <img src={filePreviewUrl || getImageUrl(imageUrlInput)} alt="Preview thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--admin-text-dim)' }}>
+                  {filePreviewUrl ? `${selectedFiles.length} image file(s) ready for upload` : 'Direct image URL linked'}
+                </span>
+              </div>
+            )}
+          </div>
+
           <div className="admin-form-group">
             <label className="admin-label">Description</label>
             <textarea className="admin-textarea" value={form.description} onChange={e => handleChange('description', e.target.value)} />
@@ -97,7 +138,7 @@ const ProductModal = ({ product, categories, onClose, onSave, saving }) => {
         </div>
         <div className="admin-modal-footer">
           <button className="admin-btn admin-btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="admin-btn admin-btn-primary" onClick={() => onSave(form)} disabled={saving}>
+          <button className="admin-btn admin-btn-primary" onClick={() => onSave(form, null, selectedFiles)} disabled={saving}>
             {saving ? 'Saving...' : isEdit ? 'Update' : 'Create'}
           </button>
         </div>
@@ -122,16 +163,21 @@ const ProductManagement = () => {
   const deleteMut = useDeleteProduct();
   const qc = useQueryClient();
 
-  const handleSave = async (form, variants) => {
+  const handleSave = async (form, variants, selectedFiles) => {
     try {
       let savedProduct;
       if (editProduct) {
         const result = await updateMut.mutateAsync({ id: editProduct.id, ...form });
-        savedProduct = result.product;
+        savedProduct = result?.product;
       } else {
         const result = await createMut.mutateAsync(form);
-        savedProduct = result.product;
+        savedProduct = result?.product;
       }
+
+      if (selectedFiles && selectedFiles.length > 0 && savedProduct?.id) {
+        await uploadProductImages(savedProduct.id, selectedFiles);
+      }
+
       // Save variants if any were provided
       if (variants && savedProduct?.id) {
         for (const v of variants) {
@@ -144,8 +190,9 @@ const ProductManagement = () => {
             }
           } catch (ve) { console.warn('Variant save error:', ve.message); }
         }
-        qc.invalidateQueries({ queryKey: ['admin-products'] });
       }
+
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
       setShowModal(false);
       setEditProduct(null);
     } catch (err) {

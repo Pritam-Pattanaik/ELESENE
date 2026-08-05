@@ -3,9 +3,14 @@ import { motion } from 'framer-motion';
 import ScrollReveal from '../effects/ScrollReveal';
 
 const trendingItems = [
-  { id: 1, name: 'Silk Slip Dress', price: '₹4,999', tag: 'BESTSELLER', img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=1000&auto=format&fit=crop' },
+  { id: 101, name: 'Scarlet Double-Breasted Suit', price: '₹14,999', tag: 'NEW', img: '/images/fashion-red-suit.jpg' },
+  { id: 102, name: 'Ethereal Organza Ruffle Blouse', price: '₹9,499', tag: 'TRENDING', img: '/images/fashion-organza-blouse.jpg' },
+  { id: 103, name: 'Ivory Open-Weave Chunky Sweater', price: '₹10,999', tag: 'NEW', img: '/images/fashion-chunky-knit.jpg' },
+  { id: 104, name: 'Noir Sleeveless Turtleneck Set', price: '₹11,499', tag: 'EXCLUSIVE', img: '/images/fashion-noir-set.jpg' },
+  { id: 105, name: 'Botanical Embroidered Silk Blouse', price: '₹12,299', tag: 'MUST HAVE', img: '/images/fashion-embroidered-blouse.jpg' },
+  { id: 1, name: 'Silk Slip Dress', price: '₹14,999', tag: 'BESTSELLER', img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=1000&auto=format&fit=crop' },
   { id: 2, name: 'Velvet Evening Gown', price: '₹12,499', tag: 'NEW', img: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?q=80&w=1000&auto=format&fit=crop' },
-  { id: 3, name: 'Crystal Embellished Top', price: '₹3,499', tag: 'TRENDING', img: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?q=80&w=1000&auto=format&fit=crop' },
+  { id: 3, name: 'Crystal Embellished Top', price: '₹13,499', tag: 'TRENDING', img: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?q=80&w=1000&auto=format&fit=crop' },
   { id: 4, name: 'Noir Tailored Suit', price: '₹15,999', tag: 'EXCLUSIVE', img: 'https://images.unsplash.com/photo-1594938291221-94f18cbb5660?q=80&w=1000&auto=format&fit=crop' },
   { id: 5, name: 'Pearl Drop Earrings', price: '₹1,299', tag: 'LIMITED', img: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1000&auto=format&fit=crop' },
 ];

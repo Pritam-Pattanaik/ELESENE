@@ -107,13 +107,18 @@ const ScrollToHash = () => {
             clearInterval(intervalId);
           }
         }, 100);
-        setTimeout(() => clearInterval(intervalId), 3000);
+        const timeoutId = setTimeout(() => clearInterval(intervalId), 3000);
+        return () => {
+          clearInterval(intervalId);
+          clearTimeout(timeoutId);
+        };
       }
     }
   }, [location.hash, location.pathname]);
 
   return null;
 };
+
 
 // Scroll to top on every route change (no hash)
 const ScrollToTop = () => {

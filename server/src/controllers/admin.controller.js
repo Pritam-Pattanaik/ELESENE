@@ -10,64 +10,69 @@ const sequelize = require('../config/db');
 // @route   GET /api/admin/dashboard
 const getDashboard = async (req, res) => {
   try {
-    // Total revenue (paid orders only)
-    const revenueResult = await Order.findOne({
-      attributes: [[fn('COALESCE', fn('SUM', col('total_amount')), 0), 'totalRevenue']],
-      where: { payment_status: 'paid' },
-      raw: true,
-    });
-
-    // Total orders
-    const totalOrders = await Order.count();
-
-    // Total customers
-    const totalCustomers = await User.count({ where: { role: 'customer' } });
-
-    // Active products
-    const activeProducts = await Product.count({ where: { is_active: true } });
-
-    // Pending orders
-    const pendingOrders = await Order.count({ where: { status: 'pending' } });
-
-    // Recent orders
-    const recentOrders = await Order.findAll({
-      include: [{ model: User, attributes: ['full_name', 'email'] }],
-      order: [['created_at', 'DESC']],
-      limit: 10,
-    });
-
-    // Top products by order count
-    const topProducts = await OrderItem.findAll({
-      attributes: [
-        'product_id',
-        [fn('SUM', col('quantity')), 'total_sold'],
-        [fn('SUM', col('total_price')), 'total_revenue'],
-      ],
-      include: [{ model: Product, attributes: ['name', 'slug', 'base_price'] }],
-      group: ['product_id', 'Product.id'],
-      order: [[fn('SUM', col('quantity')), 'DESC']],
-      limit: 5,
-      raw: false,
-    });
-
-    // Monthly revenue (last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const monthlyRevenue = await Order.findAll({
-      attributes: [
-        [fn('date_trunc', 'month', col('created_at')), 'month'],
-        [fn('COALESCE', fn('SUM', col('total_amount')), 0), 'revenue'],
-        [fn('COUNT', col('id')), 'order_count'],
-      ],
-      where: {
-        payment_status: 'paid',
-        created_at: { [Op.gte]: sixMonthsAgo },
-      },
-      group: [fn('date_trunc', 'month', col('created_at'))],
-      order: [[fn('date_trunc', 'month', col('created_at')), 'ASC']],
-      raw: true,
-    });
+    // Run all queries in parallel — they are fully independent
+    const [
+      revenueResult,
+      totalOrders,
+      totalCustomers,
+      activeProducts,
+      pendingOrders,
+      recentOrders,
+      topProducts,
+      monthlyRevenue,
+    ] = await Promise.all([
+      // Total revenue (paid orders only)
+      Order.findOne({
+        attributes: [[fn('COALESCE', fn('SUM', col('total_amount')), 0), 'totalRevenue']],
+        where: { payment_status: 'paid' },
+        raw: true,
+      }),
+      // Total orders
+      Order.count(),
+      // Total customers
+      User.count({ where: { role: 'customer' } }),
+      // Active products
+      Product.count({ where: { is_active: true } }),
+      // Pending orders
+      Order.count({ where: { status: 'pending' } }),
+      // Recent orders
+      Order.findAll({
+        include: [{ model: User, attributes: ['full_name', 'email'] }],
+        order: [['created_at', 'DESC']],
+        limit: 10,
+      }),
+      // Top products by order count
+      OrderItem.findAll({
+        attributes: [
+          'product_id',
+          [fn('SUM', col('quantity')), 'total_sold'],
+          [fn('SUM', col('total_price')), 'total_revenue'],
+        ],
+        include: [{ model: Product, attributes: ['name', 'slug', 'base_price'] }],
+        group: ['product_id', 'Product.id'],
+        order: [[fn('SUM', col('quantity')), 'DESC']],
+        limit: 5,
+        raw: false,
+      }),
+      // Monthly revenue (last 6 months)
+      Order.findAll({
+        attributes: [
+          [fn('date_trunc', 'month', col('created_at')), 'month'],
+          [fn('COALESCE', fn('SUM', col('total_amount')), 0), 'revenue'],
+          [fn('COUNT', col('id')), 'order_count'],
+        ],
+        where: {
+          payment_status: 'paid',
+          created_at: { [Op.gte]: sixMonthsAgo },
+        },
+        group: [fn('date_trunc', 'month', col('created_at'))],
+        order: [[fn('date_trunc', 'month', col('created_at')), 'ASC']],
+        raw: true,
+      }),
+    ]);
 
     res.json({
       success: true,
@@ -86,6 +91,7 @@ const getDashboard = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // ═══════════════════════════════════════
 // PRODUCTS
@@ -126,7 +132,36 @@ const createProduct = async (req, res) => {
       meta_description: meta_description || description || ''
     });
 
-    res.status(201).json({ success: true, product });
+    // Automatically create ProductImage records if image_url or images provided
+    const { image_url, images } = req.body;
+    const imageList = [];
+    if (images && Array.isArray(images)) {
+      images.forEach(img => {
+        const url = typeof img === 'string' ? img : img.image_url;
+        if (url && url.trim()) imageList.push(url.trim());
+      });
+    } else if (image_url && typeof image_url === 'string' && image_url.trim()) {
+      imageList.push(image_url.trim());
+    }
+
+    if (imageList.length > 0) {
+      await Promise.all(imageList.map((url, idx) => 
+        ProductImage.create({
+          product_id: product.id,
+          image_url: url,
+          is_primary: idx === 0
+        })
+      ));
+    }
+
+    const fullProduct = await Product.findByPk(product.id, {
+      include: [
+        { model: ProductImage, as: 'images' },
+        { model: Category }
+      ]
+    });
+
+    res.status(201).json({ success: true, product: fullProduct || product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -217,7 +252,40 @@ const updateProduct = async (req, res) => {
 
     await product.save();
 
-    res.json({ success: true, product });
+    // Handle image_url or images update if provided
+    const { image_url, images } = req.body;
+    const imageList = [];
+    if (images && Array.isArray(images)) {
+      images.forEach(img => {
+        const url = typeof img === 'string' ? img : img.image_url;
+        if (url && url.trim()) imageList.push(url.trim());
+      });
+    } else if (image_url && typeof image_url === 'string' && image_url.trim()) {
+      imageList.push(image_url.trim());
+    }
+
+    if (imageList.length > 0) {
+      for (let idx = 0; idx < imageList.length; idx++) {
+        const url = imageList[idx];
+        const [existing] = await ProductImage.findOrCreate({
+          where: { product_id: product.id, image_url: url },
+          defaults: { product_id: product.id, image_url: url, is_primary: idx === 0 }
+        });
+        if (idx === 0) {
+          await ProductImage.update({ is_primary: false }, { where: { product_id: product.id } });
+          await existing.update({ is_primary: true });
+        }
+      }
+    }
+
+    const updatedProduct = await Product.findByPk(product.id, {
+      include: [
+        { model: ProductImage, as: 'images' },
+        { model: Category }
+      ]
+    });
+
+    res.json({ success: true, product: updatedProduct || product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

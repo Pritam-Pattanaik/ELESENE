@@ -35,13 +35,21 @@ const getProducts = async (req, res) => {
       if (maxPrice) whereClause.base_price[Op.lte] = maxPrice;
     }
 
-    if (category) {
-      // Find category ID by slug
-      const cat = await Category.findOne({ where: { slug: category } });
-      if (cat) {
-        whereClause.category_id = cat.id;
-      }
-    }
+    // Build category include — if filtering by slug, use a JOIN instead of a separate query
+    const categoryInclude = category
+      ? {
+          model: Category,
+          as: 'Category',
+          attributes: ['name', 'slug'],
+          where: { slug: category },
+          required: true, // INNER JOIN — excludes products not in the category
+        }
+      : {
+          model: Category,
+          as: 'Category',
+          attributes: ['name', 'slug'],
+          required: false, // LEFT JOIN — include all products
+        };
 
     // Build sort
     let orderClause = [['created_at', 'DESC']]; // default newest
@@ -52,7 +60,8 @@ const getProducts = async (req, res) => {
       where: whereClause,
       include: [
         { model: ProductImage, as: 'images', attributes: ['image_url', 'is_primary', 'alt_text'] },
-        { model: ProductVariant, as: 'variants' }
+        { model: ProductVariant, as: 'variants' },
+        categoryInclude,
       ],
       order: orderClause,
       limit: parseInt(limit),
@@ -67,6 +76,7 @@ const getProducts = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       currentPage: parseInt(page)
     });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

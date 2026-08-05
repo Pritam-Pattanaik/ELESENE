@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '../supabase';
+// Avoid circular import — access via dynamic import at call time
+const getWishlistStore = () => import('./wishlistStore').then(m => m.default);
 
 const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
@@ -33,6 +35,8 @@ const useCustomerAuthStore = create(
               isAuthenticated: true, 
               loading: false 
             });
+            // Fetch wishlist once after login (replaces per-component fetches)
+            getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
             return { token: data.session.access_token, user: mappedUser };
           }
         } catch {
@@ -57,6 +61,8 @@ const useCustomerAuthStore = create(
             isAuthenticated: true, 
             loading: false 
           });
+          // Fetch wishlist once after login (replaces per-component fetches)
+          getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
           set({ loading: false, error: err.message });
@@ -88,6 +94,8 @@ const useCustomerAuthStore = create(
               isAuthenticated: true, 
               loading: false 
             });
+            // Fetch wishlist once after registration
+            getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
             return { token: data.session.access_token, user: mappedUser };
           }
         } catch {
@@ -112,6 +120,8 @@ const useCustomerAuthStore = create(
             isAuthenticated: true, 
             loading: false 
           });
+          // Fetch wishlist once after registration
+          getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
           set({ loading: false, error: err.message });
@@ -127,11 +137,18 @@ const useCustomerAuthStore = create(
           console.error('Error signing out of Supabase:', err);
         }
         set({ token: null, user: null, isAuthenticated: false, error: null, loading: false });
+        // Clear wishlist on logout
+        getWishlistStore().then(store => store.getState ? store.setState?.({ wishlistIds: [], items: [] }) : null).catch(() => {});
       },
 
       clearError: () => set({ error: null }),
 
       updateUser: (updatedUser) => set((state) => ({ user: { ...state.user, ...updatedUser } })),
+
+      clearSession: () => {
+        set({ token: null, user: null, isAuthenticated: false, error: null, loading: false });
+        getWishlistStore().then(store => store.getState ? store.setState?.({ wishlistIds: [], items: [] }) : null).catch(() => {});
+      },
 
       getToken: () => get().token,
     }),
@@ -145,5 +162,36 @@ const useCustomerAuthStore = create(
     }
   )
 );
+
+// Automatically sync Supabase session tokens when auto-refreshed or changed
+try {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session?.access_token) {
+      const currentState = useCustomerAuthStore.getState();
+      if (currentState.token !== session.access_token) {
+        useCustomerAuthStore.setState({
+          token: session.access_token,
+          isAuthenticated: true,
+          ...(session.user && {
+            user: {
+              id: session.user.id,
+              email: session.user.email,
+              full_name: session.user.user_metadata?.full_name || currentState.user?.full_name || 'Customer',
+              phone: session.user.phone || currentState.user?.phone || '',
+              role: 'customer'
+            }
+          })
+        });
+      }
+    } else if (event === 'SIGNED_OUT') {
+      const currentState = useCustomerAuthStore.getState();
+      if (currentState.token) {
+        useCustomerAuthStore.setState({ token: null, user: null, isAuthenticated: false });
+      }
+    }
+  });
+} catch {
+  // Ignore subscription error
+}
 
 export default useCustomerAuthStore;

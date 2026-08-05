@@ -29,6 +29,11 @@ import athleisure from "../../assets/archive/fashion-athleisure.jpg";
 import gown from "../../assets/archive/fashion-gown.jpg";
 import cardigan from "../../assets/archive/fashion-cardigan.jpg";
 import sneakers from "../../assets/archive/fashion-sneakers.jpg";
+import redSuit from "../../assets/archive/fashion-red-suit.jpg";
+import organzaBlouse from "../../assets/archive/fashion-organza-blouse.jpg";
+import chunkyKnit from "../../assets/archive/fashion-chunky-knit.jpg";
+import noirSet from "../../assets/archive/fashion-noir-set.jpg";
+import embroideredBlouse from "../../assets/archive/fashion-embroidered-blouse.jpg";
 
 // resolved asset URL. Keys match the `file` field on PROJECTS.
 const IMAGE_MAP = {
@@ -50,6 +55,11 @@ const IMAGE_MAP = {
   "emerald-velvet-gown.webp": gown,
   "oversized-cardigan.webp": cardigan,
   "white-leather-sneakers.webp": sneakers,
+  "red-tailored-suit.webp": redSuit,
+  "organza-ruffle-blouse.webp": organzaBlouse,
+  "chunky-open-knit.webp": chunkyKnit,
+  "noir-sleeveless-set.webp": noirSet,
+  "embroidered-silk-blouse.webp": embroideredBlouse,
 };
 
 // Inlined theme helper functions
@@ -96,6 +106,11 @@ const resolvedAccentHex = (accent, theme) => {
 const IMG = (file) => IMAGE_MAP[file] ?? IMAGE_MAP["silk-midi-dress.webp"];
 
 const PROJECTS = [
+  { title: "Scarlet Double-Breasted Suit", category: "Suiting", year: "SS26", model: "Liya", price: 340, desc: "Structured double-breasted blazer in vibrant crimson red paired with tailored cigarette trousers.", file: "red-tailored-suit.webp" },
+  { title: "Ethereal Organza Ruffle Blouse", category: "Tops", year: "SS26", model: "Sasha", price: 215, desc: "High-neck semi-sheer white organza blouse with dramatic tiered ruffles around the neckline.", file: "organza-ruffle-blouse.webp" },
+  { title: "Ivory Open-Weave Chunky Sweater", category: "Knitwear", year: "AW25", model: "Clara", price: 245, desc: "Soft textured off-white chunky knit sweater with an easy crewneck and relaxed silhouette.", file: "chunky-open-knit.webp" },
+  { title: "Noir Sleeveless Turtleneck Set", category: "Sets", year: "SS26", model: "Ananya", price: 265, desc: "Sleek monochrome duo featuring a sleeveless mock-neck top and slim tailored black trousers.", file: "noir-sleeveless-set.webp" },
+  { title: "Botanical Embroidered Silk Blouse", category: "Tops", year: "SS26", model: "Sienna", price: 280, desc: "Luxurious silk long-sleeve blouse with delicate shoulder embroidery and ruffled cuffs.", file: "embroidered-silk-blouse.webp" },
   { title: "Aria Silk Midi Dress", category: "Dresses", year: "SS26", model: "Elena", price: 289, desc: "A weightless silk midi with a fluid bias cut and a whisper-soft ivory finish — made for warm evenings and long dinners.", file: "silk-midi-dress.webp" },
   { title: "Camel Wool Coat", category: "Outerwear", year: "AW25", model: "Mira", price: 495, desc: "A tailored double-face wool coat cut long and lean, with hand-finished lapels and a single horn button closure.", file: "wool-tailored-coat.webp" },
   { title: "Sienna Leather Tote", category: "Bags", year: "SS26", model: "Noor", price: 340, desc: "Full-grain vegetable-tanned leather, unlined and softly slouchy — an everyday tote that ages beautifully.", file: "leather-tote-bag.webp" },

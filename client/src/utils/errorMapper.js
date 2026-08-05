@@ -30,7 +30,9 @@ export const toHumanReadableError = (error, context = 'general') => {
   const lowerMsg = rawMessage.toLowerCase();
   const isExplicitlyExpired = lowerMsg.includes('token expired') ||
     lowerMsg.includes('session expired') ||
-    lowerMsg.includes('jwt session has been revoked');
+    lowerMsg.includes('jwt session has been revoked') ||
+    lowerMsg.includes('invalid supabase token') ||
+    lowerMsg.includes('supabase token expired');
   
   if (
     status === 401 || 

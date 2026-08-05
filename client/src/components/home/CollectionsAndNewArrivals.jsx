@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useProducts } from '../../api/products';
 import useCartStore from '../../store/cartStore';
@@ -34,10 +34,8 @@ const CollectionsAndNewArrivals = () => {
 
   const products = productsData?.products || [];
 
-  useEffect(() => {
-    // fetchWishlist checks token internally — call on mount
-    useWishlistStore.getState().fetchWishlist();
-  }, []);
+  // Wishlist state is initialized by the auth store on login.
+  // Components only read from the store — no per-component fetch needed.
 
   const toggleWishlist = (id) => {
     return toggleWishlistStore(id, navigate, location.pathname);

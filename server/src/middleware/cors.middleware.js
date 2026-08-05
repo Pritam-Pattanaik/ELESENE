@@ -24,8 +24,8 @@ const getCorsOptions = () => {
         return callback(null, true);
       }
 
-      // Support Vercel preview deployment URLs dynamically
-      const isVercelPreview = /^https:\/\/elesene-.*\.vercel\.app$/.test(origin);
+      // Support Vercel preview deployment URLs dynamically (scoped to team/deployment pattern: elesene-<hash>-<team>.vercel.app or elesene-git-<branch>-<team>.vercel.app)
+      const isVercelPreview = /^https:\/\/elesene-(?:git-[a-z0-9-]+|[a-z0-9]{8,16})-[a-z0-9-]+\.vercel\.app$/.test(origin);
       if (isVercelPreview) {
         return callback(null, true);
       }

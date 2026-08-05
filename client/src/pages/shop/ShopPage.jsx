@@ -108,10 +108,7 @@ const useWishlist = () => {
   const wishlistIds = useWishlistStore(s => s.wishlistIds);
   const toggleWishlistStore = useWishlistStore(s => s.toggleWishlist);
 
-  useEffect(() => {
-    // fetchWishlist checks token internally — no need to guard here
-    useWishlistStore.getState().fetchWishlist();
-  }, []);
+  // Wishlist is fetched once on login by the auth store — no per-component fetch needed.
 
   const toggleWishlist = useCallback((productId) => {
     return toggleWishlistStore(productId, navigate, location.pathname);
@@ -649,7 +646,7 @@ const QuickAddPanel = ({ product, isVisible }) => {
 };
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
-const ProductCard = ({ product, index, isWishlisted, onWishlistToggle }) => {
+const ProductCard = ({ product, index, isWishlisted, onWishlistToggle, onHover }) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.images?.[0]?.image_url || '';
   const secondaryImage = product.images?.find(img => !img.is_primary && img.image_url !== primaryImage)?.image_url || '';
   const imageUrl = getImageUrl(primaryImage);
@@ -670,20 +667,24 @@ const ProductCard = ({ product, index, isWishlisted, onWishlistToggle }) => {
 
   const [isHovered, setIsHovered] = useState(false);
 
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    if (onHover) onHover(product);
+  }, [onHover, product]);
+
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.45, delay: index * 0.04 }}
+      transition={{ duration: 0.45, delay: Math.min(index, 5) * 0.04 }}
       className="group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image + Quick-Add block */}
       <div
         className="relative aspect-[3/4] bg-slate rounded-2xl overflow-hidden mb-4 border border-black/5 shadow-sm group-hover:shadow-lg transition-all duration-500"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Main / secondary image */}
         <Link
@@ -698,7 +699,8 @@ const ProductCard = ({ product, index, isWishlisted, onWishlistToggle }) => {
                 src={imageUrl}
                 alt={product.name ? `${product.name} — ELESENE` : 'ELESENE product'}
                 className={`w-full h-full object-cover transition-all duration-700 ${isHovered && secondaryImageUrl ? 'opacity-0' : 'opacity-100'} group-hover:scale-[1.04]`}
-                loading="lazy"
+                loading={index < 4 ? 'eager' : 'lazy'}
+                fetchPriority={index < 4 ? 'high' : 'auto'}
                 decoding="async"
               />
               {secondaryImageUrl && (
@@ -1134,19 +1136,16 @@ const ShopPage = () => {
 
               {/* Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8 mb-6">
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="sync">
                   {products.map((product, i) => (
-                    <div
+                    <ProductCard
                       key={product.id}
-                      onMouseEnter={() => handleProductLinkHover(product)}
-                    >
-                      <ProductCard
-                        product={product}
-                        index={i}
-                        isWishlisted={isWishlisted(product.id)}
-                        onWishlistToggle={toggleWishlist}
-                      />
-                    </div>
+                      product={product}
+                      index={i}
+                      isWishlisted={isWishlisted(product.id)}
+                      onWishlistToggle={toggleWishlist}
+                      onHover={handleProductLinkHover}
+                    />
                   ))}
                 </AnimatePresence>
               </div>

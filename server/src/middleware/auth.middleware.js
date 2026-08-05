@@ -73,6 +73,11 @@ const protect = async (req, res, next) => {
       }
 
       if (!decoded) {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const isExpired = rawDecoded && rawDecoded.exp !== undefined && rawDecoded.exp !== null && rawDecoded.exp <= nowSec;
+        if (isExpired) {
+          return res.status(401).json({ success: false, message: 'Not authorized, Supabase token expired' });
+        }
         return res.status(401).json({ success: false, message: 'Not authorized, invalid Supabase token' });
       }
     } else {

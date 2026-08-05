@@ -145,83 +145,83 @@
 
   /* Light glass — for light/white backgrounds */
   .glass {
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.30);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   /* Stronger light glass */
   .glass-md {
-    background: rgba(255, 255, 255, 0.70);
+    background: rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(28px) saturate(200%);
     -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.7);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   /* Heavy frosted glass */
   .glass-lg {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(40px) saturate(220%);
     -webkit-backdrop-filter: blur(40px) saturate(220%);
-    border: 1px solid rgba(255, 255, 255, 0.40);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 1px solid rgba(201, 168, 76, 0.35);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
   /* Dark glass — for dark/black backgrounds */
   .glass-dark {
-    background: rgba(10, 10, 10, 0.55);
+    background: rgba(18, 18, 18, 0.48);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255,255,255,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* Deep dark glass */
   .glass-dark-md {
-    background: rgba(8, 8, 8, 0.72);
+    background: rgba(12, 12, 12, 0.65);
     backdrop-filter: blur(32px) saturate(180%);
     -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+    border: 1px solid rgba(201, 168, 76, 0.20);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
   }
 
   /* Gold-tinted glass — premium accent glass */
   .glass-gold {
-    background: rgba(201, 168, 76, 0.08);
+    background: rgba(201, 168, 76, 0.12);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(201, 168, 76, 0.22);
-    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.08), inset 0 1px 0 rgba(201,168,76,0.12);
+    border: 1px solid rgba(201, 168, 76, 0.30);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   /* Subtle ghost glass — barely visible */
   .glass-subtle {
-    background: rgba(255, 255, 255, 0.28);
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   /* Hover upgrade variant */
   .glass-hover {
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
   }
   .glass-hover:hover {
-    background: rgba(255, 255, 255, 0.68);
-    border-color: rgba(255, 255, 255, 0.42);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255,255,255,0.75);
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(201, 168, 76, 0.45);
+    box-shadow: 0 16px 48px rgba(201, 168, 76, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.85);
   }
   .glass-dark-hover {
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
   }
   .glass-dark-hover:hover {
-    background: rgba(15, 15, 15, 0.70);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+    background: rgba(20, 20, 20, 0.75);
+    border-color: rgba(201, 168, 76, 0.35);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
   /* Glass shimmer — animated edge highlight */
@@ -239,7 +239,7 @@
     background: linear-gradient(
       105deg,
       transparent 40%,
-      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.25) 50%,
       transparent 60%
     );
     animation: glass-shine 4s ease-in-out infinite;
@@ -255,52 +255,52 @@
 
   /* Glass card — ready-to-use glass card component */
   .glass-card {
-    background: rgba(255, 255, 255, 0.60);
-    backdrop-filter: blur(24px) saturate(190%);
-    -webkit-backdrop-filter: blur(24px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.32);
+    background: rgba(250, 249, 246, 0.52);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(201, 168, 76, 0.28);
     box-shadow:
-      0 4px 6px rgba(0, 0, 0, 0.04),
-      0 12px 36px rgba(0, 0, 0, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+      0 8px 32px rgba(0, 0, 0, 0.05),
+      0 20px 60px rgba(201, 168, 76, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
     border-radius: 1.25rem;
   }
 
   .glass-card-dark {
-    background: rgba(12, 12, 12, 0.62);
+    background: rgba(12, 12, 12, 0.58);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(201, 168, 76, 0.18);
     box-shadow:
       0 4px 6px rgba(0, 0, 0, 0.2),
       0 16px 48px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
   }
 
   /* Glass dropdown menu card */
   .glass-dropdown-card {
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(32px) saturate(200%);
-    -webkit-backdrop-filter: blur(32px) saturate(200%);
-    border: 1px solid rgba(201, 168, 76, 0.20);
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(36px) saturate(210%);
+    -webkit-backdrop-filter: blur(36px) saturate(210%);
+    border: 1px solid rgba(201, 168, 76, 0.30);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     border-radius: 1.25rem;
   }
 
-  /* Glass navbar header */
+  /* Glass navbar header — 100% fully transparent at top */
   .glass-navbar {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 1px solid rgba(201, 168, 76, 0.18);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
   }
 
   .glass-navbar-scrolled {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    background: rgba(250, 249, 246, 0.72);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
     border-bottom: 1px solid rgba(201, 168, 76, 0.28);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
   }

@@ -76,7 +76,7 @@ const Navbar = () => {
   const isUserLogged = Boolean(getCustomerToken() || isAuthenticated);
   const displayWishlistCount = isUserLogged ? wishlistIds.length : 0;
 
-  // Fetch notifications reactively
+  // Fetch notifications once on login, not on every route change
   useEffect(() => {
     if (!isAuthenticated) return;
     getNotifications({ limit: 5 })
@@ -86,7 +86,7 @@ const Navbar = () => {
       })
       .catch(err => console.error('Error fetching notifications:', err))
       .finally(() => setNotifLoading(false));
-  }, [isAuthenticated, location.pathname]);
+  }, [isAuthenticated]); // ← removed location.pathname: was firing on every page nav
 
   // Focus search input when active
   useEffect(() => {

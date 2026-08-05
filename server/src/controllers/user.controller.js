@@ -187,10 +187,11 @@ const removeFromWishlist = async (req, res) => {
   try {
     const wishlistItem = await Wishlist.findOne({ where: { id: req.params.id, user_id: req.user.id } });
     
-    if (wishlistItem) {
-      await wishlistItem.destroy();
+    if (!wishlistItem) {
+      return res.status(404).json({ success: false, message: 'Wishlist item not found' });
     }
 
+    await wishlistItem.destroy();
     res.json({ success: true, message: 'Item removed from wishlist' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -202,8 +203,13 @@ const removeFromWishlist = async (req, res) => {
 const removeFromWishlistByProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    if (product_id) {
-      await Wishlist.destroy({ where: { user_id: req.user.id, product_id } }).catch(() => null);
+    if (!product_id) {
+      return res.status(400).json({ success: false, message: 'product_id is required' });
+    }
+
+    const deletedCount = await Wishlist.destroy({ where: { user_id: req.user.id, product_id } });
+    if (!deletedCount) {
+      return res.status(404).json({ success: false, message: 'Wishlist item not found' });
     }
     
     res.json({ success: true, message: 'Item removed from wishlist' });

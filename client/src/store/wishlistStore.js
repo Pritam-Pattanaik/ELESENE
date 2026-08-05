@@ -12,7 +12,6 @@ const useWishlistStore = create(
 
       fetchWishlist: async () => {
         const token = getCustomerToken();
-        console.log('[DEBUG Wishlist] fetchWishlist token status:', token ? `Token present (${token.substring(0, 15)}...)` : 'NO TOKEN');
         if (!token) {
           if (get().wishlistIds.length > 0 || get().items.length > 0) {
             set({ wishlistIds: [], items: [], isLoading: false });
@@ -38,7 +37,6 @@ const useWishlistStore = create(
 
       toggleWishlist: async (productId, navigate = null, currentPath = '/shop') => {
         const token = getCustomerToken();
-        console.log('[DEBUG Wishlist] toggleWishlist token status:', token ? `Token present (${token.substring(0, 15)}...)` : 'NO TOKEN', 'for productId:', productId);
 
         if (!token) {
           if (navigate) {

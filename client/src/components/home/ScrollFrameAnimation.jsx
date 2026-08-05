@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useScroll, useMotionValueEvent, useInView } from 'framer-motion';
+import { useRef, useEffect, useCallback } from 'react';
+import { useScroll, useMotionValueEvent, useInView } from 'framer-motion';
 import './ScrollFrameAnimation.css';
 
 /* ─── Default Feature data ─── */
@@ -38,58 +38,37 @@ const defaultFeatures = [
   },
 ];
 
-/* ─── Single Feature Card ─── */
-const FeatureCard = ({ feature, progress }) => {
-  const [start, end] = feature.range;
-  const mid = (start + end) / 2;
+// Hoisted outside component — was previously called 4× per scroll pixel inside FeatureCard body
+const prefersReducedMotion = typeof window !== 'undefined'
+  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  : false;
 
-  // Fade in from start to midpoint, fade out from midpoint to end
-  const fadeIn = Math.min(1, Math.max(0, (progress - start) / (mid - start)));
-  const fadeOut = Math.min(1, Math.max(0, (end - progress) / (end - mid)));
-  const opacity = Math.min(fadeIn, fadeOut);
-
-  const prefersReducedMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false;
-
-  // Slide from offset to 0
-  const slideDistance = prefersReducedMotion ? 0 : 60;
-  const translateX = feature.side === 'left'
-    ? -slideDistance + slideDistance * fadeIn
-    : slideDistance - slideDistance * fadeIn;
-
-  const translateY = prefersReducedMotion ? 0 : (10 - 10 * fadeIn);
-
-  if (opacity <= 0.01) return null;
-
+/* ─── Single Feature Card — rendered once, updated via DOM ref (no re-renders) ─── */
+const FeatureCard = ({ feature, domRef }) => {
   return (
     <div
+      ref={domRef}
       className={`scroll-frame-feature ${feature.side}`}
-      style={{
-        opacity,
-        transform: `translate(${translateX}px, ${translateY}px)`,
-      }}
+      style={{ opacity: 0, visibility: 'hidden', transform: 'translate(0px, 10px)' }}
     >
       <span className="scroll-frame-feature-tag">{feature.tag}</span>
       <h3 className="scroll-frame-feature-title">{feature.title}</h3>
       <p className="scroll-frame-feature-desc">{feature.description}</p>
-      <div className="scroll-frame-feature-line" style={{ transform: `scaleX(${opacity})` }} />
+      <div className="scroll-frame-feature-line" style={{ transform: 'scaleX(0)' }} />
     </div>
   );
 };
 
-/* ─── Progress indicator dots ─── */
-const ProgressDots = ({ progress, features }) => (
+/* ─── Progress indicator dots — updated via DOM refs (no re-renders) ─── */
+const ProgressDots = ({ features, dotRefs }) => (
   <div className="scroll-frame-dots">
-    {features.map((f) => {
-      const active = progress >= f.range[0] && progress <= f.range[1];
-      return (
-        <div
-          key={f.id}
-          className={`scroll-frame-dot ${active ? 'active' : ''}`}
-        />
-      );
-    })}
+    {features.map((f, i) => (
+      <div
+        key={f.id}
+        ref={el => { dotRefs.current[i] = el; }}
+        className="scroll-frame-dot"
+      />
+    ))}
   </div>
 );
 
@@ -109,10 +88,15 @@ const ScrollFrameAnimation = ({
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const imagesRef = useRef([]);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState(0);
   const animFrameRef = useRef(null);
   const currentFrameRef = useRef(0);
+
+  // DOM refs for direct style mutation — avoids React re-renders on every scroll event
+  const headerRef = useRef(null);
+  const scrollHintRef = useRef(null);
+  const featureDomRefs = useRef(features.map(() => null));
+  const dotRefs = useRef([]);
+  const loaderRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -120,6 +104,25 @@ const ScrollFrameAnimation = ({
   });
 
   const isInView = useInView(containerRef, { once: true, margin: '200% 0px' });
+
+  /* ─── Draw frame on canvas ─── */
+  const drawFrame = useCallback((frameIndex) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !imagesRef.current[frameIndex]) return;
+
+    const ctx = canvas.getContext('2d');
+    const img = imagesRef.current[frameIndex];
+
+    if (!img.complete || img.naturalWidth === 0) return;
+
+    if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+  }, []);
 
   /* ─── Preload all frames ─── */
   useEffect(() => {
@@ -132,47 +135,79 @@ const ScrollFrameAnimation = ({
       const img = new Image();
       const num = String(i).padStart(3, '0');
       img.src = `${framePath}${num}.jpg`;
-      img.onload = () => {
+      const onDone = () => {
         loaded++;
         if (loaded === totalFrames) {
-          setImagesLoaded(true);
+          // Hide loader via DOM ref — no setState needed
+          if (loaderRef.current) loaderRef.current.style.display = 'none';
+          drawFrame(0);
         }
       };
-      img.onerror = () => {
-        loaded++;
-        if (loaded === totalFrames) {
-          setImagesLoaded(true);
-        }
-      };
+      img.onload = onDone;
+      img.onerror = onDone;
       images[i - 1] = img;
     }
 
     imagesRef.current = images;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalFrames, framePath, isInView]);
 
-  /* ─── Draw frame on canvas ─── */
-  const drawFrame = useCallback((frameIndex) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !imagesRef.current[frameIndex]) return;
-
-    const ctx = canvas.getContext('2d');
-    const img = imagesRef.current[frameIndex];
-
-    if (!img.complete || img.naturalWidth === 0) return;
-
-    // Set canvas dimensions to match image on first draw
-    if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+  /* ─── Update all DOM elements directly on scroll — zero React re-renders ─── */
+  const updateDOM = useCallback((progress) => {
+    // Header fade-out
+    if (headerRef.current) {
+      const headerOpacity = progress < 0.06 ? 1 : Math.max(0, 1 - (progress - 0.06) / 0.06);
+      headerRef.current.style.opacity = headerOpacity;
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-  }, []);
+    // Scroll hint
+    if (scrollHintRef.current) {
+      scrollHintRef.current.style.opacity = progress < 0.03 ? '1' : '0';
+    }
 
-  /* ─── Listen to scroll and update frame ─── */
+    // Feature cards
+    features.forEach((feature, i) => {
+      const el = featureDomRefs.current[i];
+      if (!el) return;
+      const [start, end] = feature.range;
+      const mid = (start + end) / 2;
+      const fadeIn  = Math.min(1, Math.max(0, (progress - start) / (mid - start)));
+      const fadeOut = Math.min(1, Math.max(0, (end - progress) / (end - mid)));
+      const opacity = Math.min(fadeIn, fadeOut);
+
+      if (opacity <= 0.01) {
+        el.style.opacity = '0';
+        el.style.visibility = 'hidden';
+        return;
+      }
+
+      el.style.visibility = 'visible';
+      el.style.opacity = opacity;
+
+      const slideDistance = prefersReducedMotion ? 0 : 60;
+      const translateX = feature.side === 'left'
+        ? -slideDistance + slideDistance * fadeIn
+        : slideDistance - slideDistance * fadeIn;
+      const translateY = prefersReducedMotion ? 0 : (10 - 10 * fadeIn);
+      el.style.transform = `translate(${translateX}px, ${translateY}px)`;
+
+      const lineEl = el.querySelector('.scroll-frame-feature-line');
+      if (lineEl) lineEl.style.transform = `scaleX(${opacity})`;
+    });
+
+    // Progress dots
+    features.forEach((feature, i) => {
+      const dot = dotRefs.current[i];
+      if (!dot) return;
+      const active = progress >= feature.range[0] && progress <= feature.range[1];
+      if (active) dot.classList.add('active');
+      else dot.classList.remove('active');
+    });
+  }, [features]);
+
+  /* ─── Listen to scroll — update canvas + DOM directly, no setState ─── */
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    setCurrentProgress(latest);
+    updateDOM(latest);
 
     const frameIndex = Math.min(
       totalFrames - 1,
@@ -181,29 +216,15 @@ const ScrollFrameAnimation = ({
 
     if (frameIndex !== currentFrameRef.current) {
       currentFrameRef.current = frameIndex;
-
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-      animFrameRef.current = requestAnimationFrame(() => {
-        drawFrame(frameIndex);
-      });
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = requestAnimationFrame(() => drawFrame(frameIndex));
     }
   });
-
-  /* ─── Draw first frame once loaded ─── */
-  useEffect(() => {
-    if (imagesLoaded) {
-      drawFrame(0);
-    }
-  }, [imagesLoaded, drawFrame]);
 
   /* ─── Cleanup ─── */
   useEffect(() => {
     return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
 
@@ -214,16 +235,11 @@ const ScrollFrameAnimation = ({
         {/* Subtle background glow */}
         <div className="scroll-frame-glow" />
 
-        {/* Section header — visible at the start */}
-        <motion.div
-          className="scroll-frame-header"
-          style={{
-            opacity: currentProgress < 0.06 ? 1 : Math.max(0, 1 - (currentProgress - 0.06) / 0.06),
-          }}
-        >
+        {/* Section header — controlled via DOM ref */}
+        <div ref={headerRef} className="scroll-frame-header" style={{ opacity: 1 }}>
           <span className="scroll-frame-header-tag">{tag}</span>
           <h2 className="scroll-frame-header-title">{title}</h2>
-        </motion.div>
+        </div>
 
         {/* Canvas */}
         <div className="scroll-frame-canvas-wrapper" style={{ paddingTop: canvasPaddingTop }}>
@@ -233,40 +249,33 @@ const ScrollFrameAnimation = ({
             style={{ mixBlendMode: blendMode, maxWidth: canvasMaxWidth }}
           />
 
-          {/* Loading state */}
-          {!imagesLoaded && (
-            <div className="scroll-frame-loader">
-              <div className="scroll-frame-loader-spinner" />
-              <span className="scroll-frame-loader-text">Loading experience...</span>
-            </div>
-          )}
+          {/* Loading state — hidden via DOM ref once frames load */}
+          <div ref={loaderRef} className="scroll-frame-loader">
+            <div className="scroll-frame-loader-spinner" />
+            <span className="scroll-frame-loader-text">Loading experience...</span>
+          </div>
         </div>
 
-        {/* Feature cards */}
+        {/* Feature cards — each receives a DOM ref, updated without re-rendering */}
         <div className="scroll-frame-features">
-          {features.map((feature) => (
+          {features.map((feature, i) => (
             <FeatureCard
               key={feature.id}
               feature={feature}
-              progress={currentProgress}
+              domRef={el => { featureDomRefs.current[i] = el; }}
             />
           ))}
         </div>
 
         {/* Progress dots */}
-        <ProgressDots progress={currentProgress} features={features} />
+        <ProgressDots features={features} dotRefs={dotRefs} />
 
-        {/* Scroll hint at bottom */}
-        <motion.div
-          className="scroll-frame-scroll-hint"
-          style={{
-            opacity: currentProgress < 0.03 ? 1 : 0,
-          }}
-        >
+        {/* Scroll hint — controlled via DOM ref */}
+        <div ref={scrollHintRef} className="scroll-frame-scroll-hint" style={{ opacity: 1 }}>
           <div className="scroll-frame-scroll-hint-mouse">
             <div className="scroll-frame-scroll-hint-wheel" />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

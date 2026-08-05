@@ -192,15 +192,15 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
-          className="glass-card glass-shimmer p-4 sm:p-6 md:p-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/20"
+          className="glass-card glass-shimmer p-4 sm:p-6 md:p-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gold/15 shadow-2xl"
         >
           {heroFeatures.map((feat) => (
-            <div key={feat.title} className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-4 first:pt-0 first:px-0">
-              <div className="w-12 h-12 rounded-xl glass-gold flex items-center justify-center shrink-0 border border-gold/25">
+            <div key={feat.title} className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-4 first:pt-0 first:px-0 group cursor-pointer transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl glass-gold flex items-center justify-center shrink-0 border border-gold/30 group-hover:scale-105 group-hover:border-gold/60 group-hover:shadow-[0_0_20px_rgba(201,168,76,0.25)] transition-all duration-300">
                 {feat.icon}
               </div>
               <div>
-                <h4 className="text-xs font-futura font-bold text-ivory tracking-widest uppercase">
+                <h4 className="text-xs font-futura font-bold text-ivory tracking-widest uppercase group-hover:text-gold transition-colors duration-300">
                   {feat.title}
                 </h4>
                 <p className="text-[11px] text-ivory/70 font-futura font-light mt-0.5 leading-snug">
