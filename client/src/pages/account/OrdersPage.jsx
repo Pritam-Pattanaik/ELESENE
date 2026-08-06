@@ -138,7 +138,7 @@ const OrdersPage = () => {
       
       <div className="space-y-6">
         {orders.map((order) => (
-          <div key={order.id} className="bg-white/40 border border-black/5 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+          <div key={order.id} className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-amber-500/20 transition-all duration-300">
             
             {/* Header info */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-black/5">
@@ -233,3 +233,4 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
+

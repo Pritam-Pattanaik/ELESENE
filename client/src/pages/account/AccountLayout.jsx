@@ -188,7 +188,7 @@ const AccountLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#FAF9F6] text-[#1C1C1C] font-body select-none">
+    <div className="flex min-h-screen bg-[#0d0d0d] text-white font-body select-none">
       <CustomCursor />
       
       {/* DESKTOP SIDEBAR ON LEFT */}
@@ -262,7 +262,7 @@ const AccountLayout = () => {
       </aside>
 
       {/* MOBILE HEADER TOGGLE */}
-      <div className="md:hidden w-full flex flex-col min-h-screen bg-[#FAF9F6]">
+      <div className="md:hidden w-full flex flex-col min-h-screen bg-[#0d0d0d]">
         <div className="flex justify-between items-center px-4 py-4 bg-[#0d0d0d] text-white">
           <Link to="/" className="text-left block group">
             <span className="text-lg font-display tracking-widest uppercase text-white group-hover:text-gold transition-colors">ELESENE</span>
@@ -317,23 +317,23 @@ const AccountLayout = () => {
 
         {/* Content Outlet for Mobile */}
         <main className="flex-1 p-4">
-          <div className="p-4 bg-white rounded-2xl shadow-sm border border-black/5 min-h-[300px]">
+          <div className="p-4 bg-[#111111] rounded-2xl border border-white/[0.06] min-h-[300px]">
             <Outlet />
           </div>
         </main>
       </div>
 
       {/* DESKTOP MAIN AREA */}
-      <div className="hidden md:flex flex-1 flex-col justify-between min-h-screen">
+      <div className="hidden md:flex flex-1 flex-col justify-between min-h-screen bg-[#111111]">
         <div className="p-8 space-y-8">
           
           {/* Top user header row */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-black/5 pb-6">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.06] pb-6">
             <div className="text-left">
-              <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-wide text-ivory flex items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-display font-semibold tracking-wide text-white flex items-center gap-2">
                 Welcome back, {user?.full_name?.split(' ')[0] || 'Customer'} <span className="text-xl">👋</span>
               </h1>
-              <p className="text-xs text-ivory/60 mt-1 font-futura">
+              <p className="text-xs text-zinc-500 mt-1 font-futura">
                 Here&apos;s what&apos;s happening with your account today.
               </p>
             </div>
@@ -349,7 +349,7 @@ const AccountLayout = () => {
                 <input 
                   type="text" 
                   placeholder="Search for products, orders..."
-                  className="pl-10 pr-4 py-2 w-full md:w-64 bg-white border border-black/5 rounded-xl text-xs text-ivory placeholder-black/40 focus:outline-none focus:border-gold transition-colors font-futura shadow-sm"
+                  className="pl-10 pr-4 py-2 w-full md:w-64 bg-[#1a1a1a] border border-white/[0.08] rounded-xl text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors font-futura"
                 />
               </div>
 
@@ -357,7 +357,7 @@ const AccountLayout = () => {
               <button
                 aria-label="Open Shopping Bag"
                 onClick={() => openCart()}
-                className="w-9 h-9 rounded-full bg-white border border-black/5 flex items-center justify-center text-stone-700 relative hover:border-amber-500 transition-all duration-300 shadow-sm cursor-pointer"
+                className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-white/[0.08] flex items-center justify-center text-zinc-400 relative hover:border-amber-500/60 hover:text-amber-400 transition-all duration-300 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -375,7 +375,7 @@ const AccountLayout = () => {
                   aria-label="Notifications"
                   aria-expanded={notifOpen}
                   onClick={() => setNotifOpen(o => !o)}
-                  className="w-9 h-9 rounded-full bg-white border border-black/5 flex items-center justify-center text-ivory/80 relative hover:border-gold transition-all duration-300 shadow-sm cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-white/[0.08] flex items-center justify-center text-zinc-400 relative hover:border-amber-500/60 hover:text-amber-400 transition-all duration-300 cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -394,11 +394,11 @@ const AccountLayout = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute right-0 top-11 w-80 bg-white border border-black/8 rounded-2xl overflow-hidden shadow-2xl z-50"
+                      className="absolute right-0 top-11 w-80 bg-[#161616] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl z-50"
                     >
                       {/* Header */}
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-black/5">
-                        <h4 className="text-xs font-futura font-bold text-ivory uppercase tracking-wider">Notifications</h4>
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+                        <h4 className="text-xs font-futura font-bold text-white uppercase tracking-wider">Notifications</h4>
                         {unreadCount > 0 && (
                           <button
                             onClick={handleMarkAllRead}
@@ -411,23 +411,23 @@ const AccountLayout = () => {
                       {/* Body */}
                       <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="px-4 py-6 text-center text-ivory/50 text-xs font-futura">No notifications yet</div>
+                          <div className="px-4 py-6 text-center text-zinc-500 text-xs font-futura">No notifications yet</div>
                         ) : (
                           notifications.map(n => (
                             <Link
                               key={n.id}
                               to="/account/notifications"
                               onClick={() => setNotifOpen(false)}
-                              className={`block px-4 py-3 hover:bg-black/[0.03] border-b border-black/5 last:border-b-0 transition-colors ${
-                                !n.is_read ? 'bg-gold/[0.04]' : ''
+                              className={`block px-4 py-3 hover:bg-white/[0.03] border-b border-white/[0.05] last:border-b-0 transition-colors ${
+                                !n.is_read ? 'bg-amber-500/[0.04]' : ''
                               }`}
                             >
                               <div className="flex items-start gap-3">
                                 <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.is_read ? 'bg-gold' : 'bg-transparent'}`} />
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-futura font-bold text-ivory truncate">{n.title}</p>
-                                  <p className="text-[11px] text-ivory/60 font-futura line-clamp-2 mt-0.5">{n.message}</p>
-                                  <p className="text-[9px] text-ivory/40 font-futura mt-1">
+                                  <p className="text-xs font-futura font-bold text-zinc-200 truncate">{n.title}</p>
+                                  <p className="text-[11px] text-zinc-500 font-futura line-clamp-2 mt-0.5">{n.message}</p>
+                                  <p className="text-[9px] text-zinc-600 font-futura mt-1">
                                     {new Date(n.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                   </p>
                                 </div>
@@ -438,7 +438,7 @@ const AccountLayout = () => {
                       </div>
                       {/* Footer */}
                       {notifications.length > 0 && (
-                        <div className="px-4 py-2.5 border-t border-black/5">
+                        <div className="px-4 py-2.5 border-t border-white/[0.06]">
                           <Link
                             to="/account/notifications"
                             onClick={() => setNotifOpen(false)}
@@ -464,7 +464,7 @@ const AccountLayout = () => {
                   <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-gold text-[10px] font-futura font-bold hover:bg-gold/30 transition-all duration-300">
                     {userInitials}
                   </div>
-                  <svg className="w-3 h-3 text-ivory/40 group-hover:text-ivory/70 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-3 h-3 text-white/40 group-hover:text-white/70 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </button>
@@ -476,12 +476,12 @@ const AccountLayout = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute right-0 top-11 w-52 bg-white border border-black/8 rounded-2xl overflow-hidden shadow-2xl z-50"
+                      className="absolute right-0 top-11 w-52 bg-[#161616] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl z-50"
                     >
                       {/* User header */}
-                      <div className="px-4 py-3 border-b border-black/5">
-                        <p className="text-ivory text-xs font-bold truncate font-futura">{user?.full_name}</p>
-                        <p className="text-ivory/60 text-[10px] font-futura truncate mt-0.5">{user?.email}</p>
+                      <div className="px-4 py-3 border-b border-white/[0.06]">
+                        <p className="text-white text-xs font-bold truncate font-futura">{user?.full_name}</p>
+                        <p className="text-zinc-500 text-[10px] font-futura truncate mt-0.5">{user?.email}</p>
                       </div>
                       {/* Menu items */}
                       <div className="py-1">
@@ -494,12 +494,12 @@ const AccountLayout = () => {
                             key={item.to}
                             to={item.to}
                             onClick={() => setProfileOpen(false)}
-                            className="flex items-center px-4 py-2.5 text-ivory/70 hover:text-gold hover:bg-black/[0.03] transition-all duration-200 text-xs font-futura font-medium"
+                            className="flex items-center px-4 py-2.5 text-zinc-400 hover:text-amber-400 hover:bg-white/[0.03] transition-all duration-200 text-xs font-futura font-medium"
                           >
                             {item.label}
                           </Link>
                         ))}
-                        <div className="border-t border-black/5 my-1" />
+                        <div className="border-t border-white/[0.06] my-1" />
                         <button
                           onClick={handleLogout}
                           className="flex items-center w-full px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50/60 transition-all duration-200 text-xs font-futura font-medium cursor-pointer"
@@ -531,7 +531,7 @@ const AccountLayout = () => {
         </div>
 
         {/* Custom Trust & Copyright Footer */}
-        <footer className="border-t border-black/5 p-6 md:px-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-ivory/50 font-futura tracking-wider bg-white/30">
+        <footer className="border-t border-white/[0.05] p-6 md:px-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-zinc-600 font-futura tracking-wider">
           <div className="flex gap-4 items-center flex-wrap justify-center sm:justify-start">
             <span>Secure Payments</span>
             <span className="opacity-30">•</span>
