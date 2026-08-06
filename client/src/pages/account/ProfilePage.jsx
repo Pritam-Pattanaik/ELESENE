@@ -144,7 +144,7 @@ const ProfilePage = () => {
       {/* TIER 1: STATS SUMMARY CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Orders */}
-        <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
           <div className="space-y-1">
             <span className="text-xs font-futura text-ivory/50 tracking-wider">Orders Placed</span>
             <h3 className="text-2xl font-display font-bold text-ivory">{stats.ordersCount}</h3>
@@ -160,7 +160,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Card 2: Wishlist */}
-        <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
           <div className="space-y-1">
             <span className="text-xs font-futura text-ivory/50 tracking-wider">Wishlist Items</span>
             <h3 className="text-2xl font-display font-bold text-ivory">{stats.wishlistCount}</h3>
@@ -176,7 +176,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Card 3: Reward Points */}
-        <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
           <div className="space-y-1">
             <span className="text-xs font-futura text-ivory/50 tracking-wider">Reward Points</span>
             <h3 className="text-2xl font-display font-bold text-ivory">{points.toLocaleString()}</h3>
@@ -190,7 +190,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Card 4: Club Tier */}
-        <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
           <div className="space-y-1">
             <span className="text-xs font-futura text-ivory/50 tracking-wider">Club Tier</span>
             <h3 className="text-2xl font-display font-bold text-gold tracking-wide">
@@ -222,7 +222,7 @@ const ProfilePage = () => {
         <div className="lg:col-span-7 space-y-6">
           
           {/* Box 1: Recent Orders */}
-          <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 space-y-5 shadow-sm">
+          <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 space-y-5 shadow-sm">
             <div className="flex justify-between items-center">
               <h4 className="text-sm font-futura tracking-wider text-ivory uppercase font-bold">Recent Orders</h4>
               <Link to="/account/orders" className="text-[10px] font-futura tracking-widest text-gold uppercase hover:underline font-bold">
@@ -261,7 +261,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Box 2: Wishlist Highlights */}
-          <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 space-y-5 shadow-sm">
+          <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 space-y-5 shadow-sm">
             <div className="flex justify-between items-center">
               <h4 className="text-sm font-futura tracking-wider text-ivory uppercase font-bold">Wishlist Highlights</h4>
               <Link to="/account/wishlist" className="text-[10px] font-futura tracking-widest text-gold uppercase hover:underline font-bold">
@@ -400,7 +400,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Account Information Card */}
-          <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 space-y-6 shadow-sm">
+          <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 space-y-6 shadow-sm">
             <div className="flex justify-between items-center">
               <h4 className="text-sm font-futura tracking-wider text-ivory uppercase font-bold">Account Information</h4>
               <button 
@@ -455,4 +455,5 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
 

@@ -154,7 +154,7 @@ const LoyaltyPage = () => {
       <InvestmentJourney metrics={metrics} progress={progress} />
 
       {/* ── Engagement Actions ── */}
-      <div className="rounded-2xl border border-white/[0.07] bg-[#0e0e0e] p-5 shadow-xl text-white">
+      <div className="rounded-2xl border border-white/[0.07] bg-[#1e1d2a] p-5 shadow-xl text-white">
         <h3 className="text-[10px] font-futura font-bold uppercase tracking-[0.2em] text-amber-400/80 mb-5 flex items-center gap-2">
           <Gift className="h-3.5 w-3.5" />
           Earn Engagement Investment Bonuses
@@ -170,7 +170,7 @@ const LoyaltyPage = () => {
                 onClick={() => handleEngagementBonus(action.type)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className={`flex items-center gap-3 rounded-xl border border-zinc-800 bg-[#141414] p-4 text-left transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${c.ring}`}
+                className={`flex items-center gap-3 rounded-xl border border-zinc-800 bg-[#252340] p-4 text-left transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${c.ring}`}
               >
                 <div className={`rounded-lg p-2.5 shrink-0 ${c.bg} ${c.text}`}>
                   {action.icon}
@@ -189,7 +189,7 @@ const LoyaltyPage = () => {
       <InvestmentTimeline transactions={history} />
 
       {/* ── AI Concierge ── */}
-      <div className="rounded-2xl border border-white/[0.07] bg-[#0e0e0e] p-6 shadow-xl text-white">
+      <div className="rounded-2xl border border-white/[0.07] bg-[#1e1d2a] p-6 shadow-xl text-white">
         <div className="flex items-center gap-3 mb-5">
           <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 shrink-0">
             <Sparkles className="h-4 w-4" />
@@ -200,13 +200,13 @@ const LoyaltyPage = () => {
           </div>
         </div>
 
-        <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-xl p-4 h-52 overflow-y-auto space-y-3 text-xs mb-4">
+        <div className="bg-[#16152a] border border-white/[0.05] rounded-xl p-4 h-52 overflow-y-auto space-y-3 text-xs mb-4">
           {chatMessages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-xl px-4 py-2.5 leading-relaxed font-futura ${
                 msg.sender === 'user'
                   ? 'bg-amber-500 text-black font-semibold'
-                  : 'bg-[#141414] text-zinc-300 border border-white/[0.06]'
+                  : 'bg-[#252340] text-zinc-300 border border-white/[0.06]'
               }`}>
                 {msg.text}
               </div>
@@ -214,7 +214,7 @@ const LoyaltyPage = () => {
           ))}
           {aiLoading && (
             <div className="flex justify-start">
-              <div className="bg-[#141414] text-zinc-400 rounded-xl px-4 py-2.5 flex items-center gap-2 border border-white/[0.06]">
+              <div className="bg-[#252340] text-zinc-400 rounded-xl px-4 py-2.5 flex items-center gap-2 border border-white/[0.06]">
                 <RefreshCw className="h-3.5 w-3.5 animate-spin text-amber-400" />
                 <span>Consulting AI Concierge...</span>
               </div>
@@ -228,7 +228,7 @@ const LoyaltyPage = () => {
             value={aiQuery}
             onChange={(e) => setAiQuery(e.target.value)}
             placeholder="e.g. What privileges do I unlock at Gold tier?"
-            className="flex-1 bg-[#0a0a0a] border border-white/[0.07] rounded-xl px-4 py-2.5 text-xs text-white font-futura focus:outline-none focus:border-amber-500/50 placeholder-zinc-600 transition-colors"
+            className="flex-1 bg-[#16152a] border border-white/[0.07] rounded-xl px-4 py-2.5 text-xs text-white font-futura focus:outline-none focus:border-amber-500/50 placeholder-zinc-600 transition-colors"
           />
           <button
             type="submit"
@@ -253,3 +253,4 @@ const LoyaltyPage = () => {
 };
 
 export default LoyaltyPage;
+

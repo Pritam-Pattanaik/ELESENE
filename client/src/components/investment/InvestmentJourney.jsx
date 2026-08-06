@@ -10,7 +10,7 @@ const TIERS_CONFIG = [
     themeColor: 'emerald',
     colorHex: '#10b981',
     activeStyle: 'border-[#10b981] text-[#10b981] shadow-[0_0_20px_rgba(16,185,129,0.4)] bg-[#10b981]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#10b981]/30 bg-[#10b981]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -29,7 +29,7 @@ const TIERS_CONFIG = [
     themeColor: 'bronze',
     colorHex: '#c27a3f',
     activeStyle: 'border-[#c27a3f] text-[#c27a3f] shadow-[0_0_20px_rgba(194,122,63,0.4)] bg-[#c27a3f]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#c27a3f]/30 bg-[#c27a3f]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -45,7 +45,7 @@ const TIERS_CONFIG = [
     themeColor: 'silver',
     colorHex: '#cbd5e1',
     activeStyle: 'border-[#cbd5e1] text-[#cbd5e1] shadow-[0_0_20px_rgba(203,213,225,0.4)] bg-[#cbd5e1]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#cbd5e1]/30 bg-[#cbd5e1]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -61,7 +61,7 @@ const TIERS_CONFIG = [
     themeColor: 'gold',
     colorHex: '#d97706',
     activeStyle: 'border-[#d97706] text-[#d97706] shadow-[0_0_20px_rgba(217,119,6,0.4)] bg-[#d97706]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#d97706]/30 bg-[#d97706]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -78,7 +78,7 @@ const TIERS_CONFIG = [
     themeColor: 'platinum',
     colorHex: '#a855f7',
     activeStyle: 'border-[#a855f7] text-[#a855f7] shadow-[0_0_20px_rgba(168,85,247,0.4)] bg-[#a855f7]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#a855f7]/30 bg-[#a855f7]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -96,7 +96,7 @@ const TIERS_CONFIG = [
     themeColor: 'diamond',
     colorHex: '#fbbf24',
     activeStyle: 'border-[#fbbf24] text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.4)] bg-[#fbbf24]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#0d0d0d]',
+    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
     innerActiveStyle: 'border-[#fbbf24]/30 bg-[#fbbf24]/5',
     innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
     icon: (className) => (
@@ -156,7 +156,7 @@ export default function InvestmentJourney({ metrics, progress }) {
   const pointsToNext = progress?.pointsToNext || 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0b0b0b] p-6 shadow-2xl text-white select-none">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#1a1929] p-6 shadow-2xl text-white select-none">
       {/* Subtle radial metallic reflection */}
       <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/[0.03] rounded-full blur-[40px] pointer-events-none" />
 
@@ -187,7 +187,7 @@ export default function InvestmentJourney({ metrics, progress }) {
                 className={`absolute w-2 h-2 rounded-full border -translate-y-1/2 z-10 transition-all duration-700 ${
                   isDotPassed 
                     ? 'border-[#c27a3f]/70 bg-amber-500/20 shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
-                    : 'border-zinc-800 bg-[#0d0d0d]'
+                    : 'border-zinc-800 bg-[#1e1d2a]'
                 }`}
                 style={{ left: `${pos + 1}%`, top: '50%' }}
               />
@@ -284,7 +284,7 @@ export default function InvestmentJourney({ metrics, progress }) {
         </div>
 
         {/* Progress bar line */}
-        <div className="flex-1 h-3.5 bg-[#141414] border border-white/[0.04] rounded-full overflow-hidden p-0.5 max-w-[460px] w-full">
+        <div className="flex-1 h-3.5 bg-[#252340] border border-white/[0.04] rounded-full overflow-hidden p-0.5 max-w-[460px] w-full">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${nextTierObj ? progressPct : 100}%` }}
@@ -306,3 +306,4 @@ export default function InvestmentJourney({ metrics, progress }) {
     </div>
   );
 }
+

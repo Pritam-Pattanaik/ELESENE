@@ -14,14 +14,14 @@ const SOURCE_ICONS = {
 export default function InvestmentTimeline({ transactions = [] }) {
   if (!transactions || transactions.length === 0) {
     return (
-      <div className="rounded-2xl border border-stone-800 bg-[#121118] p-8 text-center text-neutral-300 shadow-xl">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#1a1929] p-8 text-center text-neutral-300 shadow-xl">
         <p className="text-xs font-medium">No investment activity logged yet. Your purchases and brand engagements will appear here.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-stone-800 bg-[#121118] p-6 md:p-8 shadow-2xl text-white">
+    <div className="rounded-2xl border border-white/[0.08] bg-[#1a1929] p-6 md:p-8 shadow-2xl text-white">
       <h3 className="text-lg font-light tracking-wide text-white mb-6">Investment Activity & Timeline</h3>
 
       <div className="relative border-l border-stone-700 ml-4 pl-6 space-y-6">
@@ -32,7 +32,7 @@ export default function InvestmentTimeline({ transactions = [] }) {
               {SOURCE_ICONS[tx.source] || <ArrowUpRight className="h-3.5 w-3.5 text-neutral-300" />}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl bg-neutral-900 p-4 border border-stone-800 hover:border-stone-700 transition-all">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl bg-neutral-900 p-4 border border-white/[0.08] hover:border-stone-700 transition-all">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-neutral-200">
@@ -73,3 +73,4 @@ export default function InvestmentTimeline({ transactions = [] }) {
     </div>
   );
 }
+

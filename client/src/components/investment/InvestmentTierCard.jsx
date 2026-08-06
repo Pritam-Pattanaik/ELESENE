@@ -60,7 +60,7 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
   const nextTier = progress?.nextTier;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-stone-800 bg-[#121118] p-6 md:p-8 shadow-2xl text-white">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#1e1d2a] p-6 md:p-8 shadow-2xl text-white">
       {/* Background Metallic Accent Mesh */}
       <div className={`absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br ${theme.accent} opacity-20 blur-3xl`} />
 
@@ -95,7 +95,7 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
           </div>
 
           {/* Investment Points */}
-          <div className="flex flex-col border-t md:border-t-0 md:border-l border-stone-800 pt-4 md:pt-0 md:pl-6">
+          <div className="flex flex-col border-t md:border-t-0 md:border-l border-white/[0.08] pt-4 md:pt-0 md:pl-6">
             <span className="text-xs font-semibold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400" />
               Investment Points (IP)
@@ -107,7 +107,7 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
           </div>
 
           {/* Spendable Loyalty Points */}
-          <div className="flex flex-col border-t md:border-t-0 md:border-l border-stone-800 pt-4 md:pt-0 md:pl-6 justify-between">
+          <div className="flex flex-col border-t md:border-t-0 md:border-l border-white/[0.08] pt-4 md:pt-0 md:pl-6 justify-between">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-neutral-300">Spendable Loyalty Points (LP)</span>
               <span className="text-3xl font-light tracking-tight text-emerald-400 mt-1 block font-mono">
@@ -135,7 +135,7 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
                 {pointsToNext.toLocaleString()} IP Remaining ({progressPct}%)
               </span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-950 p-0.5 border border-stone-800">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-950 p-0.5 border border-white/[0.08]">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
@@ -151,10 +151,11 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
         )}
 
         {/* Compliance Disclaimer Footnote */}
-        <div className="text-[11px] text-neutral-400 italic border-t border-stone-800 pt-3">
+        <div className="text-[11px] text-neutral-400 italic border-t border-white/[0.08] pt-3">
           * Note: ELESENE Brand Investment Points & Tiers represent customer recognition and lifetime engagement. Points hold no cash value, equity, dividends, or financial interest.
         </div>
       </div>
     </div>
   );
 }
+

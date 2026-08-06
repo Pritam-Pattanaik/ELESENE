@@ -132,7 +132,7 @@ export const RewardsTab = ({ points = 1250 }) => {
         </motion.div>
 
         {/* Benefits Breakdown */}
-        <div className="flex-grow bg-[#161616] border border-white/[0.07] rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+        <div className="flex-grow bg-[#252340] border border-white/[0.07] rounded-2xl p-6 flex flex-col justify-between shadow-sm">
           <h4 className="text-xs font-futura tracking-widest uppercase font-bold text-ivory">ELITE MEMBERSHIP BENEFITS</h4>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
@@ -352,7 +352,7 @@ export const AccountSettingsTab = () => {
       )}
 
       {/* Profile Section */}
-      <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-futura tracking-wider text-ivory uppercase font-bold mb-6">Profile Information</h3>
         <form onSubmit={handleProfileSubmit} className="space-y-5" noValidate>
           <div className="space-y-4">
@@ -404,7 +404,7 @@ export const AccountSettingsTab = () => {
       </div>
 
       {/* Password Section */}
-      <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-futura tracking-wider text-ivory uppercase font-bold mb-6">Change Password</h3>
         <form onSubmit={handlePasswordSubmit} className="space-y-5" noValidate>
           <div className="space-y-4">
@@ -520,4 +520,5 @@ export const AccountSettingsTab = () => {
     </div>
   );
 };
+
 

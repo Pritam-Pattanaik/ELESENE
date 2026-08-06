@@ -188,11 +188,11 @@ const AccountLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0d0d0d] text-white font-body select-none">
+    <div className="flex h-screen overflow-hidden bg-[#13121a] text-white font-body select-none">
       <CustomCursor />
       
       {/* DESKTOP SIDEBAR ON LEFT */}
-      <aside className="hidden md:flex flex-col justify-between w-72 shrink-0 bg-[#0d0d0d] text-white p-8 border-r border-white/[0.08] min-h-screen">
+      <aside className="hidden md:flex flex-col justify-between w-72 shrink-0 sticky top-0 h-screen overflow-y-auto bg-[#1a1929] text-white p-8 border-r border-white/[0.07]" style={{scrollbarWidth:'none'}}>
         <div className="space-y-8">
           {/* Clickable Brand Logo linking to Home */}
           <Link to="/" className="text-left block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-lg p-1 -m-1">
@@ -232,7 +232,7 @@ const AccountLayout = () => {
           </nav>
 
           {/* Club Box Promotion */}
-          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4 text-left">
+          <div className="bg-[#221f33] border border-white/[0.08] rounded-2xl p-5 space-y-4 text-left">
             <div className="flex items-center gap-2">
               <span className="text-xs font-futura tracking-widest text-white uppercase font-bold">ELESENE CLUB</span>
               <span className="text-gold text-xs">✦</span>
@@ -262,8 +262,8 @@ const AccountLayout = () => {
       </aside>
 
       {/* MOBILE HEADER TOGGLE */}
-      <div className="md:hidden w-full flex flex-col min-h-screen bg-[#0d0d0d]">
-        <div className="flex justify-between items-center px-4 py-4 bg-[#0d0d0d] text-white">
+      <div className="md:hidden w-full flex flex-col min-h-screen bg-[#13121a]">
+        <div className="flex justify-between items-center px-4 py-4 bg-[#1a1929] text-white">
           <Link to="/" className="text-left block group">
             <span className="text-lg font-display tracking-widest uppercase text-white group-hover:text-gold transition-colors">ELESENE</span>
           </Link>
@@ -283,7 +283,7 @@ const AccountLayout = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-[#0d0d0d] border-b border-white/[0.08]"
+              className="bg-[#1a1929] border-b border-white/[0.08]"
             >
               <div className="px-4 py-2 space-y-1">
                 {links.map((link) => (
@@ -317,18 +317,18 @@ const AccountLayout = () => {
 
         {/* Content Outlet for Mobile */}
         <main className="flex-1 p-4">
-          <div className="p-4 bg-[#111111] rounded-2xl border border-white/[0.06] min-h-[300px]">
+          <div className="p-4 bg-[#1e1d2a] rounded-2xl border border-white/[0.07] min-h-[300px]">
             <Outlet />
           </div>
         </main>
       </div>
 
       {/* DESKTOP MAIN AREA */}
-      <div className="hidden md:flex flex-1 flex-col justify-between min-h-screen bg-[#111111]">
+      <div className="hidden md:flex flex-1 flex-col min-h-0 overflow-y-auto bg-[#1e1d2a]">
         <div className="p-8 space-y-8">
           
           {/* Top user header row */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.06] pb-6">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.08] pb-6 sticky top-0 z-20 bg-[#1e1d2a] pt-1">
             <div className="text-left">
               <h1 className="text-xl md:text-2xl font-display font-semibold tracking-wide text-white flex items-center gap-2">
                 Welcome back, {user?.full_name?.split(' ')[0] || 'Customer'} <span className="text-xl">👋</span>
@@ -349,7 +349,7 @@ const AccountLayout = () => {
                 <input 
                   type="text" 
                   placeholder="Search for products, orders..."
-                  className="pl-10 pr-4 py-2 w-full md:w-64 bg-[#1a1a1a] border border-white/[0.08] rounded-xl text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors font-futura"
+                  className="pl-10 pr-4 py-2 w-full md:w-64 bg-[#2a2840] border border-white/[0.1] rounded-xl text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition-colors font-futura"
                 />
               </div>
 
@@ -357,7 +357,7 @@ const AccountLayout = () => {
               <button
                 aria-label="Open Shopping Bag"
                 onClick={() => openCart()}
-                className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-white/[0.08] flex items-center justify-center text-zinc-400 relative hover:border-amber-500/60 hover:text-amber-400 transition-all duration-300 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-[#2a2840] border border-white/[0.1] flex items-center justify-center text-zinc-300 relative hover:border-amber-500/60 hover:text-amber-300 transition-all duration-300 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -375,7 +375,7 @@ const AccountLayout = () => {
                   aria-label="Notifications"
                   aria-expanded={notifOpen}
                   onClick={() => setNotifOpen(o => !o)}
-                  className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-white/[0.08] flex items-center justify-center text-zinc-400 relative hover:border-amber-500/60 hover:text-amber-400 transition-all duration-300 cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-[#2a2840] border border-white/[0.1] flex items-center justify-center text-zinc-300 relative hover:border-amber-500/60 hover:text-amber-300 transition-all duration-300 cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -394,7 +394,7 @@ const AccountLayout = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute right-0 top-11 w-80 bg-[#161616] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl z-50"
+                      className="absolute right-0 top-11 w-80 bg-[#242237] border border-white/[0.1] rounded-2xl overflow-hidden shadow-2xl z-50"
                     >
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
@@ -476,7 +476,7 @@ const AccountLayout = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute right-0 top-11 w-52 bg-[#161616] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl z-50"
+                      className="absolute right-0 top-11 w-52 bg-[#242237] border border-white/[0.1] rounded-2xl overflow-hidden shadow-2xl z-50"
                     >
                       {/* User header */}
                       <div className="px-4 py-3 border-b border-white/[0.06]">
@@ -531,7 +531,7 @@ const AccountLayout = () => {
         </div>
 
         {/* Custom Trust & Copyright Footer */}
-        <footer className="border-t border-white/[0.05] p-6 md:px-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-zinc-600 font-futura tracking-wider">
+        <footer className="border-t border-white/[0.07] p-6 md:px-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-zinc-500 font-futura tracking-wider mt-auto">
           <div className="flex gap-4 items-center flex-wrap justify-center sm:justify-start">
             <span>Secure Payments</span>
             <span className="opacity-30">•</span>

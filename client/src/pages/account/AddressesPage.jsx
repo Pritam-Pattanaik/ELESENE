@@ -151,7 +151,7 @@ const AddressesPage = () => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-[#161616] border border-white/[0.07] rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
+            <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-base font-display font-bold text-ivory">{editingId ? 'Edit Shipping Address' : 'New Shipping Address'}</h3>
                 <button 
@@ -337,7 +337,7 @@ const AddressesPage = () => {
               </div>
             ) : (
               addresses.map((addr) => (
-                <div key={addr.id} className="relative bg-[#161616] border border-white/[0.07] rounded-2xl p-6 group hover:border-amber-500/30 hover:shadow-md transition-all duration-300">
+                <div key={addr.id} className="relative bg-[#252340] border border-white/[0.07] rounded-2xl p-6 group hover:border-amber-500/30 hover:shadow-md transition-all duration-300">
                   {addr.is_default && (
                     <div className="absolute top-0 right-0 px-3 py-1 bg-gold/15 border-b border-l border-gold/10 rounded-bl-lg rounded-tr-2xl">
                       <span className="text-[8px] font-futura font-bold tracking-widest uppercase text-gold-light">Default</span>
@@ -389,5 +389,6 @@ const AddressesPage = () => {
 };
 
 export default AddressesPage;
+
 
 
