@@ -1,7 +1,8 @@
 const { Order, OrderItem, Cart, CartItem, ProductVariant, Coupon } = require('../models');
 const { verifyWebhookSignature } = require('../services/payment.service');
+const investmentService = require('../services/investment.service');
 
-// Helper to complete order payment, decrement stock, increment coupon usage, clear cart
+// Helper to complete order payment, decrement stock, increment coupon usage, clear cart, award investment points
 const completeOrderPayment = async (order, paymentId) => {
   if (order.payment_status === 'paid') return;
 
@@ -11,6 +12,15 @@ const completeOrderPayment = async (order, paymentId) => {
     order.razorpay_payment_id = paymentId;
   }
   await order.save();
+
+  // Award Brand Investment Points & Loyalty Points
+  if (order.user_id) {
+    try {
+      await investmentService.awardPurchaseInvestment(order.user_id, order.id, order.total_amount);
+    } catch (err) {
+      console.warn('Failed to award investment points for order:', err.message);
+    }
+  }
 
   // Decrement variant stock
   const orderItems = await OrderItem.findAll({ where: { order_id: order.id } });

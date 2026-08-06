@@ -530,17 +530,18 @@ const createCategory = async (req, res) => {
 const getAdminCategories = async (req, res) => {
   try {
     const categories = await Category.findAll({
+      attributes: {
+        include: [
+          [fn('COUNT', col('Products.id')), 'productCount']
+        ]
+      },
+      include: [{ model: Product, attributes: [] }],
+      group: ['Category.id'],
       order: [['sort_order', 'ASC']],
-      include: [{ model: Product, attributes: ['id'] }],
+      subQuery: false,
     });
 
-    // Add product count
-    const categoriesWithCount = categories.map(cat => ({
-      ...cat.toJSON(),
-      productCount: cat.Products ? cat.Products.length : 0,
-    }));
-
-    res.json({ success: true, categories: categoriesWithCount });
+    res.json({ success: true, categories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

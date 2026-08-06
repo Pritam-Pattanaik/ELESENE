@@ -27,6 +27,7 @@
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import { useDashboard } from '../../api/admin';
+import AdminDashboardSkeleton from '../../components/admin/AdminSkeleton';
 import './admin.css';
 
 // ─── 1. HELPERS & FORMATTERS ────────────────────────────────────────────────
@@ -253,7 +254,7 @@ const AdminDashboard = () => {
 
   const isSuper = user?.role === 'superadmin';
 
-  if (isLoading) return <div className="admin-loading"><span className="admin-spinner" /> Loading dashboard...</div>;
+  if (isLoading) return <AdminDashboardSkeleton />;
   if (error) return <div className="admin-login-error">Error: {error.message}</div>;
 
   const dbStats = data?.dashboard || {};

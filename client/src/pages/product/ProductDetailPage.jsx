@@ -46,9 +46,10 @@ const ProductDetailPage = () => {
   const isWishlisted = product ? wishlistIds.includes(String(product.id)) : false;
 
   useEffect(() => {
-    // fetchWishlist checks token internally — no need to guard here
-    useWishlistStore.getState().fetchWishlist();
-  }, []);
+    if (isAuthenticated && wishlistIds.length === 0) {
+      useWishlistStore.getState().fetchWishlist();
+    }
+  }, [isAuthenticated, wishlistIds.length]);
 
   const handleToggleWishlist = (productId = null) => {
     const targetId = productId || product?.id;
@@ -295,6 +296,22 @@ const ProductDetailPage = () => {
             <p className="text-[#666666] font-light leading-relaxed text-sm">
               {product.description || 'Handcrafted elegance in every detail. Crafted from premium structured organza with delicate folds. This creation is the perfect blend of modern sophistication and timeless charm.'}
             </p>
+
+            {/* BRAND INVESTMENT IMPACT PREVIEW BADGE */}
+            <div className="rounded-xl border border-[#9E8B6D]/30 bg-[#9E8B6D]/5 p-4 space-y-2 text-xs">
+              <div className="flex items-center justify-between font-semibold">
+                <span className="flex items-center gap-1.5 text-[#1A1A1A]">
+                  <span className="text-amber-600">✦</span> Invest with this purchase
+                </span>
+                <span className="text-[#9E8B6D] font-mono">
+                  +{Math.floor(Number(product.base_price || 8299)).toLocaleString()} IP
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[#666666]">
+                <span>Earn {Math.floor(Number(product.base_price || 8299) / 100)} Spendable Loyalty Points (LP)</span>
+                <span className="font-semibold text-emerald-700">Lifetime Recognition</span>
+              </div>
+            </div>
 
             {/* Color Swatch Component */}
             <div className="pt-2">

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAdminOrders, useUpdateOrderStatus } from '../../api/admin';
 import { updateOrderTracking } from '../../api/admin';
 import { useQueryClient } from '@tanstack/react-query';
+import { AdminTableSkeleton } from '../../components/admin/AdminSkeleton';
 
 const statusColors = { pending: 'orange', confirmed: 'blue', processing: 'blue', shipped: 'purple', delivered: 'green', cancelled: 'red', returned: 'red' };
 const paymentColors = { pending: 'orange', paid: 'green', failed: 'red', refunded: 'purple' };
@@ -88,7 +89,7 @@ const OrderManagement = () => {
 
   const { data, isLoading, error } = useAdminOrders({ page, limit: 15, search: search || undefined, status: statusFilter || undefined });
 
-  if (isLoading) return <div className="admin-loading"><span className="admin-spinner" /> Loading orders...</div>;
+  if (isLoading) return <AdminTableSkeleton rows={8} cols={6} />;
   if (error) return <div className="admin-login-error">Error: {error.message}</div>;
 
   return (

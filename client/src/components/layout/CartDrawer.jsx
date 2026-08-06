@@ -109,17 +109,17 @@ const CartDrawer = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 h-full w-full max-w-md glass-dark-md border-l border-white/[0.07] z-[70] flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.7)]"
+            className="fixed top-0 right-0 h-full w-full max-w-md bg-[#0f0f12] text-white border-l border-neutral-800 z-[70] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/[0.06] glass-dark">
-              <h2 className="text-h4 font-bold text-ivory tracking-wider uppercase">
-                Your Bag <span className="text-gold">({items.length})</span>
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-950">
+              <h2 className="text-lg font-bold text-white tracking-wider uppercase">
+                Your Bag <span className="text-amber-400">({items.length})</span>
               </h2>
               <button 
                 onClick={closeCart} 
                 aria-label="Close cart drawer"
-                className="text-ivory/70 hover:text-gold transition-colors text-2xl leading-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-md"
+                className="text-neutral-400 hover:text-white transition-colors text-2xl leading-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-md"
               >
                 &times;
               </button>
@@ -132,7 +132,7 @@ const CartDrawer = () => {
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mx-4 mt-3 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-futura rounded-xl"
+                  className="mx-4 mt-3 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-futura rounded-xl"
                 >
                   {syncError}
                 </motion.div>
@@ -144,7 +144,7 @@ const CartDrawer = () => {
               {items.length === 0 ? (
                 <EmptyState
                   icon={
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                   }
@@ -155,7 +155,7 @@ const CartDrawer = () => {
                     onClick: closeCart,
                     to: "/shop"
                   }}
-                  className="py-10 bg-transparent border-none shadow-none"
+                  className="py-10 bg-transparent border-none shadow-none text-neutral-300"
                 />
               ) : (
                 items.map((item) => {
@@ -182,7 +182,7 @@ const CartDrawer = () => {
                       <Link
                         to={`/product/${item.Product?.slug || '#'}`}
                         onClick={closeCart}
-                        className="w-20 h-28 bg-black/5 rounded-lg overflow-hidden flex-shrink-0 border border-black/5 block hover:opacity-80 transition-opacity"
+                        className="w-20 h-28 bg-neutral-900 rounded-lg overflow-hidden flex-shrink-0 border border-neutral-800 block hover:opacity-80 transition-opacity"
                         tabIndex={isBusy ? -1 : 0}
                       >
                         {fullImgUrl && (
@@ -204,7 +204,7 @@ const CartDrawer = () => {
                               onClick={closeCart}
                               className="flex-1 focus-visible:outline-none"
                             >
-                              <h3 className="font-futura text-sm font-bold text-ivory line-clamp-2 hover:text-gold transition-colors">
+                              <h3 className="font-futura text-sm font-bold text-white line-clamp-2 hover:text-amber-400 transition-colors">
                                 {item.Product?.name}
                               </h3>
                             </Link>
@@ -212,48 +212,48 @@ const CartDrawer = () => {
                               onClick={() => handleRemove(item)}
                               disabled={isBusy}
                               aria-label={`Remove ${item.Product?.name || 'item'} from cart`}
-                              className="text-ivory/40 hover:text-red-500 transition-colors ml-2 cursor-pointer text-lg leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-30"
+                              className="text-neutral-400 hover:text-red-400 transition-colors ml-2 cursor-pointer text-lg leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:opacity-30"
                             >
                               {isDeleting ? (
-                                <span className="inline-block w-4 h-4 border-2 border-ivory/30 border-t-red-500 rounded-full animate-spin" />
+                                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-red-500 rounded-full animate-spin" />
                               ) : '×'}
                             </button>
                           </div>
-                          <p className="text-[10px] font-futura text-ivory/70 mt-1 tracking-wider uppercase font-medium">
-                            {item.ProductVariant?.color} / {item.ProductVariant?.size}
+                          <p className="text-[11px] font-futura text-neutral-300 mt-1 tracking-wider uppercase font-medium">
+                            {item.ProductVariant?.color || item.color || item.selectedColor || 'Classic'} / {item.ProductVariant?.size || item.size || item.selectedSize || 'Standard'}
                           </p>
                           {isTemp && (
-                            <p className="text-[9px] font-futura text-gold/60 mt-0.5">
+                            <p className="text-[10px] font-futura text-amber-400/80 mt-0.5 font-medium">
                               Sign in to save to cloud
                             </p>
                           )}
                         </div>
                         
                         <div className="flex justify-between items-end mt-3">
-                          <div className="flex items-center border border-white/10 rounded-lg glass-dark">
+                          <div className="flex items-center border border-stone-800 rounded-lg bg-neutral-900">
                             <button 
                               onClick={() => handleQuantityChange(item, item.quantity - 1)}
                               disabled={item.quantity <= 1 || isBusy}
                               aria-label={`Decrease quantity of ${item.Product?.name || 'item'}`}
-                              className="px-3 py-1 text-ivory/70 hover:text-gold transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-30"
+                              className="px-3 py-1 text-neutral-300 hover:text-amber-400 transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:opacity-30"
                             >
                               -
                             </button>
-                            <span className="px-2 text-xs text-ivory font-futura font-bold min-w-[24px] text-center">
+                            <span className="px-2 text-xs text-white font-futura font-bold min-w-[24px] text-center">
                               {isUpdating ? (
-                                <span className="inline-block w-3 h-3 border-2 border-ivory/30 border-t-gold rounded-full animate-spin" />
+                                <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-amber-400 rounded-full animate-spin" />
                               ) : item.quantity}
                             </span>
                             <button 
                               onClick={() => handleQuantityChange(item, item.quantity + 1)}
                               disabled={isBusy}
                               aria-label={`Increase quantity of ${item.Product?.name || 'item'}`}
-                              className="px-3 py-1 text-ivory/70 hover:text-gold transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-30"
+                              className="px-3 py-1 text-neutral-300 hover:text-amber-400 transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:opacity-30"
                             >
                               +
                             </button>
                           </div>
-                          <p className="font-futura text-sm text-gold-light font-bold">
+                          <p className="font-futura text-sm text-amber-400 font-bold font-mono">
                             ₹{(price * item.quantity).toLocaleString('en-IN')}
                           </p>
                         </div>
@@ -266,21 +266,21 @@ const CartDrawer = () => {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-6 border-t border-white/[0.06] space-y-4 glass-dark">
-                <div className="flex justify-between text-sm font-futura text-ivory">
+              <div className="p-6 border-t border-stone-800 space-y-4 bg-neutral-950">
+                <div className="flex justify-between text-sm font-futura text-white">
                   <span className="uppercase tracking-wider font-bold">Subtotal</span>
-                  <span className="text-gold-light text-base font-bold">
+                  <span className="text-amber-400 text-base font-bold font-mono">
                     ₹{getCartTotal().toLocaleString('en-IN')}
                   </span>
                 </div>
-                <p className="text-[9px] text-ivory/70 text-center font-futura tracking-wider">
+                <p className="text-[11px] text-neutral-400 text-center font-futura tracking-wider font-medium">
                   Shipping &amp; taxes calculated at checkout.
                 </p>
                 <Link 
                   to="/checkout"
                   onClick={closeCart}
-                  className="block w-full py-4 glass-gold hover:bg-gold/30 hover:border-gold/60 text-gold hover:text-gold text-center text-[11px] font-futura font-bold uppercase tracking-[0.3em] transition-all rounded-xl shadow-md hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold border border-gold/25"
-                style={{ minHeight: '52px' }}
+                  className="flex items-center justify-center w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:brightness-110 text-black font-bold text-[11px] font-futura uppercase tracking-[0.25em] transition-all rounded-xl shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  style={{ minHeight: '52px' }}
                 >
                   Secure Checkout
                 </Link>

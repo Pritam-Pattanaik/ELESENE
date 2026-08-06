@@ -3,12 +3,16 @@ import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-d
 import { motion, AnimatePresence } from 'framer-motion';
 import useCustomerAuthStore from '../../store/customerAuthStore';
 import useWishlistStore from '../../store/wishlistStore';
+import useUiStore from '../../store/uiStore';
+import useCartStore from '../../store/cartStore';
 import CartDrawer from '../../components/layout/CartDrawer';
 import CustomCursor from '../../components/effects/CustomCursor';
 import { getNotifications, markAllNotificationsRead } from '../../api/user';
 
 const AccountLayout = () => {
   const { isAuthenticated, user, logout } = useCustomerAuthStore();
+  const { openCart } = useUiStore();
+  const { items: cartItems } = useCartStore();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -348,6 +352,22 @@ const AccountLayout = () => {
                   className="pl-10 pr-4 py-2 w-full md:w-64 bg-white border border-black/5 rounded-xl text-xs text-ivory placeholder-black/40 focus:outline-none focus:border-gold transition-colors font-futura shadow-sm"
                 />
               </div>
+
+              {/* ── Shopping Bag Trigger ── */}
+              <button
+                aria-label="Open Shopping Bag"
+                onClick={() => openCart()}
+                className="w-9 h-9 rounded-full bg-white border border-black/5 flex items-center justify-center text-stone-700 relative hover:border-amber-500 transition-all duration-300 shadow-sm cursor-pointer"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-amber-500 rounded-full text-[9px] font-bold text-black flex items-center justify-center border border-white">
+                    {cartItems.length}
+                  </span>
+                )}
+              </button>
 
               {/* ── Notification Bell ── */}
               <div className="relative" ref={notifRef}>

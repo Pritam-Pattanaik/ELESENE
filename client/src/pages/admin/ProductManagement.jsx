@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getImageUrl } from '../../utils/imageUrl';
 import { supabase } from '../../supabase';
 import { useProductRealtime } from '../../hooks/useProductRealtime';
+import { AdminTableSkeleton } from '../../components/admin/AdminSkeleton';
 
 // ─── File validation constants ───────────────────────────────────────────────
 const ALLOWED_TYPES = ['image/webp', 'image/jpeg', 'image/png'];
@@ -472,7 +473,7 @@ const ProductManagement = () => {
     } catch (err) { alert(err.message); }
   };
 
-  if (isLoading) return <div className="admin-loading"><span className="admin-spinner" /> Loading products...</div>;
+  if (isLoading) return <AdminTableSkeleton rows={8} cols={6} />;
   if (error)     return <div className="admin-login-error">Error: {error.message}</div>;
 
   return (

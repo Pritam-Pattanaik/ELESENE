@@ -32,10 +32,21 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  loyaltyPoints: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'loyalty_points',
+  },
   loyalty_tier: {
     type: DataTypes.STRING(50),
     allowNull: false,
     defaultValue: 'Member',
+  },
+  loyaltyTier: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Member',
+    field: 'loyalty_tier',
   },
   role: {
     type: DataTypes.ENUM('customer', 'admin', 'superadmin'),
@@ -70,6 +81,56 @@ const User = sequelize.define('User', {
     defaultValue: 0,
     allowNull: false,
     field: 'token_version',
+  },
+  lifetimeInvestmentAmount: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+    field: 'lifetime_investment_amount',
+  },
+  investmentPoints: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'investment_points',
+  },
+  investmentTier: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Seed',
+    field: 'investment_tier',
+  },
+  tierAchievedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'tier_achieved_at',
+  },
+  nextTierProgress: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'next_tier_progress',
+  },
+  totalReferrals: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'total_referrals',
+  },
+  engagementScore: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'engagement_score',
+  },
+  investmentLevel: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    field: 'investment_level',
+  },
+  totalOrders: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'total_orders',
+  },
+  totalSpent: {
+    type: DataTypes.DECIMAL(12, 2),
+    defaultValue: 0,
+    field: 'total_spent',
   }
 }, {
   tableName: 'users',

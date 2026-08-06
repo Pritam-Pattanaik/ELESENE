@@ -17,6 +17,10 @@ const Notification = require('./Notification');
 const LoyaltyTransaction = require('./LoyaltyTransaction');
 const LoyaltyReturnStat = require('./LoyaltyReturnStat');
 const { LoyaltyTier, LoyaltySettings } = require('./LoyaltyTier');
+const InvestmentTransaction = require('./InvestmentTransaction');
+const InvestmentTierHistory = require('./InvestmentTierHistory');
+const RewardRedemption = require('./RewardRedemption');
+const EngagementActivity = require('./EngagementActivity');
 
 // User Relationships
 User.hasMany(Address, { foreignKey: 'user_id' });
@@ -84,7 +88,7 @@ Wishlist.belongsTo(ProductVariant, { foreignKey: 'variant_id' });
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'user_id' });
 
-// Loyalty Relationships
+// Loyalty & Investment Relationships
 User.hasMany(LoyaltyTransaction, { foreignKey: 'user_id', as: 'loyaltyTransactions' });
 LoyaltyTransaction.belongsTo(User, { foreignKey: 'user_id' });
 
@@ -93,6 +97,21 @@ LoyaltyTransaction.belongsTo(Order, { foreignKey: 'order_id' });
 
 User.hasOne(LoyaltyReturnStat, { foreignKey: 'user_id', as: 'returnStat' });
 LoyaltyReturnStat.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasMany(InvestmentTransaction, { foreignKey: 'user_id', as: 'investmentTransactions' });
+InvestmentTransaction.belongsTo(User, { foreignKey: 'user_id' });
+
+Order.hasMany(InvestmentTransaction, { foreignKey: 'order_id', as: 'investmentTransactions' });
+InvestmentTransaction.belongsTo(Order, { foreignKey: 'order_id' });
+
+User.hasMany(InvestmentTierHistory, { foreignKey: 'user_id', as: 'tierHistory' });
+InvestmentTierHistory.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasMany(RewardRedemption, { foreignKey: 'user_id', as: 'rewardRedemptions' });
+RewardRedemption.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasMany(EngagementActivity, { foreignKey: 'user_id', as: 'engagementActivities' });
+EngagementActivity.belongsTo(User, { foreignKey: 'user_id' });
 
 module.exports = {
   sequelize,
@@ -114,4 +133,8 @@ module.exports = {
   LoyaltyReturnStat,
   LoyaltyTier,
   LoyaltySettings,
+  InvestmentTransaction,
+  InvestmentTierHistory,
+  RewardRedemption,
+  EngagementActivity,
 };

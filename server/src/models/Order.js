@@ -52,6 +52,26 @@ const Order = sequelize.define('Order', {
     defaultValue: 0,
     comment: 'Points earned by this order — stored for exact reversal on return',
   },
+  investmentPointsEarned: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'investment_points_earned',
+  },
+  loyaltyPointsEarned: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'loyalty_points_earned',
+  },
+  rewardMultiplier: {
+    type: DataTypes.DECIMAL(3, 2),
+    defaultValue: 1.00,
+    field: 'reward_multiplier',
+  },
+  campaignId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'campaign_id',
+  },
 }, {
   tableName: 'orders',
   timestamps: true,

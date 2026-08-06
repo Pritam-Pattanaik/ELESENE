@@ -7,6 +7,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
 import './index.css';
 
+import ErrorBoundary from './components/common/ErrorBoundary';
 import CustomerAuthGuard from './components/auth/CustomerAuthGuard';
 import ProductSkeletonGrid from './components/product/ProductSkeletonGrid';
 import ProductDetailSkeleton from './components/product/ProductDetailSkeleton';
@@ -144,10 +145,11 @@ createRoot(document.getElementById('root')).render(
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <MotionConfig reducedMotion="user">
-          <BrowserRouter>
-            <ScrollToHash />
-            <ScrollToTop />
-            <Suspense fallback={<PageLoader />}>
+          <ErrorBoundary>
+            <BrowserRouter>
+              <ScrollToHash />
+              <ScrollToTop />
+              <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Public Routes */}
                 <Route
@@ -431,7 +433,8 @@ createRoot(document.getElementById('root')).render(
               </Routes>
             </Suspense>
           </BrowserRouter>
-        </MotionConfig>
+        </ErrorBoundary>
+      </MotionConfig>
       </QueryClientProvider>
     </HelmetProvider>
     </AppBootstrapper>

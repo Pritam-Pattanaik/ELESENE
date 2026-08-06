@@ -2,8 +2,19 @@ const { Category } = require('../models');
 
 // @desc    Get all categories (nested tree)
 // @route   GET /api/categories
+let cachedCategoryTree = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 300000; // 5 minutes cache
+
 const getCategories = async (req, res) => {
   try {
+    const now = Date.now();
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+
+    if (cachedCategoryTree && (now - lastCacheTime < CACHE_TTL_MS)) {
+      return res.json({ success: true, categories: cachedCategoryTree });
+    }
+
     // Fetch all active categories
     const categories = await Category.findAll({
       where: { is_active: true },
@@ -20,9 +31,10 @@ const getCategories = async (req, res) => {
         }));
     };
 
-    const categoryTree = buildTree(categories);
+    cachedCategoryTree = buildTree(categories);
+    lastCacheTime = now;
 
-    res.json({ success: true, categories: categoryTree });
+    res.json({ success: true, categories: cachedCategoryTree });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

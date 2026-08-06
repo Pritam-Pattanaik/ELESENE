@@ -11,6 +11,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { AddressSkeletonGrid } from '../../components/common/Skeleton';
 import { getImageUrl } from '../../utils/imageUrl';
 import useFormValidation from '../../hooks/useFormValidation';
+import CelebrationModal from '../../components/investment/CelebrationModal';
 
 const CheckoutPage = () => {
   const { items, getCartTotal, clearCart } = useCartStore();
@@ -650,10 +651,35 @@ const CheckoutPage = () => {
               <span>Total</span>
               <span className="text-gold">₹{total.toLocaleString()}</span>
             </div>
+
+            {/* BRAND INVESTMENT CHECKOUT SUMMARY WIDGET */}
+            <div className="mt-6 rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 space-y-2 text-xs">
+              <div className="flex items-center justify-between font-bold text-amber-400">
+                <span>✦ Brand Investment Earned</span>
+                <span className="font-mono">+{total.toLocaleString()} IP</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-ivory/70">
+                <span>Spendable Loyalty Points</span>
+                <span className="font-mono text-emerald-400">+{Math.floor(total / 100)} LP</span>
+              </div>
+              <p className="text-[10px] text-ivory/50 italic pt-1 border-t border-white/5">
+                Invest in ELESENE: Increases your lifetime standing towards the next privilege tier.
+              </p>
+            </div>
           </div>
         </div>
 
       </div>
+
+      <CelebrationModal
+        isOpen={!!orderComplete}
+        onClose={() => setOrderComplete(null)}
+        ipEarned={total}
+        lpEarned={Math.floor(total / 100)}
+        newTier={user?.investmentTier || 'Seed'}
+        tierUpgraded={false}
+      />
+
       <Footer />
     </div>
   );

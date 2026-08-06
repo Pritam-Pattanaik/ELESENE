@@ -148,3 +148,59 @@ export const updateAdminLoyaltySettings = async (settingsData) => {
   });
   return handleResponse(res, 'Failed to update loyalty settings');
 };
+
+// ─── BRAND INVESTMENT API ─────────────────────────────────────────────────────
+
+export const getMyInvestmentSummary = async () => {
+  if (!getCustomerToken()) return null;
+  const res = await fetch(`${API}/loyalty/investment/summary`, { headers: getCustomerHeaders() });
+  return handleResponse(res, 'Failed to fetch investment summary');
+};
+
+export const getMyInvestmentHistory = async ({ page = 1, limit = 20 } = {}) => {
+  if (!getCustomerToken()) return { transactions: [], total: 0 };
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(`${API}/loyalty/investment/history?${params}`, { headers: getCustomerHeaders() });
+  return handleResponse(res, 'Failed to fetch investment transactions');
+};
+
+export const engageActivity = async (activityType, referenceId = null) => {
+  const res = await fetch(`${API}/loyalty/investment/engage`, {
+    method: 'POST',
+    headers: getCustomerHeaders(),
+    body: JSON.stringify({ activityType, referenceId }),
+  });
+  return handleResponse(res, 'Failed to record engagement activity');
+};
+
+export const redeemPoints = async ({ rewardTitle, rewardType, lpCost }) => {
+  const res = await fetch(`${API}/loyalty/investment/redeem`, {
+    method: 'POST',
+    headers: getCustomerHeaders(),
+    body: JSON.stringify({ rewardTitle, rewardType, lpCost }),
+  });
+  return handleResponse(res, 'Failed to redeem loyalty points');
+};
+
+export const calculateOrderImpact = async (cartSubtotal, campaignId = null) => {
+  const res = await fetch(`${API}/loyalty/investment/calculate-order`, {
+    method: 'POST',
+    headers: getCustomerHeaders(),
+    body: JSON.stringify({ cartSubtotal, campaignId }),
+  });
+  return handleResponse(res, 'Failed to calculate order investment impact');
+};
+
+export const getAdminInvestmentAnalytics = async () => {
+  const res = await fetch(`${API}/loyalty/admin/investment-analytics`, { headers: getAdminHeaders() });
+  return handleResponse(res, 'Failed to fetch investment analytics');
+};
+
+export const adjustUserInvestmentPoints = async ({ userId, ipAmount, lpAmount, reason }) => {
+  const res = await fetch(`${API}/loyalty/admin/adjust-investment`, {
+    method: 'POST',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ userId, ipAmount, lpAmount, reason }),
+  });
+  return handleResponse(res, 'Failed to adjust investment points');
+};

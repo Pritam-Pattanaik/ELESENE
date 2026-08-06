@@ -18,7 +18,7 @@ const OrdersPage = () => {
     setError(null);
     try {
       const data = await getUserOrders();
-      setOrders(data || []);
+      setOrders(Array.isArray(data) ? data : (data?.orders || []));
     } catch (err) {
       setError(err);
     } finally {
@@ -28,21 +28,13 @@ const OrdersPage = () => {
 
   useEffect(() => {
     let isMounted = true;
-    getUserOrders()
-      .then(data => {
-        if (isMounted) {
-          setOrders(data || []);
-          setLoading(false);
-        }
-      })
-      .catch(err => {
-        if (isMounted) {
-          setError(err);
-          setLoading(false);
-        }
+    if (isAuthenticated) {
+      fetchOrders().catch(err => {
+        if (isMounted) setError(err);
       });
+    }
     return () => { isMounted = false; };
-  }, []);
+  }, [fetchOrders, isAuthenticated]);
 
   if (!isAuthenticated) {
     return <Navigate to="/auth" state={{ from: '/account/orders' }} replace />;

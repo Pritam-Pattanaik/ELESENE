@@ -343,11 +343,137 @@ const updateSettings = async (req, res) => {
   }
 };
 
+const investmentService = require('../services/investment.service');
+const rewardEngine     = require('../services/reward.engine');
+
+// ═══════════════════════════════════════
+// BRAND INVESTMENT USER CONTROLLERS
+// ═══════════════════════════════════════
+
+// @desc  Get user's full Brand Investment summary dashboard data
+// @route GET /api/loyalty/investment/summary
+// @auth  protect
+const getMyInvestmentSummary = async (req, res) => {
+  try {
+    const summary = await investmentService.getUserInvestmentSummary(req.user.id);
+    res.json({ success: true, ...summary });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc  Get paginated investment transactions history
+// @route GET /api/loyalty/investment/history?page=1&limit=20
+// @auth  protect
+const getMyInvestmentHistory = async (req, res) => {
+  try {
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
+    const data = await investmentService.getInvestmentTransactionsHistory(req.user.id, page, limit);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc  Trigger engagement bonus (profile completion, social share, reviews)
+// @route POST /api/loyalty/investment/engage
+// @auth  protect
+// @body  { activityType: string, referenceId?: string }
+const engageActivity = async (req, res) => {
+  try {
+    const { activityType, referenceId } = req.body;
+    if (!activityType) {
+      return res.status(400).json({ success: false, message: 'activityType is required' });
+    }
+    const result = await investmentService.awardEngagementBonus(req.user.id, activityType, referenceId);
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc  Redeem Loyalty Points for vouchers/rewards
+// @route POST /api/loyalty/investment/redeem
+// @auth  protect
+// @body  { rewardTitle: string, rewardType: string, lpCost: number }
+const redeemPoints = async (req, res) => {
+  try {
+    const { rewardTitle, rewardType, lpCost } = req.body;
+    if (!rewardTitle || !rewardType || !lpCost) {
+      return res.status(400).json({ success: false, message: 'rewardTitle, rewardType, and lpCost are required' });
+    }
+    const result = await investmentService.redeemLoyaltyPoints(req.user.id, rewardTitle, rewardType, lpCost);
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc  Calculate projected IP/LP earnings for cart total
+// @route POST /api/loyalty/investment/calculate-order
+// @auth  optional
+// @body  { cartSubtotal: number, campaignId?: string }
+const calculateOrderImpact = async (req, res) => {
+  try {
+    const { cartSubtotal, campaignId } = req.body;
+    const user = req.user || null;
+    const impact = rewardEngine.calculateOrderInvestment(cartSubtotal, user, campaignId);
+    res.json({ success: true, ...impact });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ═══════════════════════════════════════
+// BRAND INVESTMENT ADMIN CONTROLLERS
+// ═══════════════════════════════════════
+
+// @desc  Get program-wide Brand Investment Analytics
+// @route GET /api/loyalty/admin/investment-analytics
+// @auth  protect + admin
+const getAdminInvestmentAnalytics = async (req, res) => {
+  try {
+    const analytics = await investmentService.getAdminInvestmentAnalytics();
+    res.json({ success: true, analytics });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc  Admin manual adjustment of IP and LP balances
+// @route POST /api/loyalty/admin/adjust-investment
+// @auth  protect + admin
+// @body  { userId: string, ipAmount: number, lpAmount: number, reason: string }
+const adjustUserInvestmentPoints = async (req, res) => {
+  try {
+    const { userId, ipAmount, lpAmount, reason } = req.body;
+    if (!userId || !reason?.trim()) {
+      return res.status(400).json({ success: false, message: 'userId and reason are required' });
+    }
+    const result = await investmentService.adjustUserInvestmentPoints(
+      userId,
+      ipAmount,
+      lpAmount,
+      reason.trim(),
+      req.user.id
+    );
+    res.json({ success: true, ...result, message: 'Investment points adjusted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   // User
   getMyLoyalty,
   getMyHistory,
   askLoyaltyAI,
+  getMyInvestmentSummary,
+  getMyInvestmentHistory,
+  engageActivity,
+  redeemPoints,
+  calculateOrderImpact,
   // Admin
   getAdminStats,
   getAdminLoyaltyUsers,
@@ -358,6 +484,8 @@ module.exports = {
   removeRestriction,
   aiSummarize,
   aiTriageUser,
+  getAdminInvestmentAnalytics,
+  adjustUserInvestmentPoints,
   // Super-admin
   getTiers,
   updateTier,

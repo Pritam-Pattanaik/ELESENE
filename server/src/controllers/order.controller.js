@@ -350,12 +350,25 @@ const handleRazorpayWebhook = async (req, res) => {
 // @route   GET /api/orders
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const offset = (page - 1) * limit;
+
+    const { count, rows: orders } = await Order.findAndCountAll({
       where: { user_id: req.user.id },
       include: [{ model: OrderItem, include: [{ model: Product }] }],
-      order: [['created_at', 'DESC']]
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      distinct: true,
     });
-    res.json({ success: true, orders });
+    res.json({
+      success: true,
+      orders,
+      totalCount: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
