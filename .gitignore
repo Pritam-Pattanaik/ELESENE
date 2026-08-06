@@ -47,7 +47,11 @@ server/uploads/*
 .kilo/
 skills-lock.json
 
-# Internal / AI-generated scratch files (not production code)
+# Internal / Confidential scratch files (strictly ignored, never committed)
+SECRETS.md
+ADMIN_CREDENTIALS.md
+*secret*.md
+*credentials*.md
 logindata.md
 memory.md
 scratch_eslint.txt
