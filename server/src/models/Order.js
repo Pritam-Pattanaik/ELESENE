@@ -41,6 +41,17 @@ const Order = sequelize.define('Order', {
   shipped_at: DataTypes.DATE,
   delivered_at: DataTypes.DATE,
   notes: DataTypes.TEXT,
+  return_reason_code: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: 'size_fit | damaged_on_arrival | wrong_item_received | defective | changed_mind | found_cheaper | no_longer_needed | pattern_return',
+  },
+  points_awarded: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    comment: 'Points earned by this order — stored for exact reversal on return',
+  },
 }, {
   tableName: 'orders',
   timestamps: true,

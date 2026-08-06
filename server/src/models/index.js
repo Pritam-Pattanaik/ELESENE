@@ -14,6 +14,9 @@ const Coupon = require('./Coupon');
 const Wishlist = require('./Wishlist');
 const Address = require('./Address');
 const Notification = require('./Notification');
+const LoyaltyTransaction = require('./LoyaltyTransaction');
+const LoyaltyReturnStat = require('./LoyaltyReturnStat');
+const { LoyaltyTier, LoyaltySettings } = require('./LoyaltyTier');
 
 // User Relationships
 User.hasMany(Address, { foreignKey: 'user_id' });
@@ -77,8 +80,19 @@ Review.belongsTo(Order, { foreignKey: 'order_id' });
 Wishlist.belongsTo(Product, { foreignKey: 'product_id' });
 Wishlist.belongsTo(ProductVariant, { foreignKey: 'variant_id' });
 
+// Notification Relationships
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'user_id' });
+
+// Loyalty Relationships
+User.hasMany(LoyaltyTransaction, { foreignKey: 'user_id', as: 'loyaltyTransactions' });
+LoyaltyTransaction.belongsTo(User, { foreignKey: 'user_id' });
+
+Order.hasMany(LoyaltyTransaction, { foreignKey: 'order_id', as: 'loyaltyTransactions' });
+LoyaltyTransaction.belongsTo(Order, { foreignKey: 'order_id' });
+
+User.hasOne(LoyaltyReturnStat, { foreignKey: 'user_id', as: 'returnStat' });
+LoyaltyReturnStat.belongsTo(User, { foreignKey: 'user_id' });
 
 module.exports = {
   sequelize,
@@ -95,5 +109,9 @@ module.exports = {
   Coupon,
   Wishlist,
   Address,
-  Notification
+  Notification,
+  LoyaltyTransaction,
+  LoyaltyReturnStat,
+  LoyaltyTier,
+  LoyaltySettings,
 };

@@ -37,6 +37,7 @@ const AddressesPage = lazy(() => import('./pages/account/AddressesPage'));
 const WishlistPage = lazy(() => import('./pages/account/WishlistPage'));
 const PaymentMethodsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.PaymentMethodsTab })));
 const RewardsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.RewardsTab })));
+const LoyaltyPage = lazy(() => import('./pages/account/LoyaltyPage'));
 const AccountSettingsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.AccountSettingsTab })));
 const NotificationsPage = lazy(() => import('./pages/account/NotificationsPage'));
 
@@ -50,6 +51,9 @@ const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const CouponManagement = lazy(() => import('./pages/admin/CouponManagement'));
 const FeaturedProductsTab = lazy(() => import('./pages/admin/FeaturedProductsTab'));
+const LoyaltyManagement = lazy(() => import('./pages/admin/LoyaltyManagement'));
+const FlaggedAccounts = lazy(() => import('./pages/admin/FlaggedAccounts'));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -286,7 +290,15 @@ createRoot(document.getElementById('root')).render(
                     path="rewards"
                     element={
                       <Suspense fallback={<PageLoader />}>
-                        <RewardsTab />
+                        <LoyaltyPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="loyalty"
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <LoyaltyPage />
                       </Suspense>
                     }
                   />
@@ -386,6 +398,22 @@ createRoot(document.getElementById('root')).render(
                     element={
                       <Suspense fallback={<PageLoader />}>
                         <FeaturedProductsTab />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="loyalty"
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <LoyaltyManagement />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="flagged-accounts"
+                    element={
+                      <Suspense fallback={<PageLoader />}>
+                        <FlaggedAccounts />
                       </Suspense>
                     }
                   />

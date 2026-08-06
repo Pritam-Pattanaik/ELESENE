@@ -1,6 +1,7 @@
 const { Product, Category, ProductVariant, ProductImage, Order, OrderItem, User, Coupon, Address, Review } = require('../models');
 const { Op, fn, col, literal } = require('sequelize');
 const sequelize = require('../config/db');
+const loyaltyService = require('../services/loyalty.service');
 
 // ═══════════════════════════════════════
 // DASHBOARD
@@ -691,6 +692,32 @@ const updateOrderStatus = async (req, res) => {
     if (status === 'delivered') order.delivered_at = new Date();
 
     await order.save({ transaction: t });
+
+    // ─── Loyalty hooks ───────────────────────────────────────────────────────
+    if (status === 'delivered' && order.points_awarded === 0 && order.payment_status === 'paid') {
+      // Award points for this order if not already awarded
+      try {
+        await loyaltyService.awardPoints(order.user_id, order.id, order.total_amount, t);
+      } catch (loyaltyErr) {
+        // Non-fatal: log but do not fail the status update
+        console.error('[Loyalty] awardPoints error:', loyaltyErr.message);
+      }
+    }
+
+    if (status === 'returned') {
+      // Reverse points, update return stats, possibly flag account
+      try {
+        const reasonCode = req.body.return_reason_code || null;
+        if (reasonCode) {
+          await Order.update({ return_reason_code: reasonCode }, { where: { id: order.id }, transaction: t });
+        }
+        await loyaltyService.reversePoints(order.user_id, order.id, reasonCode, t);
+      } catch (loyaltyErr) {
+        console.error('[Loyalty] reversePoints error:', loyaltyErr.message);
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     await t.commit();
     res.json({ success: true, order });
   } catch (error) {

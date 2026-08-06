@@ -32,6 +32,11 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  loyalty_tier: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Member',
+  },
   role: {
     type: DataTypes.ENUM('customer', 'admin', 'superadmin'),
     defaultValue: 'customer',

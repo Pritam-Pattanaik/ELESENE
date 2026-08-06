@@ -83,6 +83,8 @@ const AdminLayout = () => {
     if (location.pathname === '/admin/users') return 'Users';
     if (location.pathname === '/admin/coupons') return 'Coupons';
     if (location.pathname === '/admin/featured') return 'Featured Products';
+    if (location.pathname === '/admin/loyalty') return 'Loyalty Score System';
+    if (location.pathname === '/admin/flagged-accounts') return 'Flagged Accounts & Return Abuse';
     return 'Admin';
   };
 
@@ -96,9 +98,9 @@ const AdminLayout = () => {
     { to: '/admin/featured', label: 'Featured Products', icon: 'products' },
     { to: '/admin/categories', label: 'Categories', icon: 'categories' },
     { to: '/admin/users', label: 'Customers', icon: 'customers' },
+    { to: '/admin/loyalty', label: 'Loyalty System', icon: 'reviews' },
+    { to: '/admin/flagged-accounts', label: 'Flagged Accounts', icon: 'returns' },
     { to: '/admin/coupons', label: 'Coupons', icon: 'coupons' },
-    { to: '#reviews', label: 'Reviews', icon: 'reviews', mock: true },
-    { to: '#returns', label: 'Returns', icon: 'returns', mock: true },
     { to: '#reports', label: 'Reports', icon: 'reports', mock: true },
     { to: '#settings', label: 'Settings', icon: 'settings', mock: true },
   ];
@@ -111,6 +113,8 @@ const AdminLayout = () => {
     { to: '/admin/products', label: 'Catalog', icon: 'catalog', arrow: true },
     { to: '/admin/featured', label: 'Featured Products', icon: 'products' },
     { to: '/admin/users', label: 'Customers', icon: 'customers', arrow: true },
+    { to: '/admin/loyalty', label: 'Loyalty System', icon: 'reviews' },
+    { to: '/admin/flagged-accounts', label: 'Flagged Accounts', icon: 'returns' },
     { to: '/admin/coupons', label: 'Marketing', icon: 'marketing', arrow: true },
     { to: '#stores', label: 'Stores', icon: 'stores', mock: true },
     { to: '/admin/users', label: 'Users', icon: 'users' },

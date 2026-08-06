@@ -12,6 +12,7 @@ const cartRoutes = require('./routes/cart.routes');
 const orderRoutes = require('./routes/order.routes');
 const userRoutes = require('./routes/user.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const loyaltyRoutes = require('./routes/loyalty.routes');
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
 
 // 404 Fallback Handler
 app.use((req, res) => {
