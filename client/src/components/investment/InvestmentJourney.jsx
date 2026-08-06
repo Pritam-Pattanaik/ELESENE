@@ -9,10 +9,10 @@ const TIERS_CONFIG = [
     maxPoints: 2999,
     themeColor: 'emerald',
     colorHex: '#10b981',
-    activeStyle: 'border-[#10b981] text-[#10b981] shadow-[0_0_20px_rgba(16,185,129,0.4)] bg-[#10b981]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#10b981]/30 bg-[#10b981]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    activeStyle: 'border-emerald-500 text-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-emerald-300 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M7 20h10" />
@@ -28,10 +28,10 @@ const TIERS_CONFIG = [
     maxPoints: 7999,
     themeColor: 'bronze',
     colorHex: '#c27a3f',
-    activeStyle: 'border-[#c27a3f] text-[#c27a3f] shadow-[0_0_20px_rgba(194,122,63,0.4)] bg-[#c27a3f]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#c27a3f]/30 bg-[#c27a3f]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    activeStyle: 'border-[#c27a3f] text-[#c27a3f] shadow-[0_0_15px_rgba(194,122,63,0.3)] bg-amber-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-[#c27a3f]/30 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 15 8.5 22 9.5 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.5 9 8.5 12 2" />
@@ -43,11 +43,11 @@ const TIERS_CONFIG = [
     minPoints: 8000,
     maxPoints: 14999,
     themeColor: 'silver',
-    colorHex: '#cbd5e1',
-    activeStyle: 'border-[#cbd5e1] text-[#cbd5e1] shadow-[0_0_20px_rgba(203,213,225,0.4)] bg-[#cbd5e1]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#cbd5e1]/30 bg-[#cbd5e1]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    colorHex: '#64748b',
+    activeStyle: 'border-slate-400 text-slate-700 shadow-[0_0_15px_rgba(100,116,139,0.3)] bg-slate-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-slate-300 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 15 8.5 22 9.5 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.5 9 8.5 12 2" />
@@ -60,10 +60,10 @@ const TIERS_CONFIG = [
     maxPoints: 29999,
     themeColor: 'gold',
     colorHex: '#d97706',
-    activeStyle: 'border-[#d97706] text-[#d97706] shadow-[0_0_20px_rgba(217,119,6,0.4)] bg-[#d97706]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#d97706]/30 bg-[#d97706]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    activeStyle: 'border-amber-500 text-amber-700 shadow-[0_0_15px_rgba(217,119,6,0.3)] bg-amber-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-amber-300 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z" />
@@ -77,10 +77,10 @@ const TIERS_CONFIG = [
     maxPoints: 59999,
     themeColor: 'platinum',
     colorHex: '#a855f7',
-    activeStyle: 'border-[#a855f7] text-[#a855f7] shadow-[0_0_20px_rgba(168,85,247,0.4)] bg-[#a855f7]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#a855f7]/30 bg-[#a855f7]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    activeStyle: 'border-purple-500 text-purple-700 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-purple-300 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 3h12l4 6-10 12L2 9z" />
@@ -94,11 +94,11 @@ const TIERS_CONFIG = [
     minPoints: 60000,
     maxPoints: null,
     themeColor: 'diamond',
-    colorHex: '#fbbf24',
-    activeStyle: 'border-[#fbbf24] text-[#fbbf24] shadow-[0_0_20px_rgba(251,191,36,0.4)] bg-[#fbbf24]/10',
-    inactiveStyle: 'border-zinc-700/60 text-zinc-500 bg-[#1e1d2a]',
-    innerActiveStyle: 'border-[#fbbf24]/30 bg-[#fbbf24]/5',
-    innerInactiveStyle: 'border-white/[0.04] bg-[#0c0c0c]',
+    colorHex: '#f59e0b',
+    activeStyle: 'border-amber-500 text-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.3)] bg-amber-50',
+    inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
+    innerActiveStyle: 'border-amber-300 bg-white',
+    innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 3h12l4 6-10 12L2 9z" />
@@ -113,7 +113,7 @@ const TIERS_CONFIG = [
 
 export default function InvestmentJourney({ metrics, progress }) {
   const currentIp = metrics?.investmentPoints || 0;
-  
+
   // Normalise current tier name from database summary (defaults to 'Seed' if missing)
   const rawTier = metrics?.investmentTier || 'Seed';
   const currentTierName = rawTier.charAt(0).toUpperCase() + rawTier.slice(1).toLowerCase();
@@ -123,28 +123,21 @@ export default function InvestmentJourney({ metrics, progress }) {
   const activeTierIndex = currentTierIndex !== -1 ? currentTierIndex : 0;
 
   // Calculate percentage of line completed
-  // There are 5 intervals between 6 tiers.
   const getLineProgressPercent = () => {
     if (activeTierIndex === 0) {
-      // Seed is at index 0. Between index 0 and 1, progress to Bronze
       const nextMin = TIERS_CONFIG[1].minPoints;
       const progressRatio = Math.min(1, currentIp / nextMin);
-      return progressRatio * 20; // First segment takes up 20%
+      return progressRatio * 20;
     }
-    
-    // If it's the maximum tier (Diamond)
     if (activeTierIndex === TIERS_CONFIG.length - 1) {
       return 100;
     }
-
     const completedSegmentsPercent = activeTierIndex * 20;
     const currentTierObj = TIERS_CONFIG[activeTierIndex];
     const nextTierObj = TIERS_CONFIG[activeTierIndex + 1];
-    
     const range = nextTierObj.minPoints - currentTierObj.minPoints;
     const currentProgressInSegment = currentIp - currentTierObj.minPoints;
     const segmentRatio = Math.min(1, Math.max(0, currentProgressInSegment / range));
-    
     return completedSegmentsPercent + (segmentRatio * 20);
   };
 
@@ -202,7 +195,7 @@ export default function InvestmentJourney({ metrics, progress }) {
 
             let circleClass = tier.inactiveStyle;
             let innerClass = tier.innerInactiveStyle;
-            let iconClass = 'w-5 h-5 opacity-40 transition-all duration-500';
+            let iconClass = 'w-5 h-5 text-stone-400 opacity-60 transition-all duration-500';
 
             if (isCurrent) {
               circleClass = tier.activeStyle;
@@ -213,12 +206,16 @@ export default function InvestmentJourney({ metrics, progress }) {
                 tier.themeColor === 'silver' ? 'text-slate-600' :
                 tier.themeColor === 'gold' ? 'text-amber-600' :
                 tier.themeColor === 'platinum' ? 'text-purple-600' :
-                'text-amber-500'
+                'text-amber-600'
               }`;
             } else if (isCompleted) {
-              circleClass = `border-${tier.themeColor}-500/50 text-${tier.themeColor}-600 bg-stone-100`;
-              innerClass = `border-${tier.themeColor}-500/20 bg-white`;
-              iconClass = `w-5 h-5 text-stone-700 opacity-80`;
+              circleClass = 'border-stone-300 text-stone-700 bg-stone-100';
+              innerClass = 'border-stone-200 bg-white';
+              iconClass = 'w-5 h-5 text-stone-700 opacity-90';
+            } else {
+              circleClass = 'border-stone-200 text-stone-400 bg-stone-50';
+              innerClass = 'border-stone-200/60 bg-white';
+              iconClass = 'w-5 h-5 text-stone-400 opacity-50';
             }
 
             return (
