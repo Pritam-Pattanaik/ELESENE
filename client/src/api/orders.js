@@ -42,8 +42,9 @@ export const initiateOrder = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to initiate order');
-  return response.json();
+  const resData = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(resData.message || 'Failed to initiate order');
+  return resData;
 };
 
 export const verifyPayment = async (data) => {
@@ -52,8 +53,9 @@ export const verifyPayment = async (data) => {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Payment verification failed');
-  return response.json();
+  const resData = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(resData.message || 'Payment verification failed');
+  return resData;
 };
 
 export const getUserOrders = async () => {
