@@ -29,6 +29,7 @@ const updateUserProfile = async (req, res) => {
 
     if (full_name) user.full_name = full_name;
     if (phone) user.phone = phone;
+    if (req.body.profile_picture !== undefined) user.profile_picture = req.body.profile_picture;
 
     await user.save();
     
@@ -39,6 +40,7 @@ const updateUserProfile = async (req, res) => {
         email: user.email,
         full_name: user.full_name,
         phone: user.phone,
+        profile_picture: user.profile_picture,
         loyalty_points: user.loyalty_points,
         role: user.role
       }

@@ -183,7 +183,7 @@ const adminLogin = async (req, res) => {
         id:        user.id,
         full_name: user.full_name,
         role:      user.role,
-        // email intentionally omitted from response — not needed by the admin UI
+        profile_picture: user.profile_picture || ''
       },
       token: generateToken(user.id, user.role, version),
     });

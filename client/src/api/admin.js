@@ -180,3 +180,7 @@ export const useUpdateUserRole = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: updateUserRole, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) });
 };
+
+// Profile
+export const updateAdminProfile = (data) =>
+  adminFetch('/user/profile', { method: 'PUT', body: JSON.stringify(data) });

@@ -16,6 +16,10 @@ const useAuthStore = create(
         set({ token: null, user: null, isAuthenticated: false });
       },
 
+      updateUser: (updatedFields) => {
+        set((state) => ({ user: state.user ? { ...state.user, ...updatedFields } : null }));
+      },
+
       getToken: () => get().token,
 
       isAdmin: () => {

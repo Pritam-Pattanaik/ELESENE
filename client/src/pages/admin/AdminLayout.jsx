@@ -21,8 +21,10 @@
  */
 
 import { Outlet, NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useAuthStore from '../../store/authStore';
+import { getAdminToken } from '../../api/authHelper';
+import { updateAdminProfile } from '../../api/admin';
 import './admin.css';
 
 // ─── 1. IMPORTS & COMPONENT ICONS ───────────────────────────────────────────
@@ -56,6 +58,110 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const rawApiUrl = import.meta.env.VITE_API_URL || '';
+  const API_URL = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
+    ? rawApiUrl
+    : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+
+  const { updateUser } = useAuthStore();
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [fullName, setFullName] = useState(user?.full_name || '');
+  const [profilePicture, setProfilePicture] = useState(user?.profile_picture || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [modalError, setModalError] = useState(null);
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.full_name || '');
+      setProfilePicture(user.profile_picture || '');
+    }
+  }, [user]);
+
+  const fetchNotificationsList = async () => {
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const res = await fetch(`${API_URL}/user/notifications`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.notifications ? data.notifications.filter(n => !n.is_read).length : 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin notifications:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotificationsList();
+      const interval = setInterval(fetchNotificationsList, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const handleMarkRead = async (id) => {
+    try {
+      const token = getAdminToken();
+      const res = await fetch(`${API_URL}/user/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error('Failed to mark read:', err);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      const token = getAdminToken();
+      const res = await fetch(`${API_URL}/user/notifications/read-all`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      }
+    } catch (err) {
+      console.error('Failed to mark all read:', err);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      await updateAdminProfile({ full_name: fullName, profile_picture: profilePicture });
+      updateUser({ full_name: fullName, profile_picture: profilePicture });
+      setProfileModalOpen(false);
+    } catch (err) {
+      setModalError(err.message || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
@@ -180,9 +286,14 @@ const AdminLayout = () => {
 
         {/* Footer profiles & Logout */}
         <div className="admin-sidebar-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '16px 12px' }}>
-          <div className="admin-sidebar-user" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8 }}>
+          <div 
+            className="admin-sidebar-user" 
+            onClick={() => setProfileModalOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, cursor: 'pointer' }}
+            title="Click to edit profile"
+          >
             <img 
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" 
+              src={user?.profile_picture || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"} 
               alt="Avatar" 
               className="admin-avatar-img"
               loading="lazy"
@@ -190,10 +301,10 @@ const AdminLayout = () => {
             />
             <div className="admin-sidebar-user-info" style={{ overflow: 'hidden' }}>
               <p className="name" style={{ color: '#fff', fontSize: '0.82rem', fontWeight: 600, margin: 0 }}>
-                {isSuper ? 'Super Admin' : 'Admin User'}
+                {user?.full_name || (isSuper ? 'Super Admin' : 'Admin User')}
               </p>
               <p className="role" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', margin: 0, textTransform: 'lowercase' }}>
-                {isSuper ? 'superadmin@elegance.com' : 'admin@elegance.com'}
+                {user?.email || (isSuper ? 'superadmin@elesene.com' : 'admin@elesene.com')}
               </p>
             </div>
           </div>
@@ -259,35 +370,109 @@ const AdminLayout = () => {
             )}
 
             {/* Notification alert widget */}
-            <div style={{ position: 'relative', cursor: 'pointer', padding: 6 }}>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-              <span style={{
-                position: 'absolute',
-                top: 2,
-                right: 2,
-                background: '#ef4444',
-                color: '#fff',
-                fontSize: '0.62rem',
-                fontWeight: 700,
-                width: 14,
-                height: 14,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifycontent: 'center'
-              }}>
-                {isSuper ? '1' : '2'}
-              </span>
+            <div style={{ position: 'relative' }}>
+              <div 
+                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                style={{ cursor: 'pointer', padding: 6, color: 'var(--admin-text-muted)' }}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                {unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    background: '#ef4444',
+                    color: '#fff',
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+
+              {notifDropdownOpen && (
+                <div 
+                  className="admin-card"
+                  style={{
+                    position: 'absolute',
+                    top: '40px',
+                    right: 0,
+                    width: '320px',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    zIndex: 100,
+                    boxShadow: 'var(--glass-shadow)',
+                    background: 'var(--admin-bg-2)',
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: 'var(--admin-radius-sm)',
+                    padding: 0
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--admin-border)' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--admin-text)' }}>Notifications</span>
+                    {unreadCount > 0 && (
+                      <button 
+                        onClick={handleMarkAllRead}
+                        style={{ background: 'none', border: 'none', color: 'var(--admin-gold)', fontSize: '0.72rem', cursor: 'pointer', padding: 0 }}
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ padding: '8px 0' }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--admin-text-dim)' }}>
+                        No notifications
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div 
+                          key={n.id}
+                          onClick={() => {
+                            handleMarkRead(n.id);
+                            setNotifDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: '10px 16px',
+                            borderBottom: '1px solid rgba(255,255,255,0.03)',
+                            background: n.is_read ? 'transparent' : 'rgba(197, 168, 92, 0.05)',
+                            cursor: 'pointer',
+                            fontSize: '0.78rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4
+                          }}
+                        >
+                          <div style={{ color: 'var(--admin-text)', fontWeight: n.is_read ? 400 : 600 }}>{n.title || n.message}</div>
+                          {n.title && <div style={{ color: 'var(--admin-text-muted)', fontSize: '0.72rem' }}>{n.message}</div>}
+                          <div style={{ color: 'var(--admin-text-dim)', fontSize: '0.65rem' }}>
+                            {new Date(n.created_at || n.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* User Profile Avatar */}
             <img 
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" 
+              src={user?.profile_picture || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"} 
               alt="Profile" 
               className="admin-avatar-img-lg"
-              style={{ border: '2px solid #fff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+              onClick={() => setProfileModalOpen(true)}
+              style={{ border: '2px solid #fff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer' }}
               loading="lazy"
               decoding="async"
+              title="Click to edit profile"
             />
           </div>
         </header>
@@ -297,6 +482,122 @@ const AdminLayout = () => {
           <Outlet />
         </div>
       </div>
+
+      {/* Profile Edit Modal */}
+      {profileModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.65)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+          backdropFilter: 'blur(8px)'
+        }}>
+          <div className="admin-card" style={{
+            width: '440px',
+            background: 'var(--admin-bg-2)',
+            border: '1px solid var(--admin-border)',
+            boxShadow: 'var(--glass-shadow)',
+            borderRadius: 'var(--admin-radius)',
+            padding: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--admin-border)' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: 'var(--admin-text)' }}>Edit Profile</h3>
+              <button 
+                onClick={() => setProfileModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--admin-text-muted)', cursor: 'pointer', fontSize: '1.2rem', padding: 0 }}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveProfile} style={{ padding: '20px' }}>
+              {modalError && (
+                <div style={{ background: 'var(--admin-red-bg)', color: 'var(--admin-red)', padding: '10px 14px', borderRadius: 'var(--admin-radius-sm)', fontSize: '0.78rem', marginBottom: 14 }}>
+                  {modalError}
+                </div>
+              )}
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--admin-text-muted)', marginBottom: 6 }}>Full Name</label>
+                <input 
+                  type="text" 
+                  className="admin-input" 
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
+                  required
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--admin-border)', color: '#fff', borderRadius: 'var(--admin-radius-sm)', padding: '8px 12px' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--admin-text-muted)', marginBottom: 6 }}>Profile Picture URL</label>
+                <input 
+                  type="url" 
+                  className="admin-input" 
+                  value={profilePicture}
+                  onChange={e => setProfilePicture(e.target.value)}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--admin-border)', color: '#fff', borderRadius: 'var(--admin-radius-sm)', padding: '8px 12px' }}
+                />
+              </div>
+
+              {/* Avatar presets selection */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--admin-text-muted)', marginBottom: 8 }}>Or select a preset avatar</label>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between' }}>
+                  {[
+                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop"
+                  ].map((preset, idx) => (
+                    <img 
+                      key={idx}
+                      src={preset}
+                      alt={`Preset ${idx + 1}`}
+                      onClick={() => setProfilePicture(preset)}
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        border: profilePicture === preset ? '2px solid var(--admin-gold)' : '2px solid transparent',
+                        boxShadow: profilePicture === preset ? '0 0 8px var(--admin-gold-glow)' : 'none',
+                        transition: 'all 0.2s ease',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <button 
+                  type="button"
+                  className="admin-btn"
+                  onClick={() => setProfileModalOpen(false)}
+                  style={{ background: 'transparent', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="admin-btn admin-btn-primary"
+                  disabled={isSaving}
+                  style={{ background: 'var(--admin-gold)', color: '#000', border: 'none', fontWeight: 600 }}
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

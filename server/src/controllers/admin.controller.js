@@ -21,9 +21,12 @@ const getDashboard = async (req, res) => {
       totalCustomers,
       activeProducts,
       pendingOrders,
+      lowStockProducts,
+      returnRequests,
       recentOrders,
       topProducts,
       monthlyRevenue,
+      categorySalesBreakdown,
     ] = await Promise.all([
       // Total revenue (paid orders only)
       Order.findOne({
@@ -39,6 +42,10 @@ const getDashboard = async (req, res) => {
       Product.count({ where: { is_active: true } }),
       // Pending orders
       Order.count({ where: { status: 'pending' } }),
+      // Low stock products
+      ProductVariant.count({ where: { stock_quantity: { [Op.lt]: 5 } } }),
+      // Return requests
+      Order.count({ where: { status: 'returned' } }),
       // Recent orders
       Order.findAll({
         include: [{ model: User, attributes: ['full_name', 'email'] }],
@@ -73,6 +80,21 @@ const getDashboard = async (req, res) => {
         order: [[fn('date_trunc', 'month', col('created_at')), 'ASC']],
         raw: true,
       }),
+      // Category sales breakdown
+      OrderItem.findAll({
+        attributes: [
+          [col('Product.Category.name'), 'category_name'],
+          [fn('SUM', col('quantity')), 'sales_count'],
+        ],
+        include: [{
+          model: Product,
+          attributes: [],
+          include: [{ model: Category, attributes: [] }]
+        }],
+        group: [col('Product.Category.name')],
+        order: [[fn('SUM', col('quantity')), 'DESC']],
+        raw: true,
+      }),
     ]);
 
     res.json({
@@ -83,9 +105,15 @@ const getDashboard = async (req, res) => {
         totalCustomers,
         activeProducts,
         pendingOrders,
+        lowStockProducts,
+        returnRequests,
         recentOrders,
         topProducts,
         monthlyRevenue,
+        categorySalesBreakdown: categorySalesBreakdown.map(item => ({
+          label: item.category_name || 'Uncategorized',
+          value: parseInt(item.sales_count) || 0
+        }))
       },
     });
   } catch (error) {

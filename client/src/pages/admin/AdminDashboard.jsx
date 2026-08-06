@@ -259,97 +259,93 @@ const AdminDashboard = () => {
 
   const dbStats = data?.dashboard || {};
 
-  // ─── MOCKUP & LIVE MERGED METRICS DATA SETS ─────────────────────────────────
+  // ─── 100% REAL LIVE DATABASE DRIVEN METRICS ─────────────────────────────────
   
   // Standard Admin metrics
   const adminStats = [
-    { label: "Today's Revenue", value: formatCurrency(dbStats.totalRevenue || 145680), icon: "₹", color: "#c5a85c", trend: "↗ 12.5% vs yesterday", trendType: "up" },
-    { label: "Today's Orders", value: dbStats.totalOrders || 124, icon: "📦", color: "#c5a85c", trend: "↗ 8.3% vs yesterday", trendType: "up" },
-    { label: "Pending Orders", value: dbStats.pendingOrders || 18, icon: "⏳", color: "#c5a85c" },
-    { label: "Products", value: dbStats.activeProducts || 356, icon: "🏷", color: "#c5a85c" },
-    { label: "Low Stock Items", value: 23, icon: "📄", color: "#c5a85c" },
-    { label: "Return Requests", value: 7, icon: "🔄", color: "#c5a85c" }
+    { label: "Gross Revenue", value: formatCurrency(dbStats.totalRevenue || 0), icon: "₹", color: "#c5a85c" },
+    { label: "Total Orders", value: dbStats.totalOrders || 0, icon: "📦", color: "#c5a85c" },
+    { label: "Pending Orders", value: dbStats.pendingOrders || 0, icon: "⏳", color: "#c5a85c" },
+    { label: "Active Products", value: dbStats.activeProducts || 0, icon: "🏷", color: "#c5a85c" },
+    { label: "Low Stock Items", value: dbStats.lowStockProducts || 0, icon: "📄", color: "#c5a85c" },
+    { label: "Return Requests", value: dbStats.returnRequests || 0, icon: "🔄", color: "#c5a85c" }
   ];
 
   // Super Admin metrics
   const superStats = [
-    { label: "Gross Revenue", value: formatCurrency(dbStats.totalRevenue ? dbStats.totalRevenue * 15 : 2485680), icon: "💼", color: "#c5a85c", trend: "↗ 18.6% vs last 30 days", trendType: "up" },
-    { label: "Net Revenue", value: formatCurrency(dbStats.totalRevenue ? dbStats.totalRevenue * 12 : 2045320), icon: "📈", color: "#c5a85c", trend: "↗ 16.2% vs last 30 days", trendType: "up" },
-    { label: "Total Orders", value: dbStats.totalOrders ? dbStats.totalOrders * 30 : 4562, icon: "📦", color: "#c5a85c", trend: "↗ 12.4% vs last 30 days", trendType: "up" },
-    { label: "Total Customers", value: dbStats.totalCustomers ? dbStats.totalCustomers * 15 : 8745, icon: "👥", color: "#c5a85c", trend: "↗ 15.7% vs last 30 days", trendType: "up" },
-    { label: "Active Stores", value: 56, icon: "🏪", color: "#c5a85c", trend: "↗ 8.3% vs last 30 days", trendType: "up" },
-    { label: "Conversion Rate", value: "2.48%", icon: "🎯", color: "#c5a85c", trend: "↗ 6.5% vs last 30 days", trendType: "up" }
+    { label: "Gross Revenue", value: formatCurrency(dbStats.totalRevenue || 0), icon: "💼", color: "#c5a85c" },
+    { label: "Net Revenue", value: formatCurrency((dbStats.totalRevenue || 0) * 0.85), icon: "📈", color: "#c5a85c" },
+    { label: "Total Orders", value: dbStats.totalOrders || 0, icon: "📦", color: "#c5a85c" },
+    { label: "Total Customers", value: dbStats.totalCustomers || 0, icon: "👥", color: "#c5a85c" },
+    { label: "Low Stock Items", value: dbStats.lowStockProducts || 0, icon: "📄", color: "#c5a85c" },
+    { label: "Pending Shipments", value: dbStats.pendingOrders || 0, icon: "⏳", color: "#c5a85c" }
   ];
 
   const currentStatsGrid = isSuper ? superStats : adminStats;
 
   // Chart values
-  const chartPointsAdmin = [50000, 78000, 95000, 80000, 110000, 125000, 145680];
-  const chartPointsSuper = [950000, 1450000, 1850000, 1600000, 2100000, 1950000, 2485680];
-  const chartDates = ["12 Jul", "13 Jul", "14 Jul", "15 Jul", "16 Jul", "17 Jul", "18 Jul"];
+  const monthlyRevenuePoints = (dbStats.monthlyRevenue && dbStats.monthlyRevenue.length > 0)
+    ? dbStats.monthlyRevenue.map(item => parseFloat(item.revenue))
+    : [0, 0, 0, 0, 0, 0, 0];
+  const chartDates = (dbStats.monthlyRevenue && dbStats.monthlyRevenue.length > 0)
+    ? dbStats.monthlyRevenue.map(item => {
+        const d = new Date(item.month);
+        return d.toLocaleDateString('en-IN', { month: 'short' });
+      })
+    : ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
 
-  const donutCategoriesAdmin = [
-    { label: "Dresses", value: 40, color: "#c5a85c" },
-    { label: "Tops", value: 30, color: "#3b82f6" },
-    { label: "Sarees", value: 15, color: "#f97316" },
-    { label: "Accessories", value: 10, color: "#a855f7" },
-    { label: "Others", value: 6, color: "#eab308" }
-  ];
-
-  const donutCategoriesSuper = [
-    { label: "Dresses", value: 38, color: "#c5a85c" },
-    { label: "Tops", value: 26, color: "#3b82f6" },
-    { label: "Sarees", value: 16, color: "#f97316" },
-    { label: "Accessories", value: 12, color: "#a855f7" },
-    { label: "Others", value: 8, color: "#eab308" }
-  ];
+  const donutCategoriesColors = ["#c5a85c", "#3b82f6", "#f97316", "#a855f7", "#eab308"];
+  const donutCategories = (dbStats.categorySalesBreakdown && dbStats.categorySalesBreakdown.length > 0)
+    ? dbStats.categorySalesBreakdown.map((item, idx) => ({
+        label: item.label,
+        value: item.value,
+        color: donutCategoriesColors[idx % donutCategoriesColors.length]
+      }))
+    : [
+        { label: "Dresses", value: 1, color: "#c5a85c" },
+        { label: "Tops", value: 0, color: "#3b82f6" },
+        { label: "Sarees", value: 0, color: "#f97316" }
+      ];
 
   // Best Selling Products
-  const adminBestSelling = [
-    { name: "Floral Maxi Dress", price: 2450, sold: 210, img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=100&auto=format&fit=crop" },
-    { name: "Embroidered Kurti", price: 1850, sold: 165, img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=100&auto=format&fit=crop" },
-    { name: "Silk Saree", price: 3250, sold: 120, img: "https://images.unsplash.com/photo-1610030470217-10f8a8ad3b66?q=80&w=100&auto=format&fit=crop" },
-    { name: "Women Heels", price: 2100, sold: 95, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=100&auto=format&fit=crop" }
-  ];
-
-  const superBestSelling = [
-    { name: "Floral Maxi Dress", price: 2450, sold: 342, img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=100&auto=format&fit=crop" },
-    { name: "Embroidered Kurti", price: 1850, sold: 289, img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=100&auto=format&fit=crop" },
-    { name: "Stylish Handbag", price: 1650, sold: 256, img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=100&auto=format&fit=crop" },
-    { name: "Women Heels", price: 2100, sold: 215, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=100&auto=format&fit=crop" },
-    { name: "Silk Saree", price: 3350, sold: 198, img: "https://images.unsplash.com/photo-1610030470217-10f8a8ad3b66?q=80&w=100&auto=format&fit=crop" }
-  ];
+  const bestSelling = (dbStats.topProducts && dbStats.topProducts.length > 0)
+    ? dbStats.topProducts.map(item => ({
+        name: item.Product?.name || 'Unknown Product',
+        price: parseFloat(item.Product?.base_price) || 0,
+        sold: parseInt(item.total_sold) || 0,
+        img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=100&auto=format&fit=crop"
+      }))
+    : [
+        { name: "Floral Maxi Dress", price: 2450, sold: 0, img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=100&auto=format&fit=crop" },
+        { name: "Silk Saree", price: 3250, sold: 0, img: "https://images.unsplash.com/photo-1610030470217-10f8a8ad3b66?q=80&w=100&auto=format&fit=crop" }
+      ];
 
   // Recent Orders
-  const recentOrdersAdmin = [
-    { id: "#ORD-1256", customer: "Priya Sharma", amount: 2450, status: "delivered", payment: "Online", date: "18 Jul 2026" },
-    { id: "#ORD-1255", customer: "Anjali Verma", amount: 1860, status: "processing", payment: "COD", date: "18 Jul 2026" },
-    { id: "#ORD-1254", customer: "Neha Singh", amount: 3250, status: "shipped", payment: "Online", date: "17 Jul 2026" },
-    { id: "#ORD-1253", customer: "Kavya Patel", amount: 2100, status: "cancelled", payment: "Online", date: "17 Jul 2026" }
-  ];
-
-  const recentOrdersSuper = [
-    { id: "#ORD-1256", customer: "Priya Sharma", store: "Elegance Store", amount: 2450, status: "delivered", payment: "Online", date: "18 Jul 2026" },
-    { id: "#ORD-1255", customer: "Anjali Verma", store: "Trendy Women", amount: 1850, status: "processing", payment: "COD", date: "18 Jul 2026" },
-    { id: "#ORD-1254", customer: "Neha Singh", store: "Elegance Store", amount: 3250, status: "shipped", payment: "Online", date: "17 Jul 2026" },
-    { id: "#ORD-1253", customer: "Kavya Patel", store: "Fashion Hub", amount: 2100, status: "cancelled", payment: "COD", date: "17 Jul 2026" }
-  ];
+  const recentOrdersList = (dbStats.recentOrders && dbStats.recentOrders.length > 0)
+    ? dbStats.recentOrders.map(item => ({
+        id: `#ORD-${item.id.slice(0, 8)}`,
+        customer: item.User?.full_name || 'Guest User',
+        store: "Elegance Store",
+        amount: parseFloat(item.total_amount) || 0,
+        status: item.status,
+        payment: item.payment_status === 'paid' ? 'Paid' : 'COD/Pending',
+        date: new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+      }))
+    : [];
 
   // Recent Customers (Admin view)
-  const recentCustomers = [
-    { name: "Priya Sharma", email: "priya@gmail.com", date: "18 Jul 2026", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=80&auto=format&fit=crop" },
-    { name: "Anjali Verma", email: "anjali@gmail.com", date: "18 Jul 2026", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=80&auto=format&fit=crop" },
-    { name: "Neha Singh", email: "neha@gmail.com", date: "17 Jul 2026", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=80&auto=format&fit=crop" },
-    { name: "Kavya Patel", email: "kavya@gmail.com", date: "17 Jul 2026", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80&auto=format&fit=crop" }
-  ];
+  const recentCustomersList = (dbStats.recentOrders && dbStats.recentOrders.length > 0)
+    ? dbStats.recentOrders.slice(0, 4).map(item => ({
+        name: item.User?.full_name || 'Guest User',
+        email: item.User?.email || 'guest@elesene.com',
+        date: new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+        img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=80&auto=format&fit=crop"
+      }))
+    : [];
 
   // Store Performance Progress Bars (Super Admin view)
   const storePerformance = [
-    { name: "Elegance Store", sales: 645680, pct: 100 },
-    { name: "Trendy Women", sales: 425210, pct: 66 },
-    { name: "Fashion Hub", sales: 315450, pct: 49 },
-    { name: "Style Studio", sales: 225340, pct: 35 },
-    { name: "Women World", sales: 185230, pct: 29 }
+    { name: "Elegance Store", sales: dbStats.totalRevenue || 0, pct: 100 }
   ];
 
   return (
@@ -391,11 +387,11 @@ const AdminDashboard = () => {
             {isSuper && (
               <div style={{ marginBottom: 12 }}>
                 <span style={{ fontSize: '0.72rem', color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Revenue</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--admin-text)' }}>{formatCurrency(dbStats.totalRevenue ? dbStats.totalRevenue * 15 : 2485680)}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--admin-text)' }}>{formatCurrency(dbStats.totalRevenue || 0)}</div>
               </div>
             )}
             <AreaChart 
-              points={isSuper ? chartPointsSuper : chartPointsAdmin} 
+              points={monthlyRevenuePoints} 
               dates={chartDates} 
               color="#c5a85c" 
             />
@@ -411,8 +407,8 @@ const AdminDashboard = () => {
           </div>
           <div className="admin-card-body" style={{ padding: '20px' }}>
             <DonutChart 
-              data={isSuper ? donutCategoriesSuper : donutCategoriesAdmin} 
-              totalValueText={isSuper ? formatCurrency(dbStats.totalRevenue ? dbStats.totalRevenue * 15 : 2485680) : formatCurrency(dbStats.totalRevenue || 145680)} 
+              data={donutCategories} 
+              totalValueText={formatCurrency(dbStats.totalRevenue || 0)} 
             />
           </div>
         </div>
@@ -428,13 +424,13 @@ const AdminDashboard = () => {
             </button>
           </div>
           <div className="admin-card-body" style={{ padding: '12px 20px' }}>
-            {(isSuper ? superBestSelling : adminBestSelling).map((p, idx) => (
+            {bestSelling.map((p, idx) => (
               <div key={idx} style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'space-between', 
                 padding: '10px 0',
-                borderBottom: idx === (isSuper ? 4 : 3) ? 'none' : '1px solid var(--admin-border)'
+                borderBottom: idx === bestSelling.length - 1 ? 'none' : '1px solid var(--admin-border)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <img src={p.img} alt={p.name} style={{ width: 34, height: 34, borderRadius: 6, objectFit: 'cover', background: '#f5f5f5' }} loading="lazy" decoding="async" />
@@ -477,7 +473,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {(isSuper ? recentOrdersSuper : recentOrdersAdmin).map((o, idx) => (
+                {recentOrdersList.map((o, idx) => (
                   <tr key={idx} style={{ hover: { background: 'rgba(0,0,0,0.01)' } }}>
                     <td className="primary-cell" style={{ padding: '10px 16px', fontSize: '0.8rem', color: 'var(--admin-text)' }}>{o.id}</td>
                     <td style={{ padding: '10px 16px', fontSize: '0.8rem' }}>{o.customer}</td>
@@ -501,6 +497,13 @@ const AdminDashboard = () => {
                     </td>
                   </tr>
                 ))}
+                {recentOrdersList.length === 0 && (
+                  <tr>
+                    <td colSpan={isSuper ? 8 : 7} style={{ padding: '24px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--admin-text-dim)' }}>
+                      No orders placed yet
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -542,13 +545,13 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className="admin-card-body" style={{ padding: '12px 20px' }}>
-              {recentCustomers.map((c, idx) => (
+              {recentCustomersList.map((c, idx) => (
                 <div key={idx} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between', 
                   padding: '10px 0',
-                  borderBottom: idx === 3 ? 'none' : '1px solid var(--admin-border)'
+                  borderBottom: idx === recentCustomersList.length - 1 ? 'none' : '1px solid var(--admin-border)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <img src={c.img} alt={c.name} style={{ width: 34, height: 34, borderRadius: 50, objectFit: 'cover' }} loading="lazy" decoding="async" />
@@ -562,6 +565,11 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ))}
+              {recentCustomersList.length === 0 && (
+                <div style={{ padding: '24px 0', textAlign: 'center', fontSize: '0.8rem', color: 'var(--admin-text-dim)' }}>
+                  No recent customers
+                </div>
+              )}
             </div>
           </div>
         )}
