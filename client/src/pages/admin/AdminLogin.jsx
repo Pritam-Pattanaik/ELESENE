@@ -5,13 +5,14 @@ import { adminLogin } from '../../api/admin';
 import './admin.css';
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [adminId,      setAdminId]      = useState('');
+  const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [error,        setError]        = useState('');
+  const [loading,      setLoading]      = useState(false);
+
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const { login } = useAuthStore();
 
   const handleSubmit = async (e) => {
@@ -19,7 +20,7 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
     try {
-      const data = await adminLogin({ email, password });
+      const data = await adminLogin({ admin_id: adminId.trim(), password });
       if (data.success) {
         login(data.token, data.user);
         const fromPath = location.state?.from?.pathname || location.state?.from;
@@ -41,26 +42,29 @@ const AdminLogin = () => {
         {error && <div className="admin-login-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* ── Admin ID ── */}
           <div className="admin-form-group">
-            <label className="admin-label">Email Address</label>
+            <label className="admin-label" htmlFor="admin-id-input">Admin ID</label>
             <input
-              type="email"
-              id="admin-email"
-              name="admin-email"
-              autoComplete="off"
+              type="text"
+              id="admin-id-input"
+              name="admin-id"
+              autoComplete="username"
               className="admin-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@elesene.com"
+              value={adminId}
+              onChange={(e) => setAdminId(e.target.value)}
+              placeholder="Enter your Admin ID"
               required
             />
           </div>
+
+          {/* ── Password ── */}
           <div className="admin-form-group">
-            <label className="admin-label">Password</label>
+            <label className="admin-label" htmlFor="admin-password-input">Password</label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
-                id="admin-password"
+                type={showPassword ? 'text' : 'password'}
+                id="admin-password-input"
                 name="admin-password"
                 autoComplete="current-password"
                 className="admin-input pr-10"
@@ -73,7 +77,7 @@ const AdminLogin = () => {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 text-ivory/50 hover:text-gold transition-colors duration-200 focus:outline-none"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -88,8 +92,11 @@ const AdminLogin = () => {
               </button>
             </div>
           </div>
+
           <button type="submit" className="admin-btn admin-btn-primary" disabled={loading}>
-            {loading ? <><span className="admin-spinner" style={{width:16,height:16,borderWidth:2}} /> Signing in...</> : 'Sign In'}
+            {loading
+              ? <><span className="admin-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Signing in...</>
+              : 'Sign In'}
           </button>
         </form>
       </div>

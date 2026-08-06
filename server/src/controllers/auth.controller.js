@@ -121,35 +121,58 @@ const login = async (req, res) => {
   }
 };
 
-// @desc    Admin login with email + password
+// @desc    Admin login with admin_id + password (email is never exposed to the client)
 // @route   POST /api/auth/admin-login
+//
+// Admin IDs are opaque short strings defined in server env vars.
+// The server resolves them to emails internally — the client never sees or sends an email.
+//
+// Env vars expected (set in server/.env):
+//   ADMIN_ID          — ID for the standard admin  (default: "ELESENE-ADMIN")
+//   ADMIN_EMAIL       — email that maps to ADMIN_ID
+//   SUPERADMIN_ID     — ID for the super-admin      (default: "ELESENE-SUPERADMIN")
+//   SUPERADMIN_EMAIL  — email that maps to SUPERADMIN_ID (falls back to ADMIN_EMAIL)
 const adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { admin_id, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    if (!admin_id || !password) {
+      return res.status(400).json({ success: false, message: 'Admin ID and password are required' });
     }
 
-    const user = await User.findOne({ where: { email } });
+    // ── Build the ID → email lookup map from env ──────────────────────────────
+    const idMap = {
+      [process.env.ADMIN_ID      || 'ELESENE-ADMIN']:      process.env.ADMIN_EMAIL,
+      [process.env.SUPERADMIN_ID || 'ELESENE-SUPERADMIN']: process.env.SUPERADMIN_EMAIL || process.env.ADMIN_EMAIL,
+    };
+
+    const resolvedEmail = idMap[admin_id.trim()];
+
+    // Use a generic error so IDs are not enumerable
+    const GENERIC_ERR = 'Invalid admin ID or password';
+
+    if (!resolvedEmail) {
+      return res.status(401).json({ success: false, message: GENERIC_ERR });
+    }
+
+    const user = await User.findOne({ where: { email: resolvedEmail } });
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: GENERIC_ERR });
     }
 
-    // Check if user has admin/superadmin role
+    // Enforce admin / superadmin role
     if (user.role !== 'admin' && user.role !== 'superadmin') {
       return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
     }
 
-    // Verify password
     if (!user.password_hash) {
       return res.status(401).json({ success: false, message: 'Password not set for this account' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: GENERIC_ERR });
     }
 
     const version = user.tokenVersion !== undefined ? user.tokenVersion : (user.token_version || 0);
@@ -157,10 +180,10 @@ const adminLogin = async (req, res) => {
     res.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
+        id:        user.id,
         full_name: user.full_name,
-        role: user.role,
+        role:      user.role,
+        // email intentionally omitted from response — not needed by the admin UI
       },
       token: generateToken(user.id, user.role, version),
     });
@@ -168,6 +191,7 @@ const adminLogin = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile

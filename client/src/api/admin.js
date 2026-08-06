@@ -36,6 +36,8 @@ const adminFetch = async (url, options = {}) => {
 // Auth
 export const adminLogin = (credentials) =>
   adminFetch('/auth/admin-login', { method: 'POST', body: JSON.stringify(credentials) });
+// credentials shape: { admin_id: string, password: string }
+
 
 // Dashboard
 export const fetchDashboard = () => adminFetch('/admin/dashboard');
