@@ -36,7 +36,11 @@ const AdminLogin = () => {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <h1>ELESENE</h1>
+        <img
+          src="/elesene-logo.png"
+          alt="ELESENE"
+          className="admin-login-logo"
+        />
         <p className="subtitle">Admin Portal — Sign In</p>
 
         {error && <div className="admin-login-error">{error}</div>}

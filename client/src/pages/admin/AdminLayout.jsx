@@ -129,20 +129,18 @@ const AdminLayout = () => {
 
       {/* Persistent Left Sidebar Navigation */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
-        {/* Branding monograms */}
-        <div className="admin-sidebar-brand" style={{ textAlign: 'center', padding: '24px 16px' }}>
-          <svg viewBox="0 0 100 100" width="48" height="48" style={{ display: 'block', margin: '0 auto 10px' }} fill="none">
-            <path d="M35 25 C35 25 55 15 55 50 C55 85 35 75 35 75" stroke="#c5a85c" strokeWidth="6" strokeLinecap="round" />
-            <path d="M65 25 C65 25 45 15 45 50 C45 85 65 75 65 75" stroke="#c5a85c" strokeWidth="6" strokeLinecap="round" />
-            <line x1="43" y1="50" x2="57" y2="50" stroke="#c5a85c" strokeWidth="5" strokeLinecap="round" />
-          </svg>
-          <h2 style={{ fontFamily: 'var(--admin-font-display)', fontSize: '1.25rem', letterSpacing: '0.12em', color: '#c5a85c', margin: 0, fontWeight: 700 }}>ELEGANCE</h2>
-          <span style={{ fontSize: '0.58rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginTop: 2, display: 'block' }}>WOMEN'S FASHION</span>
-          
+        {/* Branding — ELESENE Logo */}
+        <div className="admin-sidebar-brand" style={{ textAlign: 'center', padding: '24px 16px 16px' }}>
+          <img
+            src="/elesene-logo.png"
+            alt="ELESENE"
+            className="admin-sidebar-logo"
+          />
           <div className={`admin-top-badge-capsule ${isSuper ? 'admin-top-badge-super' : ''}`}>
             {isSuper ? 'SUPER ADMIN' : 'ADMIN PANEL'}
           </div>
         </div>
+
 
         {/* Sidebar Nav Links */}
         <nav className="admin-sidebar-nav" style={{ padding: '8px 12px 24px' }}>
