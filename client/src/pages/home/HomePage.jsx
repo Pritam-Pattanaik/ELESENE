@@ -30,15 +30,15 @@ const ScrollingTextSection = () => {
     { type: 'text', text: 'TRENDING', italic: false },
     { type: 'image', url: '/images/fashion-embroidered-blouse.jpg', tag: 'EMBROIDERED SILK', slug: 'botanical-embroidered-silk-blouse' },
     { type: 'text', text: 'NOW', italic: true },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop', tag: 'SILK SLIP', slug: 'silk-slip-dress' },
+    { type: 'image', url: '/images/fashion-gown.jpg', tag: 'SILK GOWN', slug: 'silk-ombre-maxi-gown' },
     { type: 'text', text: 'TRENDING', italic: false },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop', tag: 'COUTURE COAT', slug: 'noir-tailored-suit' },
+    { type: 'image', url: '/images/fashion-coat.jpg', tag: 'COUTURE COAT', slug: 'architectural-trench-coat' },
     { type: 'text', text: 'NOW', italic: true },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=600&auto=format&fit=crop', tag: 'SATIN EDIT', slug: 'luxe-satin-dress' },
+    { type: 'image', url: '/images/fashion-slip.jpg', tag: 'SATIN SLIP', slug: 'crystal-trim-slip-dress' },
     { type: 'text', text: 'TRENDING', italic: false },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop', tag: 'LINEN SET', slug: 'linen-belted-set' },
+    { type: 'image', url: '/images/fashion-cardigan.jpg', tag: 'CARDIGAN EDIT', slug: 'oversized-boucle-jacket' },
     { type: 'text', text: 'NOW', italic: true },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop', tag: 'PARTY EDIT', slug: 'crystal-embellished-top' },
+    { type: 'image', url: '/images/fashion-suit.jpg', tag: 'TAILORED SUIT', slug: 'linen-blazer-trouser-coord' },
   ];
 
   return (

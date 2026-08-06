@@ -10,12 +10,12 @@ import { getImageUrl } from '../../utils/imageUrl';
 
 /* ─── CATEGORIES DATA ────────────────────────────────────────── */
 const categories = [
-  { id: 1, name: 'Dresses',      slug: 'evening-wear',  img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=500&auto=format&fit=crop' },
-  { id: 2, name: 'Bridal',       slug: 'bridal',        img: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?q=80&w=500&auto=format&fit=crop' },
-  { id: 3, name: 'Gowns',        slug: 'evening-wear',  img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=500&auto=format&fit=crop' },
-  { id: 4, name: 'Accessories',  slug: 'accessories',   img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=500&auto=format&fit=crop' },
-  { id: 5, name: 'Prêt-à-Porter', slug: 'pret-a-porter', img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=500&auto=format&fit=crop' },
-  { id: 6, name: 'Shoes',        slug: 'shoes',         img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=500&auto=format&fit=crop' },
+  { id: 1, name: 'Dresses',      slug: 'evening-wear',  img: '/images/fashion-dress.jpg' },
+  { id: 2, name: 'Bridal',       slug: 'bridal',        img: '/images/fashion-gown.jpg' },
+  { id: 3, name: 'Gowns',        slug: 'evening-wear',  img: '/images/fashion-sundress.jpg' },
+  { id: 4, name: 'Accessories',  slug: 'accessories',   img: '/images/fashion-bag.jpg' },
+  { id: 5, name: 'Prêt-à-Porter', slug: 'pret-a-porter', img: '/images/fashion-red-suit.jpg' },
+  { id: 6, name: 'Shoes',        slug: 'shoes',         img: '/images/fashion-boots.jpg' },
 ];
 
 /* ─── COMPONENT ──────────────────────────────────────────────── */
@@ -175,9 +175,24 @@ const CollectionsAndNewArrivals = () => {
                 <div key={i} className="aspect-[3/4] bg-black/5 rounded-xl animate-pulse" />
               ))
             ) : (
-              products.map((item) => {
+              products.map((item, index) => {
+                const JUST_IN_FALLBACK_IMAGES = [
+                  '/images/fashion-red-suit.jpg',
+                  '/images/fashion-organza-blouse.jpg',
+                  '/images/fashion-chunky-knit.jpg',
+                  '/images/fashion-noir-set.jpg',
+                  '/images/fashion-embroidered-blouse.jpg',
+                  '/images/fashion-gown.jpg',
+                  '/images/fashion-coat.jpg',
+                  '/images/fashion-dress.jpg',
+                  '/images/fashion-suit.jpg',
+                  '/images/fashion-cardigan.jpg'
+                ];
                 const img = item.images?.[0]?.image_url;
-                const fullImgUrl = img ? getImageUrl(img) : 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=500&auto=format&fit=crop';
+                const isUnsplashOrEmpty = !img || img.includes('unsplash.com');
+                const fullImgUrl = !isUnsplashOrEmpty
+                  ? getImageUrl(img)
+                  : JUST_IN_FALLBACK_IMAGES[index % JUST_IN_FALLBACK_IMAGES.length];
                 const isAdded = addedItemMap[item.id];
 
                 return (
