@@ -2,6 +2,7 @@ const { Product, Category, ProductVariant, ProductImage, Order, OrderItem, User,
 const { Op, fn, col, literal } = require('sequelize');
 const sequelize = require('../config/db');
 const loyaltyService = require('../services/loyalty.service');
+const { formatError } = require('../utils/errors');
 
 // ═══════════════════════════════════════
 // DASHBOARD
@@ -192,7 +193,8 @@ const createProduct = async (req, res) => {
 
     res.status(201).json({ success: true, product: fullProduct || product });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -316,7 +318,8 @@ const updateProduct = async (req, res) => {
 
     res.json({ success: true, product: updatedProduct || product });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -491,7 +494,8 @@ const createVariant = async (req, res) => {
 
     res.status(201).json({ success: true, variant });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -512,7 +516,8 @@ const updateVariant = async (req, res) => {
     await variant.save();
     res.json({ success: true, variant });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -549,7 +554,8 @@ const createCategory = async (req, res) => {
 
     res.status(201).json({ success: true, category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -590,7 +596,8 @@ const updateCategory = async (req, res) => {
     await category.save();
     res.json({ success: true, category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -896,7 +903,8 @@ const createCoupon = async (req, res) => {
 
     res.status(201).json({ success: true, coupon });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 
@@ -915,7 +923,8 @@ const updateCoupon = async (req, res) => {
     await coupon.save();
     res.json({ success: true, coupon });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const { status, message } = formatError(error);
+    res.status(status).json({ success: false, message });
   }
 };
 

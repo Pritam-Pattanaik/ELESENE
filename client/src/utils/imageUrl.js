@@ -12,7 +12,10 @@ export const getImageUrl = (imagePath) => {
   if (cleanPathStr.startsWith('http://') || cleanPathStr.startsWith('https://') || cleanPathStr.startsWith('data:')) {
     return cleanPathStr;
   }
-  const apiUrl = import.meta.env.VITE_API_URL || '';
+  const rawApiUrl = import.meta.env.VITE_API_URL || '';
+  const apiUrl = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH'))
+    ? rawApiUrl
+    : (import.meta.env.DEV ? 'http://localhost:3000/api' : '');
   const baseUrl = apiUrl.replace(/\/api\/?$/, '');
   const cleanPath = cleanPathStr.startsWith('/') ? cleanPathStr : `/${cleanPathStr}`;
   return `${baseUrl}${cleanPath}`;
