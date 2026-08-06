@@ -1,6 +1,9 @@
 import { getCustomerToken } from './authHelper';
 
-const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+const API = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
+  ? rawApiUrl
+  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 const getHeaders = () => {
   const token = getCustomerToken();

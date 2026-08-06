@@ -2,7 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCustomerToken } from './authHelper';
 import useCartStore from '../store/cartStore';
 
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+const API_URL = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
+  ? rawApiUrl
+  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 const getHeaders = () => {
   const token = getCustomerToken();
