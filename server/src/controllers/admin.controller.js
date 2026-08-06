@@ -356,10 +356,11 @@ const uploadProductImages = async (req, res) => {
 
     const imagePromises = req.files.map(async (file, index) => {
       let imageUrl;
+      let storagePath = null;
 
       if (useSupabase && file.buffer) {
         try {
-          const fileExt = file.originalname.split('.').pop();
+          const fileExt = file.originalname.split('.').pop().toLowerCase();
           const fileName = `${product.id}/${Date.now()}-${Math.round(Math.random() * 1E9)}.${fileExt}`;
 
           const { data, error } = await supabase.storage
@@ -375,6 +376,8 @@ const uploadProductImages = async (req, res) => {
               .getPublicUrl(fileName);
 
             imageUrl = publicUrlData.publicUrl;
+            // Record the bucket path so we can delete the object later
+            storagePath = fileName;
           }
         } catch (supabaseError) {
           console.warn('Supabase image upload failed, using disk fallback:', supabaseError.message);
@@ -398,6 +401,7 @@ const uploadProductImages = async (req, res) => {
       return ProductImage.create({
         product_id: product.id,
         image_url: imageUrl,
+        storage_path: storagePath,
         is_primary: index === 0
       });
     });
@@ -418,6 +422,22 @@ const deleteProductImage = async (req, res) => {
       where: { id: req.params.imageId, product_id: req.params.id },
     });
     if (!image) return res.status(404).json({ success: false, message: 'Image not found' });
+
+    // If this image was uploaded to Supabase Storage, remove the object too
+    if (image.storage_path) {
+      try {
+        const supabase = require('../config/supabase');
+        const { error } = await supabase.storage
+          .from('product-images')
+          .remove([image.storage_path]);
+        if (error) {
+          // Log but don't block the DB record deletion
+          console.warn(`Supabase Storage delete failed for ${image.storage_path}:`, error.message);
+        }
+      } catch (storageErr) {
+        console.warn('Supabase Storage removal skipped:', storageErr.message);
+      }
+    }
 
     await image.destroy();
     res.json({ success: true, message: 'Image deleted' });

@@ -11,6 +11,13 @@ const ProductImage = sequelize.define('ProductImage', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  // Supabase Storage object path (e.g. "<product-id>/1234567890.webp").
+  // Populated only for images uploaded via the Supabase bucket.
+  // NULL for legacy URL-pasted or local-disk images.
+  storage_path: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
   alt_text: DataTypes.STRING(255),
   sort_order: {
     type: DataTypes.INTEGER,
