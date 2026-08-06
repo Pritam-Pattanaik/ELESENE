@@ -1,4 +1,4 @@
-const { Order, OrderItem, Cart, CartItem, Product, ProductVariant, Coupon } = require('../models');
+const { Order, OrderItem, Cart, CartItem, Product, ProductVariant, ProductImage, Coupon } = require('../models');
 const sequelize = require('../config/db');
 const { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } = require('../services/payment.service');
 const { v4: uuidv4 } = require('uuid');
@@ -357,7 +357,18 @@ const getUserOrders = async (req, res) => {
 
     const { count, rows: orders } = await Order.findAndCountAll({
       where: { user_id: req.user.id },
-      include: [{ model: OrderItem, include: [{ model: Product }] }],
+      include: [
+        {
+          model: OrderItem,
+          include: [
+            {
+              model: Product,
+              include: [{ model: ProductImage, as: 'images', attributes: ['image_url', 'is_primary', 'alt_text'] }],
+            },
+            { model: ProductVariant, attributes: ['size', 'color'] },
+          ],
+        },
+      ],
       order: [['created_at', 'DESC']],
       limit,
       offset,

@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import useCustomerAuthStore from '../../store/customerAuthStore';
 import { getUserProfile, getWishlist, getAddresses } from '../../api/user';
 import { getUserOrders } from '../../api/orders';
+import { getMyInvestmentSummary } from '../../api/loyalty';
 import { ProfileSkeleton } from '../../components/common/Skeleton';
 
 const ProfilePage = () => {
-  const { user } = useCustomerAuthStore();
+  const { user, updateUser } = useCustomerAuthStore();
   const [fetchingProfile, setFetchingProfile] = useState(true);
   const [points, setPoints] = useState(1250);
+  const [investmentSummary, setInvestmentSummary] = useState(null);
   const [stats, setStats] = useState({
     ordersCount: 12,
     wishlistCount: 18,
@@ -64,47 +66,72 @@ const ProfilePage = () => {
     }
   ]);
 
-  useEffect(() => {
-    const fetchShopperData = async () => {
-      setFetchingProfile(true);
-      try {
-        const [profile, ordersList, wishlistList, addressesList] = await Promise.all([
-          getUserProfile(),
-          getUserOrders(),
-          getWishlist(),
-          getAddresses()
-        ]);
-        
-        if (profile) {
-          setPoints(profile.loyalty_points || 1250);
-        }
-        
-        setStats({
-          ordersCount: ordersList?.length || 12,
-          wishlistCount: wishlistList?.length || 18,
-          addressesCount: addressesList?.length || 4
-        });
-
-        if (ordersList && ordersList.length > 0) {
-          // Map backend orders into view model
-          const mapped = ordersList.slice(0, 3).map((ord) => ({
-            id: ord.order_number || `ELS-${ord.id}`,
-            title: ord.OrderItems?.[0]?.product_name || 'Couture Garment',
-            date: new Date(ord.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            status: ord.status || 'Delivered',
-            statusColor: ord.status === 'Shipped' ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50',
-            price: `₹${parseFloat(ord.total_amount).toLocaleString()}`,
-            image: ord.OrderItems?.[0]?.product_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=150&auto=format&fit=crop'
-          }));
-          setRecentOrders(mapped);
-        }
-      } catch (err) {
-        console.error('Failed to load profile data', err);
-      } finally {
-        setFetchingProfile(false);
+  const fetchShopperData = async (silent = false) => {
+    if (!silent) setFetchingProfile(true);
+    try {
+      const [profile, ordersList, wishlistList, addressesList, invSummary] = await Promise.all([
+        getUserProfile(),
+        getUserOrders(),
+        getWishlist(),
+        getAddresses(),
+        getMyInvestmentSummary()
+      ]);
+      
+      if (profile) {
+        updateUser(profile);
+        setPoints(profile.loyalty_points || 0);
       }
-    };
+
+      if (invSummary) {
+        setInvestmentSummary(invSummary);
+      }
+      
+      setStats({
+        ordersCount: ordersList?.length || 12,
+        wishlistCount: wishlistList?.length || 18,
+        addressesCount: addressesList?.length || 4
+      });
+
+      if (ordersList && ordersList.length > 0) {
+        // Map backend orders into view model
+        const mapped = ordersList.slice(0, 3).map((ord) => ({
+          id: ord.order_number || `ELS-${ord.id}`,
+          title: ord.OrderItems?.[0]?.product_name || 'Couture Garment',
+          date: new Date(ord.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          status: ord.status || 'Delivered',
+          statusColor: ord.status === 'Shipped' ? 'text-blue-600 bg-blue-50' : 'text-green-600 bg-green-50',
+          price: `₹${parseFloat(ord.total_amount).toLocaleString()}`,
+          image: ord.OrderItems?.[0]?.product_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=150&auto=format&fit=crop'
+        }));
+        setRecentOrders(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to load profile data', err);
+    } finally {
+      if (!silent) setFetchingProfile(false);
+    }
+  };
+
+  useEffect(() => {
     fetchShopperData();
+
+    // Poll for real-time updates every 15 seconds when active
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchShopperData(true);
+      }
+    }, 15000);
+
+    // Refresh immediately when window comes back into focus
+    const handleFocus = () => {
+      fetchShopperData(true);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   if (fetchingProfile) {
@@ -166,8 +193,19 @@ const ProfilePage = () => {
         <div className="bg-white border border-black/5 rounded-2xl p-5 flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
           <div className="space-y-1">
             <span className="text-xs font-futura text-ivory/50 tracking-wider">Club Tier</span>
-            <h3 className="text-2xl font-display font-bold text-gold tracking-wide">Elite</h3>
-            <p className="text-[10px] text-green-600/80 tracking-wider font-futura font-bold pt-2">You&apos;re on our top tier!</p>
+            <h3 className="text-2xl font-display font-bold text-gold tracking-wide">
+              {investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed'}
+            </h3>
+            {(() => {
+              const tier = (investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed').toLowerCase();
+              if (['platinum', 'diamond'].includes(tier)) {
+                return <p className="text-[10px] text-green-600/80 tracking-wider font-futura font-bold pt-2">You&apos;re on our highest tier!</p>;
+              }
+              if (['silver', 'gold'].includes(tier)) {
+                return <p className="text-[10px] text-gold tracking-wider font-futura font-bold pt-2">Concierge privileges active!</p>;
+              }
+              return <p className="text-[10px] text-zinc-500 tracking-wider font-futura font-semibold pt-2">Grow your brand standing</p>;
+            })()}
           </div>
           <div className="w-12 h-12 rounded-xl bg-gold/5 flex items-center justify-center text-gold border border-gold/10">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -262,28 +300,51 @@ const ProfilePage = () => {
             <div className="flex justify-between items-start">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-futura tracking-[0.25em] text-white/50 uppercase block">ELESENE CLUB</span>
-                <span className="text-xs font-display tracking-widest text-white uppercase font-bold block">ELITE MEMBER</span>
+                <span className="text-xs font-display tracking-widest text-white uppercase font-bold block">
+                  {(investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed').toUpperCase()} MEMBER
+                </span>
               </div>
               <span className="text-[8px] font-futura tracking-widest bg-gold text-[#0d0d0d] px-2.5 py-0.5 rounded-full font-bold uppercase select-none">
-                ELITE
+                {investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed'}
               </span>
             </div>
 
             <p className="text-[11px] font-futura text-white/70 font-light">
-              You&apos;re earning 5x points on every purchase.
+              {(() => {
+                const tier = (investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed').toLowerCase();
+                if (tier === 'diamond') return "You're earning 5x points on every purchase.";
+                if (tier === 'platinum') return "You're earning 4x points on every purchase.";
+                if (tier === 'gold') return "You're earning 3x points on every purchase.";
+                if (tier === 'silver') return "You're earning 2x points on every purchase.";
+                if (tier === 'bronze') return "You're earning 1.5x points on every purchase.";
+                return "You're earning 1x points on every purchase.";
+              })()}
             </p>
 
             {/* Progress bar */}
             <div className="space-y-2">
               <div className="w-full h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                <div className="h-full bg-gold rounded-full w-[45%]" />
+                <div 
+                  className="h-full bg-gold rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${investmentSummary?.progress?.progressPct || 0}%` }}
+                />
               </div>
               <div className="flex justify-between items-center text-[10px] font-futura tracking-wider text-white/50">
                 <div>
-                  <span className="text-white font-bold">1,250 pts</span> Available Points
+                  <span className="text-white font-bold">
+                    {(investmentSummary?.metrics?.loyaltyPoints || user?.loyalty_points || 0).toLocaleString()} LP
+                  </span> Available Balance
                 </div>
                 <div>
-                  <span className="text-white font-bold">2,750 pts</span> To Next Tier
+                  {investmentSummary?.progress?.nextTier ? (
+                    <span>
+                      <span className="text-white font-bold">
+                        {(investmentSummary?.progress?.pointsToNext || 0).toLocaleString()} IP
+                      </span> to {investmentSummary.progress.nextTier}
+                    </span>
+                  ) : (
+                    <span className="text-gold font-bold">Pinnacle Status Reached</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -291,20 +352,26 @@ const ProfilePage = () => {
             {/* Horizontal VIP Perks list */}
             <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/[0.06] text-center">
               {/* Perk 1 */}
-              <div className="space-y-1.5">
-                <div className="w-8 h-8 rounded-full border border-white/[0.08] flex items-center justify-center text-gold mx-auto bg-white/[0.01]">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7a2.5 2.5 0 112-2.5V7" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7L2 16.5a1.5 1.5 0 001 2.5h18a1.5 1.5 0 001-2.5L12 7z" />
-                  </svg>
-                </div>
-                <h5 className="text-[9px] font-futura font-bold tracking-wider text-white uppercase leading-none">Early Access</h5>
-                <p className="text-[8px] text-white/40 font-futura leading-none">To New Drops</p>
-              </div>
+              {(() => {
+                const tier = (investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed').toLowerCase();
+                const unlocked = ['silver', 'gold', 'platinum', 'diamond'].includes(tier);
+                return (
+                  <div className={`space-y-1.5 ${unlocked ? 'opacity-100' : 'opacity-35'}`}>
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center mx-auto bg-white/[0.01] ${unlocked ? 'border-gold/30 text-gold shadow-[0_0_8px_rgba(217,119,6,0.2)]' : 'border-white/[0.08] text-white/40'}`}>
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7a2.5 2.5 0 112-2.5V7" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7L2 16.5a1.5 1.5 0 001 2.5h18a1.5 1.5 0 001-2.5L12 7z" />
+                      </svg>
+                    </div>
+                    <h5 className="text-[9px] font-futura font-bold tracking-wider text-white uppercase leading-none">Early Access</h5>
+                    <p className="text-[8px] text-white/40 font-futura leading-none">To New Drops</p>
+                  </div>
+                );
+              })()}
 
               {/* Perk 2 */}
-              <div className="space-y-1.5">
-                <div className="w-8 h-8 rounded-full border border-white/[0.08] flex items-center justify-center text-gold mx-auto bg-white/[0.01]">
+              <div className="space-y-1.5 opacity-100">
+                <div className="w-8 h-8 rounded-full border border-gold/30 flex items-center justify-center text-gold mx-auto bg-white/[0.01] shadow-[0_0_8px_rgba(217,119,6,0.2)]">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a2.25 2.25 0 003.182 0l5.136-5.136a2.25 2.25 0 000-3.182L11.16 3.659A2.25 2.25 0 009.568 3z" />
                   </svg>
@@ -314,15 +381,21 @@ const ProfilePage = () => {
               </div>
 
               {/* Perk 3 */}
-              <div className="space-y-1.5">
-                <div className="w-8 h-8 rounded-full border border-white/[0.08] flex items-center justify-center text-gold mx-auto bg-white/[0.01]">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.75a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007" />
-                  </svg>
-                </div>
-                <h5 className="text-[9px] font-futura font-bold tracking-wider text-white uppercase leading-none">Free Shipping</h5>
-                <p className="text-[8px] text-white/40 font-futura leading-none">On All Orders</p>
-              </div>
+              {(() => {
+                const tier = (investmentSummary?.metrics?.investmentTier || user?.investmentTier || 'Seed').toLowerCase();
+                const unlocked = ['silver', 'gold', 'platinum', 'diamond'].includes(tier);
+                return (
+                  <div className={`space-y-1.5 ${unlocked ? 'opacity-100' : 'opacity-35'}`}>
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center mx-auto bg-white/[0.01] ${unlocked ? 'border-gold/30 text-gold shadow-[0_0_8px_rgba(217,119,6,0.2)]' : 'border-white/[0.08] text-white/40'}`}>
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.75a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007" />
+                      </svg>
+                    </div>
+                    <h5 className="text-[9px] font-futura font-bold tracking-wider text-white uppercase leading-none">Free Shipping</h5>
+                    <p className="text-[8px] text-white/40 font-futura leading-none">On All Orders</p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

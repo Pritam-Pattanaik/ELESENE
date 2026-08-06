@@ -4,6 +4,7 @@ import { getMyInvestmentSummary, getMyInvestmentHistory, engageActivity, askLoya
 import InvestmentTierCard from '../../components/investment/InvestmentTierCard';
 import InvestmentTimeline from '../../components/investment/InvestmentTimeline';
 import RewardRedemptionModal from '../../components/investment/RewardRedemptionModal';
+import InvestmentJourney from '../../components/investment/InvestmentJourney';
 import { Sparkles, Trophy, Award, Gift, RefreshCw, Send, Star, Share2, UserCheck } from 'lucide-react';
 
 const LoyaltyPage = () => {
@@ -24,9 +25,11 @@ const LoyaltyPage = () => {
     },
   ]);
 
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
+  const loadData = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const [sumRes, histRes] = await Promise.all([
         getMyInvestmentSummary(),
@@ -37,14 +40,36 @@ const LoyaltyPage = () => {
         setHistory(histRes.transactions);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load brand investment summary');
+      if (!silent) {
+        setError(err.message || 'Failed to load brand investment summary');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     loadData();
+
+    // Poll for real-time updates every 15 seconds when active
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadData(true);
+      }
+    }, 15000);
+
+    // Refresh immediately when window comes back into focus
+    const handleFocus = () => {
+      loadData(true);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const handleEngagementBonus = async (type) => {
@@ -140,6 +165,12 @@ const LoyaltyPage = () => {
         metrics={metrics}
         progress={progress}
         onRedeemClick={() => setIsRedeemOpen(true)}
+      />
+
+      {/* ─── Investment Journey Horizontal Roadmap ──────────────────────────────── */}
+      <InvestmentJourney
+        metrics={metrics}
+        progress={progress}
       />
 
       {/* ─── Engagement Actions Bar ─────────────────────────────────────────── */}
