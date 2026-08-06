@@ -19,9 +19,11 @@ const crypto = require('crypto');
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const GROK_API_KEY  = process.env.GROK_API_KEY;
-const GROK_BASE_URL = 'https://api.x.ai/v1'; // xAI / Grok endpoint
-const GROK_MODEL    = process.env.GROK_MODEL || 'grok-beta';
+const isGroq        = !!(GROK_API_KEY && GROK_API_KEY.startsWith('gsk_'));
+const GROK_BASE_URL = isGroq ? 'https://api.groq.com/openai/v1' : (process.env.GROK_BASE_URL || 'https://api.x.ai/v1');
+const GROK_MODEL    = process.env.GROK_MODEL || (isGroq ? 'llama-3.3-70b-versatile' : 'grok-beta');
 const MAX_TOKENS    = 512;
+
 const RATE_LIMIT    = 10;       // requests per window
 const RATE_WINDOW   = 60_000;   // 1 minute in ms
 const CACHE_TTL     = 600_000;  // 10 minutes in ms
