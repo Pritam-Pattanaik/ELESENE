@@ -213,7 +213,8 @@ const initiateOrder = async (req, res) => {
     res.status(201).json({
       success: true,
       order: newOrder,
-      razorpayOrder: rzpOrder
+      razorpayOrder: rzpOrder,
+      keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_TMQq9wmG77ZzLQ'
     });
   } catch (error) {
     await t.rollback();

@@ -198,10 +198,10 @@ const CheckoutPage = () => {
       if (!res.success) throw new Error(res.message);
 
       const selectedAddress = addresses.find(a => a.id === selectedAddressId);
-      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      const razorpayKey = res.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TMQq9wmG77ZzLQ';
 
-      if (!razorpayKey || razorpayKey === 'rzp_test_placeholder' || !razorpayKey.trim()) {
-        throw new Error('Payment gateway configuration error: Razorpay Key (VITE_RAZORPAY_KEY_ID) is missing or unconfigured. Please contact support.');
+      if (!razorpayKey || razorpayKey.includes('placeholder') || razorpayKey.includes('XXXXX')) {
+        throw new Error('Payment gateway configuration error: Razorpay Key is missing or invalid.');
       }
 
       // 2. Open Razorpay Checkout
