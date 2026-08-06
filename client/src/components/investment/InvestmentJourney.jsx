@@ -156,12 +156,12 @@ export default function InvestmentJourney({ metrics, progress }) {
   const pointsToNext = progress?.pointsToNext || 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#1a1929] p-6 shadow-2xl text-white select-none">
+    <div className="relative overflow-hidden rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm text-stone-900 select-none">
       {/* Subtle radial metallic reflection */}
-      <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/[0.03] rounded-full blur-[40px] pointer-events-none" />
+      <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/[0.05] rounded-full blur-[40px] pointer-events-none" />
 
       {/* Header title */}
-      <h3 className="text-left text-[10px] font-futura tracking-[0.25em] text-[#e0a96d]/85 uppercase font-bold mb-8">
+      <h3 className="text-left text-[10px] font-futura tracking-[0.25em] text-[#c27a3f] uppercase font-bold mb-8">
         YOUR INVESTMENT JOURNEY
       </h3>
 
@@ -170,11 +170,11 @@ export default function InvestmentJourney({ metrics, progress }) {
         <div className="relative flex items-center justify-between min-w-[750px] px-8 py-5 z-10">
           
           {/* Connector timeline background line */}
-          <div className="absolute h-[1.5px] bg-[#1a1a1a] top-1/2 left-[8%] right-[8%] -translate-y-1/2 z-0" />
+          <div className="absolute h-[2px] bg-stone-200 top-1/2 left-[8%] right-[8%] -translate-y-1/2 z-0" />
 
           {/* Glowing completion progress line */}
           <div 
-            className="absolute h-[1.5px] bg-gradient-to-r from-emerald-500 via-[#c27a3f] to-amber-500 top-1/2 left-[8%] -translate-y-1/2 z-0 transition-all duration-1000 ease-out"
+            className="absolute h-[2px] bg-gradient-to-r from-emerald-500 via-[#c27a3f] to-amber-500 top-1/2 left-[8%] -translate-y-1/2 z-0 transition-all duration-1000 ease-out"
             style={{ width: `${lineProgress * 0.84}%` }} 
           />
 
@@ -184,10 +184,10 @@ export default function InvestmentJourney({ metrics, progress }) {
             return (
               <div 
                 key={pos}
-                className={`absolute w-2 h-2 rounded-full border -translate-y-1/2 z-10 transition-all duration-700 ${
+                className={`absolute w-2.5 h-2.5 rounded-full border -translate-y-1/2 z-10 transition-all duration-700 ${
                   isDotPassed 
-                    ? 'border-[#c27a3f]/70 bg-amber-500/20 shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
-                    : 'border-zinc-800 bg-[#1e1d2a]'
+                    ? 'border-[#c27a3f] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
+                    : 'border-stone-300 bg-stone-100'
                 }`}
                 style={{ left: `${pos + 1}%`, top: '50%' }}
               />
@@ -208,18 +208,17 @@ export default function InvestmentJourney({ metrics, progress }) {
               circleClass = tier.activeStyle;
               innerClass = tier.innerActiveStyle;
               iconClass = `w-5 h-5 transition-all duration-500 ${
-                tier.themeColor === 'emerald' ? 'text-emerald-400' :
+                tier.themeColor === 'emerald' ? 'text-emerald-600' :
                 tier.themeColor === 'bronze' ? 'text-[#c27a3f]' :
-                tier.themeColor === 'silver' ? 'text-slate-300' :
-                tier.themeColor === 'gold' ? 'text-amber-500' :
-                tier.themeColor === 'platinum' ? 'text-purple-400' :
-                'text-[#fbbf24]'
+                tier.themeColor === 'silver' ? 'text-slate-600' :
+                tier.themeColor === 'gold' ? 'text-amber-600' :
+                tier.themeColor === 'platinum' ? 'text-purple-600' :
+                'text-amber-500'
               }`;
             } else if (isCompleted) {
-              // Completed nodes get solid subtle styling with their theme color border
-              circleClass = `border-${tier.themeColor}-500/50 text-${tier.themeColor}-400 bg-neutral-900`;
-              innerClass = `border-${tier.themeColor}-500/20 bg-neutral-950`;
-              iconClass = `w-5 h-5 text-neutral-200 opacity-80`;
+              circleClass = `border-${tier.themeColor}-500/50 text-${tier.themeColor}-600 bg-stone-100`;
+              innerClass = `border-${tier.themeColor}-500/20 bg-white`;
+              iconClass = `w-5 h-5 text-stone-700 opacity-80`;
             }
 
             return (
@@ -234,13 +233,13 @@ export default function InvestmentJourney({ metrics, progress }) {
                 {/* Tier Name */}
                 <span className={`text-[10px] font-futura tracking-[0.15em] font-bold uppercase mt-3.5 transition-colors duration-500 ${
                   isCurrent 
-                    ? tier.themeColor === 'emerald' ? 'text-emerald-400' :
+                    ? tier.themeColor === 'emerald' ? 'text-emerald-700' :
                       tier.themeColor === 'bronze' ? 'text-[#c27a3f]' :
-                      tier.themeColor === 'silver' ? 'text-slate-300' :
-                      tier.themeColor === 'gold' ? 'text-amber-500' :
-                      tier.themeColor === 'platinum' ? 'text-purple-400' :
-                      'text-[#fbbf24]'
-                    : isCompleted ? 'text-neutral-200' : 'text-zinc-500'
+                      tier.themeColor === 'silver' ? 'text-slate-700' :
+                      tier.themeColor === 'gold' ? 'text-amber-700' :
+                      tier.themeColor === 'platinum' ? 'text-purple-700' :
+                      'text-amber-700'
+                    : isCompleted ? 'text-stone-800' : 'text-stone-400'
                 }`}>
                   {tier.name}
                 </span>
@@ -248,12 +247,12 @@ export default function InvestmentJourney({ metrics, progress }) {
                 {/* Status or Requirement */}
                 {isCurrent ? (
                   <div className="absolute top-[88px] flex justify-center w-32 pointer-events-none">
-                    <span className="text-[8px] font-futura tracking-[0.1em] font-bold text-emerald-400 border border-emerald-500/35 px-2 py-0.5 rounded-full bg-emerald-950/40 uppercase shadow-[0_0_10px_rgba(16,185,129,0.25)]">
+                    <span className="text-[8px] font-futura tracking-[0.1em] font-bold text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full bg-emerald-50 uppercase shadow-sm">
                       YOU ARE HERE
                     </span>
                   </div>
                 ) : (
-                  <span className="text-[9px] font-mono text-zinc-500 mt-1 font-semibold">
+                  <span className="text-[9px] font-mono text-stone-400 mt-1 font-semibold">
                     {tier.minPoints > 0 ? `${tier.minPoints.toLocaleString()} IP` : '0 IP'}
                   </span>
                 )}
@@ -268,23 +267,23 @@ export default function InvestmentJourney({ metrics, progress }) {
       <div className="h-6" />
 
       {/* Progress Footer */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6 pt-5 border-t border-white/[0.04]">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6 pt-5 border-t border-stone-200/80">
         
         {/* Next Tier target text */}
-        <div className="text-[11px] font-futura tracking-wider text-zinc-400">
+        <div className="text-[11px] font-futura tracking-wider text-stone-500">
           {nextTierObj ? (
             <span>
-              Progress to <strong className="text-amber-500 font-bold uppercase tracking-widest">{nextTierObj.name}</strong>
+              Progress to <strong className="text-amber-600 font-bold uppercase tracking-widest">{nextTierObj.name}</strong>
             </span>
           ) : (
-            <span className="text-purple-400 font-semibold uppercase tracking-widest">
+            <span className="text-purple-700 font-semibold uppercase tracking-widest">
               Pinnacle Tier Reached 👑
             </span>
           )}
         </div>
 
         {/* Progress bar line */}
-        <div className="flex-1 h-3.5 bg-[#252340] border border-white/[0.04] rounded-full overflow-hidden p-0.5 max-w-[460px] w-full">
+        <div className="flex-1 h-3.5 bg-stone-200 border border-stone-300/60 rounded-full overflow-hidden p-0.5 max-w-[460px] w-full">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${nextTierObj ? progressPct : 100}%` }}
@@ -294,7 +293,7 @@ export default function InvestmentJourney({ metrics, progress }) {
         </div>
 
         {/* Remaining points count */}
-        <div className="text-[10px] font-mono text-zinc-400 font-semibold tracking-wider">
+        <div className="text-[10px] font-mono text-stone-500 font-semibold tracking-wider">
           {nextTierObj ? (
             <span>{pointsToNext.toLocaleString()} IP Remaining ({progressPct}%)</span>
           ) : (

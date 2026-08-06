@@ -83,7 +83,7 @@ const LoyaltyPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-zinc-500 gap-3">
+      <div className="flex items-center justify-center py-20 text-stone-400 gap-3">
         <RefreshCw className="w-5 h-5 animate-spin text-amber-400" />
         <span className="text-sm font-futura tracking-wider">Retrieving your ELESENE Brand Investment privileges...</span>
       </div>
@@ -94,7 +94,7 @@ const LoyaltyPage = () => {
     return (
       <div className="p-6 bg-rose-950/20 border border-rose-500/30 rounded-2xl text-rose-300 text-center my-6">
         <p className="font-medium">{error}</p>
-        <button onClick={loadData} className="mt-3 px-4 py-2 bg-rose-900/40 hover:bg-rose-900/60 rounded-xl text-xs font-semibold uppercase tracking-wider text-white transition">
+        <button onClick={loadData} className="mt-3 px-4 py-2 bg-rose-900/40 hover:bg-rose-900/60 rounded-xl text-xs font-semibold uppercase tracking-wider text-stone-900 transition">
           Try Again
         </button>
       </div>
@@ -122,25 +122,25 @@ const LoyaltyPage = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
 
       {/* ── Page Title ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/[0.07]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-stone-200">
         <div>
-          <h1 className="text-xl md:text-2xl font-display font-bold tracking-wide text-white flex items-center gap-3">
-            <Trophy className="h-6 w-6 text-amber-400 shrink-0" />
+          <h1 className="text-xl md:text-2xl font-display font-bold tracking-wide text-stone-900 flex items-center gap-3">
+            <Trophy className="h-6 w-6 text-amber-600 shrink-0" />
             ELESENE Brand Investment Dashboard
           </h1>
-          <p className="text-[11px] text-zinc-500 mt-1.5 font-futura italic leading-relaxed">
+          <p className="text-[11px] text-stone-500 mt-1.5 font-futura italic leading-relaxed">
             "You're not purchasing. You're investing in the ELESENE brand." — Lifetime Recognition &amp; Privileges
           </p>
         </div>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className="shrink-0 rounded-xl border border-amber-500/25 bg-amber-500/[0.07] px-4 py-2.5 text-[11px] text-amber-300 flex items-center gap-2 cursor-default"
+          className="shrink-0 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[11px] text-amber-900 flex items-center gap-2 cursor-default shadow-2xs"
         >
-          <Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <Sparkles className="h-3.5 w-3.5 text-amber-600 shrink-0" />
           <span className="font-futura tracking-wider">
             Referral Code:{' '}
-            <strong className="font-mono text-amber-200 font-bold select-all">
+            <strong className="font-mono text-amber-950 font-bold select-all">
               {summary?.user?.referralCode || 'ELESENE-VIP'}
             </strong>
           </span>
@@ -154,8 +154,8 @@ const LoyaltyPage = () => {
       <InvestmentJourney metrics={metrics} progress={progress} />
 
       {/* ── Engagement Actions ── */}
-      <div className="rounded-2xl border border-white/[0.07] bg-[#1e1d2a] p-5 shadow-xl text-white">
-        <h3 className="text-[10px] font-futura font-bold uppercase tracking-[0.2em] text-amber-400/80 mb-5 flex items-center gap-2">
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-sm text-stone-900">
+        <h3 className="text-[10px] font-futura font-bold uppercase tracking-[0.2em] text-amber-700 mb-5 flex items-center gap-2">
           <Gift className="h-3.5 w-3.5" />
           Earn Engagement Investment Bonuses
         </h3>
@@ -170,13 +170,13 @@ const LoyaltyPage = () => {
                 onClick={() => handleEngagementBonus(action.type)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className={`flex items-center gap-3 rounded-xl border border-zinc-800 bg-[#252340] p-4 text-left transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${c.ring}`}
+                className={`flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50/70 p-4 text-left transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-100 cursor-pointer ${c.ring}`}
               >
                 <div className={`rounded-lg p-2.5 shrink-0 ${c.bg} ${c.text}`}>
                   {action.icon}
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-zinc-200 block leading-snug">{action.label}</span>
+                  <span className="text-[11px] font-semibold text-stone-800 block leading-snug">{action.label}</span>
                   <span className={`text-[10px] font-mono font-bold mt-0.5 block ${c.text}`}>{action.bonus}</span>
                 </div>
               </motion.button>
@@ -189,24 +189,24 @@ const LoyaltyPage = () => {
       <InvestmentTimeline transactions={history} />
 
       {/* ── AI Concierge ── */}
-      <div className="rounded-2xl border border-white/[0.07] bg-[#1e1d2a] p-6 shadow-xl text-white">
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm text-stone-900">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 shrink-0">
+          <div className="p-2.5 rounded-xl bg-amber-100 text-amber-700 shrink-0 border border-amber-200">
             <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-sm font-display font-semibold text-white tracking-wide">AI Investment Concierge</h2>
-            <p className="text-[11px] text-zinc-500 font-futura mt-0.5">Ask questions about your brand standing, tier perks, or campaign multipliers.</p>
+            <h2 className="text-sm font-display font-semibold text-stone-900 tracking-wide">AI Investment Concierge</h2>
+            <p className="text-[11px] text-stone-500 font-futura mt-0.5">Ask questions about your brand standing, tier perks, or campaign multipliers.</p>
           </div>
         </div>
 
-        <div className="bg-[#16152a] border border-white/[0.05] rounded-xl p-4 h-52 overflow-y-auto space-y-3 text-xs mb-4">
+        <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 h-52 overflow-y-auto space-y-3 text-xs mb-4">
           {chatMessages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-xl px-4 py-2.5 leading-relaxed font-futura ${
                 msg.sender === 'user'
-                  ? 'bg-amber-500 text-black font-semibold'
-                  : 'bg-[#252340] text-zinc-300 border border-white/[0.06]'
+                  ? 'bg-amber-500 text-white font-semibold shadow-2xs'
+                  : 'bg-white text-stone-700 border border-stone-200 shadow-2xs'
               }`}>
                 {msg.text}
               </div>
@@ -214,8 +214,8 @@ const LoyaltyPage = () => {
           ))}
           {aiLoading && (
             <div className="flex justify-start">
-              <div className="bg-[#252340] text-zinc-400 rounded-xl px-4 py-2.5 flex items-center gap-2 border border-white/[0.06]">
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-amber-400" />
+              <div className="bg-white text-stone-500 rounded-xl px-4 py-2.5 flex items-center gap-2 border border-stone-200">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-amber-600" />
                 <span>Consulting AI Concierge...</span>
               </div>
             </div>
@@ -228,12 +228,12 @@ const LoyaltyPage = () => {
             value={aiQuery}
             onChange={(e) => setAiQuery(e.target.value)}
             placeholder="e.g. What privileges do I unlock at Gold tier?"
-            className="flex-1 bg-[#16152a] border border-white/[0.07] rounded-xl px-4 py-2.5 text-xs text-white font-futura focus:outline-none focus:border-amber-500/50 placeholder-zinc-600 transition-colors"
+            className="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-900 font-futura focus:outline-none focus:border-amber-500 placeholder-stone-400 transition-colors shadow-2xs"
           />
           <button
             type="submit"
             disabled={aiLoading || !aiQuery.trim()}
-            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-xs rounded-xl transition-all flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
             <span>Ask</span>
             <Send className="h-3.5 w-3.5" />
@@ -253,4 +253,6 @@ const LoyaltyPage = () => {
 };
 
 export default LoyaltyPage;
+
+
 
