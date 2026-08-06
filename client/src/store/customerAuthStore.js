@@ -4,7 +4,16 @@ import { supabase } from '../supabase';
 // Avoid circular import — access via dynamic import at call time
 const getWishlistStore = () => import('./wishlistStore').then(m => m.default);
 
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+const rawApiUrl = import.meta.env.VITE_API_URL || '';
+const API_BASE = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
+  ? rawApiUrl
+  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+
+const hasRealSupabase = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  return url && key && !url.includes('placeholder') && !url.includes('your-') && !key.includes('placeholder');
+};
 
 const useCustomerAuthStore = create(
   persist(
@@ -18,29 +27,30 @@ const useCustomerAuthStore = create(
       login: async (email, password) => {
         set({ loading: true, error: null });
 
-        // 1. Try Supabase Auth
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (!error && data?.session?.access_token) {
-            const mappedUser = {
-              id: data.user.id,
-              email: data.user.email,
-              full_name: data.user.user_metadata?.full_name || 'Customer',
-              phone: data.user.phone || '',
-              role: 'customer'
-            };
-            set({ 
-              token: data.session.access_token, 
-              user: mappedUser, 
-              isAuthenticated: true, 
-              loading: false 
-            });
-            // Fetch wishlist once after login (replaces per-component fetches)
-            getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
-            return { token: data.session.access_token, user: mappedUser };
+        // 1. Try Supabase Auth if real keys exist
+        if (hasRealSupabase()) {
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (!error && data?.session?.access_token) {
+              const mappedUser = {
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.user_metadata?.full_name || 'Customer',
+                phone: data.user.phone || '',
+                role: 'customer'
+              };
+              set({ 
+                token: data.session.access_token, 
+                user: mappedUser, 
+                isAuthenticated: true, 
+                loading: false 
+              });
+              getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
+              return { token: data.session.access_token, user: mappedUser };
+            }
+          } catch {
+            // Supabase auth failed, falling back to local backend API
           }
-        } catch {
-          // Supabase auth failed, falling back to local backend API
         }
 
         // 2. Express Backend API Fallback
@@ -50,7 +60,7 @@ const useCustomerAuthStore = create(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.success) {
             throw new Error(data.message || 'Invalid email or password');
           }
@@ -61,45 +71,48 @@ const useCustomerAuthStore = create(
             isAuthenticated: true, 
             loading: false 
           });
-          // Fetch wishlist once after login (replaces per-component fetches)
           getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
-          set({ loading: false, error: err.message });
-          throw err;
+          const message = (err.name === 'TypeError' && err.message === 'Failed to fetch')
+            ? 'Unable to connect to authentication server. Please check your network connection.'
+            : (err.message || 'Invalid email or password');
+          set({ loading: false, error: message });
+          throw new Error(message);
         }
       },
 
       register: async (full_name, email, password) => {
         set({ loading: true, error: null });
 
-        // 1. Try Supabase Auth
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { full_name } }
-          });
-          if (!error && data?.session?.access_token) {
-            const mappedUser = {
-              id: data.user.id,
-              email: data.user.email,
-              full_name: data.user.user_metadata?.full_name || full_name,
-              phone: data.user.phone || '',
-              role: 'customer'
-            };
-            set({ 
-              token: data.session.access_token, 
-              user: mappedUser, 
-              isAuthenticated: true, 
-              loading: false 
+        // 1. Try Supabase Auth if real keys exist
+        if (hasRealSupabase()) {
+          try {
+            const { data, error } = await supabase.auth.signUp({
+              email,
+              password,
+              options: { data: { full_name } }
             });
-            // Fetch wishlist once after registration
-            getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
-            return { token: data.session.access_token, user: mappedUser };
+            if (!error && data?.session?.access_token) {
+              const mappedUser = {
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.user_metadata?.full_name || full_name,
+                phone: data.user.phone || '',
+                role: 'customer'
+              };
+              set({ 
+                token: data.session.access_token, 
+                user: mappedUser, 
+                isAuthenticated: true, 
+                loading: false 
+              });
+              getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
+              return { token: data.session.access_token, user: mappedUser };
+            }
+          } catch {
+            // Supabase signup failed, falling back to local backend API
           }
-        } catch {
-          // Supabase signup failed, falling back to local backend API
         }
 
         // 2. Express Backend API Fallback
@@ -109,7 +122,7 @@ const useCustomerAuthStore = create(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ full_name, email, password })
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.success) {
             throw new Error(data.message || 'Registration failed');
           }
@@ -120,12 +133,14 @@ const useCustomerAuthStore = create(
             isAuthenticated: true, 
             loading: false 
           });
-          // Fetch wishlist once after registration
           getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
-          set({ loading: false, error: err.message });
-          throw err;
+          const message = (err.name === 'TypeError' && err.message === 'Failed to fetch')
+            ? 'Unable to connect to authentication server. Please check your network connection.'
+            : (err.message || 'Registration failed');
+          set({ loading: false, error: message });
+          throw new Error(message);
         }
       },
 
