@@ -48,8 +48,28 @@ const useCustomerAuthStore = create(
               getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
               return { token: data.session.access_token, user: mappedUser };
             }
-          } catch {
-            // Supabase auth failed, falling back to local backend API
+            // If Supabase returned an auth error (e.g. wrong credentials), surface it directly.
+            // Do NOT fall through to the API — it won't help and may show a confusing error.
+            if (error) {
+              // Map Supabase error messages to user-friendly ones
+              const supaMsg = error.message || '';
+              const isNetworkError = supaMsg.toLowerCase().includes('load failed')
+                || supaMsg.toLowerCase().includes('failed to fetch')
+                || supaMsg.toLowerCase().includes('network')
+                || supaMsg.toLowerCase().includes('fetch');
+              const message = isNetworkError
+                ? 'Unable to connect. Please check your internet connection and try again.'
+                : (supaMsg || 'Invalid email or password');
+              set({ loading: false, error: message });
+              throw new Error(message);
+            }
+          } catch (supaErr) {
+            // Re-throw if it's our own error (from above)
+            if (supaErr?.message && !supaErr.message.includes('supabase') && !supaErr.message.includes('Supabase')) {
+              const alreadyHandled = supaErr.message.includes('connect') || supaErr.message.includes('email') || supaErr.message.includes('password') || supaErr.message.includes('Invalid');
+              if (alreadyHandled) throw supaErr;
+            }
+            // Otherwise it's an unexpected Supabase SDK error — fall through to API
           }
         }
 
@@ -74,8 +94,16 @@ const useCustomerAuthStore = create(
           getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
-          const message = (err.name === 'TypeError' && err.message === 'Failed to fetch')
-            ? 'Unable to connect to authentication server. Please check your network connection.'
+          // Cover both Chrome ('Failed to fetch') and iOS Safari ('Load failed') network errors
+          const isNetworkErr = err instanceof TypeError
+            || err.name === 'TypeError'
+            || (typeof err.message === 'string' && (
+                err.message.toLowerCase().includes('load failed')
+                || err.message.toLowerCase().includes('failed to fetch')
+                || err.message.toLowerCase().includes('network')
+              ));
+          const message = isNetworkErr
+            ? 'Unable to connect. Please check your internet connection and try again.'
             : (err.message || 'Invalid email or password');
           set({ loading: false, error: message });
           throw new Error(message);
@@ -110,8 +138,24 @@ const useCustomerAuthStore = create(
               getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
               return { token: data.session.access_token, user: mappedUser };
             }
-          } catch {
-            // Supabase signup failed, falling back to local backend API
+            if (error) {
+              const supaMsg = error.message || '';
+              const isNetworkError = supaMsg.toLowerCase().includes('load failed')
+                || supaMsg.toLowerCase().includes('failed to fetch')
+                || supaMsg.toLowerCase().includes('network')
+                || supaMsg.toLowerCase().includes('fetch');
+              const message = isNetworkError
+                ? 'Unable to connect. Please check your internet connection and try again.'
+                : (supaMsg || 'Registration failed');
+              set({ loading: false, error: message });
+              throw new Error(message);
+            }
+          } catch (supaErr) {
+            const alreadyHandled = supaErr?.message && (
+              supaErr.message.includes('connect') || supaErr.message.includes('Registration') || supaErr.message.includes('email')
+            );
+            if (alreadyHandled) throw supaErr;
+            // Otherwise fall through to API
           }
         }
 
@@ -136,8 +180,16 @@ const useCustomerAuthStore = create(
           getWishlistStore().then(store => store.getState().fetchWishlist()).catch(() => {});
           return { token: data.token, user: data.user };
         } catch (err) {
-          const message = (err.name === 'TypeError' && err.message === 'Failed to fetch')
-            ? 'Unable to connect to authentication server. Please check your network connection.'
+          // Cover both Chrome ('Failed to fetch') and iOS Safari ('Load failed') network errors
+          const isNetworkErr = err instanceof TypeError
+            || err.name === 'TypeError'
+            || (typeof err.message === 'string' && (
+                err.message.toLowerCase().includes('load failed')
+                || err.message.toLowerCase().includes('failed to fetch')
+                || err.message.toLowerCase().includes('network')
+              ));
+          const message = isNetworkErr
+            ? 'Unable to connect. Please check your internet connection and try again.'
             : (err.message || 'Registration failed');
           set({ loading: false, error: message });
           throw new Error(message);
