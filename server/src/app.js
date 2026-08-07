@@ -14,7 +14,12 @@ const userRoutes = require('./routes/user.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const loyaltyRoutes = require('./routes/loyalty.routes');
 
+const compression = require('compression');
+
 const app = express();
+
+// Enable HTTP response compression (Gzip/Brotli)
+app.use(compression());
 
 // Middleware
 app.use(corsMiddleware);
@@ -26,8 +31,14 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded images statically
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded images statically with 1-year browser & CDN caching
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  maxAge: '1y',
+  immutable: true,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+}));
 
 // Health check endpoints
 const healthHandler = (req, res) => {

@@ -1,13 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '../supabase';
+import { API_URL as API_BASE } from '../api/config';
+
 // Avoid circular import — access via dynamic import at call time
 const getWishlistStore = () => import('./wishlistStore').then(m => m.default);
-
-const rawApiUrl = import.meta.env.VITE_API_URL || '';
-const API_BASE = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
-  ? rawApiUrl
-  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 const hasRealSupabase = () => {
   const url = import.meta.env.VITE_SUPABASE_URL;
@@ -106,7 +103,7 @@ const useCustomerAuthStore = create(
             ? 'Unable to connect. Please check your internet connection and try again.'
             : (err.message || 'Invalid email or password');
           set({ loading: false, error: message });
-          throw new Error(message);
+          throw new Error(message, { cause: err });
         }
       },
 
@@ -192,7 +189,7 @@ const useCustomerAuthStore = create(
             ? 'Unable to connect. Please check your internet connection and try again.'
             : (err.message || 'Registration failed');
           set({ loading: false, error: message });
-          throw new Error(message);
+          throw new Error(message, { cause: err });
         }
       },
 

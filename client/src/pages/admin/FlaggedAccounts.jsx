@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getFlaggedAccounts,
   applyAccountRestriction,
   removeAccountRestriction,
   getAITriageUser,
 } from '../../api/loyalty';
-import { ShieldAlert, AlertTriangle, Sparkles, RefreshCw, CheckCircle2, ShieldOff, Filter, Info, FileText } from 'lucide-react';
+import { ShieldAlert, Sparkles, ShieldOff, Info } from 'lucide-react';
 
 const FlaggedAccounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -28,8 +28,8 @@ const FlaggedAccounts = () => {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const res = await getFlaggedAccounts({ restriction: restrictionFilter, page });
@@ -42,11 +42,12 @@ const FlaggedAccounts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, restrictionFilter]);
 
   useEffect(() => {
-    loadData();
-  }, [page, restrictionFilter]);
+    const timer = setTimeout(() => loadData(false), 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   const handleApplyRestriction = async (e) => {
     e.preventDefault();
@@ -103,6 +104,12 @@ const FlaggedAccounts = () => {
             Review accounts flagged for high return rates (&gt;40%) or points shortfalls. All restrictions require explicit admin action.
           </p>
         </div>
+
+        {error && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs text-rose-300">
+            {error}
+          </div>
+        )}
 
         <div className="admin-filters">
           <select

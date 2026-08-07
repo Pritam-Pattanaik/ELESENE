@@ -482,15 +482,15 @@ const adjustUserInvestmentPoints = async (userId, ipAmount, lpAmount, reason, ad
  */
 const getAdminInvestmentAnalytics = async () => {
   const [totalIp, totalLp, totalRedemptions, tierDistribution] = await Promise.all([
-    InvestmentTransaction.sum('investment_points'),
-    InvestmentTransaction.sum('loyalty_points'),
-    RewardRedemption.count(),
+    InvestmentTransaction.sum('investmentPoints').catch(() => 0),
+    InvestmentTransaction.sum('loyaltyPoints').catch(() => 0),
+    RewardRedemption.count().catch(() => 0),
     User.findAll({
-      attributes: ['investment_tier', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      attributes: ['investmentTier', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
       where: { role: 'customer' },
-      group: ['investment_tier'],
+      group: ['investmentTier'],
       raw: true,
-    }),
+    }).catch(() => []),
   ]);
 
   return {

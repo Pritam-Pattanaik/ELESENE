@@ -79,4 +79,22 @@ const Order = sequelize.define('Order', {
   updatedAt: false
 });
 
+Order.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  const numTotal = values.total_amount != null ? Number(values.total_amount) : 0;
+  values.total_amount = numTotal;
+  values.totalAmount = numTotal;
+  values.grandTotal = numTotal;
+  values.subtotal = values.subtotal != null ? Number(values.subtotal) : 0;
+  values.amountPaid = values.payment_status === 'paid' ? numTotal : 0;
+  values.discount_amount = values.discount_amount != null ? Number(values.discount_amount) : 0;
+  values.discountAmount = values.discount_amount;
+  values.shipping_amount = values.shipping_amount != null ? Number(values.shipping_amount) : 0;
+  values.shippingAmount = values.shipping_amount;
+  values.tax_amount = values.tax_amount != null ? Number(values.tax_amount) : 0;
+  values.taxAmount = values.tax_amount;
+  return values;
+};
+
 module.exports = Order;
+

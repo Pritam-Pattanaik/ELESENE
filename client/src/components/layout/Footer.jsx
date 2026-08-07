@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollReveal from '../effects/ScrollReveal';
+import TermsAndConditionsModal from '../investment/TermsAndConditionsModal';
 
 const Footer = () => {
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const bannerImages = [
     'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=350&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=350&auto=format&fit=crop',
@@ -355,12 +357,16 @@ const Footer = () => {
           <div className="flex gap-4 items-center">
             <Link to="/about" className="hover:text-gold transition-colors">Privacy Policy</Link>
             <span className="opacity-30">|</span>
-            <Link to="/about" className="hover:text-gold transition-colors">Terms & Conditions</Link>
+            <button onClick={() => setIsTermsOpen(true)} className="hover:text-gold transition-colors cursor-pointer">Terms &amp; Conditions</button>
             <span className="opacity-30">|</span>
             <Link to="/about" className="hover:text-gold transition-colors">Cookies Policy</Link>
           </div>
         </div>
 
+        <TermsAndConditionsModal
+          isOpen={isTermsOpen}
+          onClose={() => setIsTermsOpen(false)}
+        />
       </div>
     </footer>
   );

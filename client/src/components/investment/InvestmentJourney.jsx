@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 // Defined tiers with their IP thresholds, styling attributes, and custom SVGs
@@ -76,10 +75,10 @@ const TIERS_CONFIG = [
     minPoints: 30000,
     maxPoints: 59999,
     themeColor: 'platinum',
-    colorHex: '#a855f7',
-    activeStyle: 'border-purple-500 text-purple-700 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-50',
+    colorHex: '#B99246',
+    activeStyle: 'border-[#B99246] text-[#B99246] shadow-[0_0_15px_rgba(185,146,70,0.3)] bg-[#B99246]/10',
     inactiveStyle: 'border-stone-200 text-stone-400 bg-stone-50',
-    innerActiveStyle: 'border-purple-300 bg-white',
+    innerActiveStyle: 'border-[#B99246]/30 bg-white',
     innerInactiveStyle: 'border-stone-100 bg-white',
     icon: (className) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -191,11 +190,10 @@ export default function InvestmentJourney({ metrics, progress }) {
           {TIERS_CONFIG.map((tier, idx) => {
             const isCurrent = idx === activeTierIndex;
             const isCompleted = idx < activeTierIndex;
-            const isUpcoming = idx > activeTierIndex;
 
-            let circleClass = tier.inactiveStyle;
-            let innerClass = tier.innerInactiveStyle;
-            let iconClass = 'w-5 h-5 text-stone-400 opacity-60 transition-all duration-500';
+            let circleClass;
+            let innerClass;
+            let iconClass;
 
             if (isCurrent) {
               circleClass = tier.activeStyle;
@@ -204,9 +202,9 @@ export default function InvestmentJourney({ metrics, progress }) {
                 tier.themeColor === 'emerald' ? 'text-emerald-600' :
                 tier.themeColor === 'bronze' ? 'text-[#c27a3f]' :
                 tier.themeColor === 'silver' ? 'text-slate-600' :
-                tier.themeColor === 'gold' ? 'text-amber-600' :
-                tier.themeColor === 'platinum' ? 'text-purple-600' :
-                'text-amber-600'
+                tier.themeColor === 'gold' ? 'text-[#B99246]' :
+                tier.themeColor === 'platinum' ? 'text-[#B99246]' :
+                'text-[#B99246]'
               }`;
             } else if (isCompleted) {
               circleClass = 'border-stone-300 text-stone-700 bg-stone-100';
@@ -233,9 +231,9 @@ export default function InvestmentJourney({ metrics, progress }) {
                     ? tier.themeColor === 'emerald' ? 'text-emerald-700' :
                       tier.themeColor === 'bronze' ? 'text-[#c27a3f]' :
                       tier.themeColor === 'silver' ? 'text-slate-700' :
-                      tier.themeColor === 'gold' ? 'text-amber-700' :
-                      tier.themeColor === 'platinum' ? 'text-purple-700' :
-                      'text-amber-700'
+                      tier.themeColor === 'gold' ? 'text-[#B99246]' :
+                      tier.themeColor === 'platinum' ? 'text-[#B99246]' :
+                      'text-[#B99246]'
                     : isCompleted ? 'text-stone-800' : 'text-stone-400'
                 }`}>
                   {tier.name}
@@ -270,10 +268,10 @@ export default function InvestmentJourney({ metrics, progress }) {
         <div className="text-[11px] font-futura tracking-wider text-stone-500">
           {nextTierObj ? (
             <span>
-              Progress to <strong className="text-amber-600 font-bold uppercase tracking-widest">{nextTierObj.name}</strong>
+              Progress to <strong className="text-[#B99246] font-bold uppercase tracking-widest">{nextTierObj.name}</strong>
             </span>
           ) : (
-            <span className="text-purple-700 font-semibold uppercase tracking-widest">
+            <span className="text-[#B99246] font-semibold uppercase tracking-widest">
               Pinnacle Tier Reached 👑
             </span>
           )}

@@ -103,7 +103,12 @@ const updateCartItem = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Forbidden: You do not own this cart item' });
     }
 
-    cartItem.quantity = quantity;
+    if (quantity <= 0) {
+      await cartItem.destroy();
+      return res.json({ success: true, message: 'Item removed from cart' });
+    }
+
+    cartItem.quantity = Math.max(1, parseInt(quantity, 10) || 1);
     await cartItem.save();
 
     res.json({ success: true, cartItem });

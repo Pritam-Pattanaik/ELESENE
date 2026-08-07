@@ -1,9 +1,5 @@
 import { getCustomerToken, getAdminToken } from './authHelper';
-
-const rawApiUrl = import.meta.env.VITE_API_URL || '';
-const API = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
-  ? rawApiUrl
-  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+import { API_URL as API } from './config';
 
 const getCustomerHeaders = () => {
   const token = getCustomerToken();

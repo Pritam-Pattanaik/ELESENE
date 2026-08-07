@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-require('../config/env')
+require('../config/env');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'elesene_dev_secret';
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET || '';
@@ -145,13 +145,17 @@ const protect = async (req, res, next) => {
 const optionalProtect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
+      let isSuccess = false;
       const dummyRes = {
         status: () => dummyRes,
         json: () => dummyRes
       };
-      await protect(req, dummyRes, () => {});
+      await protect(req, dummyRes, () => { isSuccess = true; });
+      if (!isSuccess) {
+        req.user = undefined;
+      }
     } catch {
-      // Ignore errors for optional auth
+      req.user = undefined;
     }
   }
   next();

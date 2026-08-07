@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowUpRight, ShoppingBag, Star, Share2, UserCheck, RefreshCw, Gift } from 'lucide-react';
 
 const SOURCE_ICONS = {

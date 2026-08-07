@@ -199,5 +199,21 @@
 
     <script type="module" src="/src/main.jsx"></script>
 
+    <!-- Safety fallback: Ensure initial preloader never hangs indefinitely on mobile browsers -->
+    <script>
+      (function() {
+        setTimeout(function() {
+          var loader = document.getElementById('initial-loader');
+          if (loader && !loader.classList.contains('fade-out')) {
+            loader.classList.add('fade-out');
+            setTimeout(function() {
+              if (loader && loader.parentNode) {
+                loader.parentNode.removeChild(loader);
+              }
+            }, 800);
+          }
+        }, 3500);
+      })();
+    </script>
   </body>
 </html>

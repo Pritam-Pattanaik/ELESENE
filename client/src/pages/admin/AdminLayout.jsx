@@ -21,10 +21,11 @@
  */
 
 import { Outlet, NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useAuthStore from '../../store/authStore';
 import { getAdminToken } from '../../api/authHelper';
 import { updateAdminProfile } from '../../api/admin';
+import { API_URL } from '../../api/config';
 import './admin.css';
 
 // ─── 1. IMPORTS & COMPONENT ICONS ───────────────────────────────────────────
@@ -54,17 +55,11 @@ const SidebarIcon = ({ name }) => {
 
 // ─── 2. LAYOUT ROUTE CONTROLLER & SIDEBAR SCHEMAS ────────────────────────────
 const AdminLayout = () => {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, updateUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const rawApiUrl = import.meta.env.VITE_API_URL || '';
-  const API_URL = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
-    ? rawApiUrl
-    : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
-
-  const { updateUser } = useAuthStore();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [profilePicture, setProfilePicture] = useState(user?.profile_picture || '');
@@ -77,12 +72,15 @@ const AdminLayout = () => {
 
   useEffect(() => {
     if (user) {
-      setFullName(user.full_name || '');
-      setProfilePicture(user.profile_picture || '');
+      const timer = setTimeout(() => {
+        if (user.full_name && user.full_name !== fullName) setFullName(user.full_name);
+        if (user.profile_picture && user.profile_picture !== profilePicture) setProfilePicture(user.profile_picture);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [user]);
+  }, [user, fullName, profilePicture]);
 
-  const fetchNotificationsList = async () => {
+  const fetchNotificationsList = useCallback(async () => {
     try {
       const token = getAdminToken();
       if (!token) return;
@@ -100,15 +98,15 @@ const AdminLayout = () => {
     } catch (err) {
       console.error('Failed to fetch admin notifications:', err);
     }
-  };
+  }, [API_URL]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchNotificationsList();
+      const timer = setTimeout(() => fetchNotificationsList(), 0);
       const interval = setInterval(fetchNotificationsList, 30000);
-      return () => clearInterval(interval);
+      return () => { clearTimeout(timer); clearInterval(interval); };
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchNotificationsList]);
 
   const handleMarkRead = async (id) => {
     try {

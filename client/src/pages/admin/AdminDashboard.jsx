@@ -28,10 +28,8 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import { useDashboard } from '../../api/admin';
 import AdminDashboardSkeleton from '../../components/admin/AdminSkeleton';
+import { formatCurrency } from '../../utils/currency';
 import './admin.css';
-
-// ─── 1. HELPERS & FORMATTERS ────────────────────────────────────────────────
-const formatCurrency = (v) => `₹${Number(v || 0).toLocaleString('en-IN')}`;
 
 // ─── 2. SUB-COMPONENTS ───────────────────────────────────────────────────────
 

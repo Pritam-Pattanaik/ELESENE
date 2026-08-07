@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useAdminProducts, useAdminCategories, useCreateProduct, useUpdateProduct, useDeleteProduct, createVariant, updateVariant } from '../../api/admin';
 import { uploadProductImages, deleteProductImage } from '../../api/admin';
 import { useQueryClient } from '@tanstack/react-query';

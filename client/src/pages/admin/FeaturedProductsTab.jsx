@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getAdminToken } from '../../api/authHelper';
 import { getImageUrl } from '../../utils/imageUrl';
+import { API_URL } from '../../api/config';
 
 const FeaturedProductsTab = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
   useEffect(() => {
     let mounted = true;

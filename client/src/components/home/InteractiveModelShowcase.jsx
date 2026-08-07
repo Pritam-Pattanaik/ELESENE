@@ -37,48 +37,64 @@ const ModelCard = ({
   const animFrameRef = useRef(null);
   const lastFeatureIdxRef = useRef(0);
 
-  // Preload frames in idle chunks to prevent main-thread freezing
+  // Preload frames in idle chunks — load frame 1 immediately for instant display
   useEffect(() => {
     let active = true;
-    let loaded = 0;
     const images = [];
 
-    const loadBatch = (startIndex) => {
-      if (!active) return;
-      const batchSize = 10;
-      const endIndex = Math.min(startIndex + batchSize, totalFrames);
-
-      for (let i = startIndex + 1; i <= endIndex; i++) {
+    const loadSingleImage = (index) => {
+      return new Promise((resolve) => {
         const img = new Image();
-        const num = String(i).padStart(3, '0');
+        const num = String(index + 1).padStart(3, '0');
         img.src = `${framePath}${num}.jpg`;
         img.onload = img.onerror = () => {
-          if (!active) return;
-          loaded++;
-          if (loaded >= totalFrames) setImagesLoaded(true);
+          images[index] = img;
+          resolve(img);
         };
-        images[i - 1] = img;
-      }
-
-      if (endIndex < totalFrames) {
-        setTimeout(() => loadBatch(endIndex), 30);
-      }
+      });
     };
 
-    loadBatch(0);
+    // Load first image immediately for instant card presentation
+    loadSingleImage(0).then(() => {
+      if (!active) return;
+      setImagesLoaded(true);
+
+      // Load rest of frames progressively in idle time
+      let idx = 1;
+      const loadChunk = () => {
+        if (!active || idx >= totalFrames) return;
+        const batch = [];
+        for (let b = 0; b < 10 && idx < totalFrames; b++, idx++) {
+          batch.push(loadSingleImage(idx));
+        }
+        Promise.all(batch).then(() => {
+          if (active && idx < totalFrames) setTimeout(loadChunk, 25);
+        });
+      };
+      loadChunk();
+    });
+
     imagesRef.current = images;
     return () => { active = false; };
   }, [totalFrames, framePath]);
 
-  // High-performance direct canvas draw (No React state re-render needed!)
+  // High-performance direct canvas draw with nearest frame fallback & direct progress bar DOM update
   const renderCanvasFrame = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !imagesRef.current[currentFrameRef.current]) return;
+    if (!canvas) return;
+
+    let img = imagesRef.current[currentFrameRef.current];
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      for (let offset = 1; offset < 20; offset++) {
+        const prev = imagesRef.current[currentFrameRef.current - offset];
+        if (prev && prev.complete && prev.naturalWidth > 0) { img = prev; break; }
+        const next = imagesRef.current[currentFrameRef.current + offset];
+        if (next && next.complete && next.naturalWidth > 0) { img = next; break; }
+      }
+    }
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
     const ctx = canvas.getContext('2d');
-    const img = imagesRef.current[currentFrameRef.current];
-
-    if (!img.complete || img.naturalWidth === 0) return;
-
     if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
@@ -86,7 +102,11 @@ const ModelCard = ({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
-  }, []);
+
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${((currentFrameRef.current + 1) / totalFrames) * 100}%`;
+    }
+  }, [totalFrames]);
 
   // Draw initial frame once loaded
   useEffect(() => {
@@ -136,13 +156,6 @@ const ModelCard = ({
   };
 
   const progressBarRef = useRef(null);
-
-  // Update progress bar width directly on DOM
-  useEffect(() => {
-    if (progressBarRef.current) {
-      progressBarRef.current.style.width = `${((currentFrameRef.current + 1) / totalFrames) * 100}%`;
-    }
-  });
 
   return (
     <div 

@@ -11,6 +11,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        globIgnores: ['**/*.html', 'index.html']
+      },
       manifest: {
         name: 'ELESENE',
         short_name: 'LUXE',
@@ -34,6 +40,8 @@ export default defineConfig({
     })
   ],
   build: {
+    target: 'es2020',
+    cssCodeSplit: true,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {

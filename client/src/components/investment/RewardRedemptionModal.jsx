@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Gift, Truck, Ticket, CheckCircle, AlertCircle, Copy } from 'lucide-react';
 import { redeemPoints } from '../../api/loyalty';

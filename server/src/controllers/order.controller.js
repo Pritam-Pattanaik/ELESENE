@@ -4,30 +4,8 @@ const { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } = 
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
-// Helper to complete order payment and clear cart
-const completeOrderPayment = async (order, paymentId) => {
-  if (order.payment_status === 'paid') return;
+const { completeOrderPayment, handlePaymentFailure } = require('./payment.controller');
 
-  order.payment_status = 'paid';
-  order.status = 'confirmed';
-  order.razorpay_payment_id = paymentId;
-  await order.save();
-
-  // Increment coupon usage count if a coupon was used
-  if (order.coupon_id) {
-    const coupon = await Coupon.findByPk(order.coupon_id);
-    if (coupon) {
-      coupon.usage_count = (coupon.usage_count || 0) + 1;
-      await coupon.save();
-    }
-  }
-
-  // Clear user cart
-  const cart = await Cart.findOne({ where: { user_id: order.user_id } });
-  if (cart) {
-    await CartItem.destroy({ where: { cart_id: cart.id } });
-  }
-};
 
 // @desc    Initiate checkout & create Razorpay order inside DB transaction with pessimistic stock locking
 // @route   POST /api/orders/initiate
@@ -336,6 +314,16 @@ const handleRazorpayWebhook = async (req, res) => {
         if (order) {
           await completeOrderPayment(order, razorpay_payment_id);
           console.log(`Order ${order.order_number} successfully fulfilled via Webhook.`);
+        }
+      }
+    } else if (event === 'payment.failed') {
+      const paymentEntity = eventData.payload?.payment?.entity;
+      const razorpay_order_id = paymentEntity?.order_id;
+      if (razorpay_order_id) {
+        const order = await Order.findOne({ where: { razorpay_order_id } });
+        if (order) {
+          await handlePaymentFailure(order, paymentEntity?.error_description || 'Payment failed');
+          console.log(`Order ${order.order_number} marked failed via Webhook.`);
         }
       }
     }

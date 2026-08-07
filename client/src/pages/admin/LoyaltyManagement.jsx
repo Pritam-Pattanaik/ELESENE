@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getAdminLoyaltyStats,
   getAdminLoyaltyUsers,
@@ -7,7 +7,7 @@ import {
   adjustUserInvestmentPoints,
   getAILoyaltySummary,
 } from '../../api/loyalty';
-import { Sparkles, Trophy, Users, RefreshCw, Search, ShieldAlert, Award, TrendingUp, Sliders, CheckCircle } from 'lucide-react';
+import { Sparkles, Trophy, RefreshCw, Search, Award, CheckCircle } from 'lucide-react';
 
 const LoyaltyManagement = () => {
   const [stats, setStats] = useState(null);
@@ -36,8 +36,8 @@ const LoyaltyManagement = () => {
   const [aiSummary, setAiSummary] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const [statsRes, analyticsRes, usersRes] = await Promise.all([
@@ -56,11 +56,12 @@ const LoyaltyManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, tierFilter, page]);
 
   useEffect(() => {
-    loadData();
-  }, [page, tierFilter]);
+    const timer = setTimeout(() => loadData(false), 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -156,6 +157,12 @@ const LoyaltyManagement = () => {
           <span>{aiLoading ? 'Analyzing...' : 'Generate AI Report'}</span>
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
+          {error}
+        </div>
+      )}
 
       {/* AI Summary Box */}
       {aiSummary && (
@@ -288,9 +295,18 @@ const LoyaltyManagement = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
           <div className="w-full max-w-lg rounded-2xl border border-white/15 bg-neutral-950 p-6 shadow-2xl text-white">
             <h3 className="text-lg font-light text-white mb-2">Adjust Investment Standing</h3>
-            <p className="text-xs text-neutral-400 mb-4">
+            <p className="text-xs text-neutral-400 mb-2">
               Customer: <strong className="text-white">{selectedUser.full_name}</strong> ({selectedUser.email})
             </p>
+
+            {modalLoading ? (
+              <p className="text-xs text-amber-400/80 mb-4 animate-pulse">Loading live account balance...</p>
+            ) : userProfile ? (
+              <div className="mb-4 flex gap-4 text-xs font-mono bg-neutral-900/60 p-2.5 rounded-xl border border-white/10">
+                <span className="text-amber-400">Current IP: {(userProfile.investment_points || userProfile.loyalty_points || 0).toLocaleString()}</span>
+                <span className="text-emerald-400">Current LP: {(userProfile.loyalty_points || 0).toLocaleString()}</span>
+              </div>
+            ) : null}
 
             {adjustSuccess && (
               <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-950/50 p-3 text-xs text-emerald-300 border border-emerald-800/40">

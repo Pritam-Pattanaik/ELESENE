@@ -3,6 +3,7 @@ import { useAdminOrders, useUpdateOrderStatus } from '../../api/admin';
 import { updateOrderTracking } from '../../api/admin';
 import { useQueryClient } from '@tanstack/react-query';
 import { AdminTableSkeleton } from '../../components/admin/AdminSkeleton';
+import { formatCurrency } from '../../utils/currency';
 
 const statusColors = { pending: 'orange', confirmed: 'blue', processing: 'blue', shipped: 'purple', delivered: 'green', cancelled: 'red', returned: 'red' };
 const paymentColors = { pending: 'orange', paid: 'green', failed: 'red', refunded: 'purple' };
@@ -36,10 +37,10 @@ const OrderDetail = ({ order, onClose }) => {
           <div className="admin-detail-grid" style={{ marginBottom: 20 }}>
             <div className="admin-detail-item"><label>Customer</label><span>{order.User?.full_name || '—'}</span></div>
             <div className="admin-detail-item"><label>Email</label><span>{order.User?.email || '—'}</span></div>
-            <div className="admin-detail-item"><label>Subtotal</label><span>₹{order.subtotal}</span></div>
-            <div className="admin-detail-item"><label>Shipping</label><span>₹{order.shipping_amount}</span></div>
-            <div className="admin-detail-item"><label>Tax</label><span>₹{order.tax_amount}</span></div>
-            <div className="admin-detail-item"><label>Total</label><span style={{ fontWeight: 700, color: 'var(--admin-gold)' }}>₹{order.total_amount}</span></div>
+            <div className="admin-detail-item"><label>Subtotal</label><span>{formatCurrency(order.subtotal, { context: 'Admin Order Subtotal' })}</span></div>
+            <div className="admin-detail-item"><label>Shipping</label><span>{formatCurrency(order.shipping_amount ?? order.shippingAmount, { context: 'Admin Order Shipping' })}</span></div>
+            <div className="admin-detail-item"><label>Tax</label><span>{formatCurrency(order.tax_amount ?? order.taxAmount, { context: 'Admin Order Tax' })}</span></div>
+            <div className="admin-detail-item"><label>Total</label><span style={{ fontWeight: 700, color: 'var(--admin-gold)' }}>{formatCurrency(order.total_amount ?? order.totalAmount ?? order.grandTotal, { context: 'Admin Order Total' })}</span></div>
             <div className="admin-detail-item"><label>Payment</label><span className={`admin-badge admin-badge-${paymentColors[order.payment_status] || 'gray'}`}>{order.payment_status}</span></div>
             <div className="admin-detail-item"><label>Date</label><span>{new Date(order.created_at).toLocaleDateString('en-IN')}</span></div>
           </div>
@@ -68,8 +69,8 @@ const OrderDetail = ({ order, onClose }) => {
                   <tr key={item.id}>
                     <td className="primary-cell">{item.Product?.name || item.product_snapshot?.name || '—'}</td>
                     <td>{item.quantity}</td>
-                    <td>₹{item.unit_price}</td>
-                    <td className="primary-cell">₹{item.total_price}</td>
+                    <td>{formatCurrency(item.unit_price ?? item.price, { context: 'Admin Item Unit Price' })}</td>
+                    <td className="primary-cell">{formatCurrency(item.total_price ?? item.totalPrice, { context: 'Admin Item Total Price' })}</td>
                   </tr>
                 ))}
               </tbody>
@@ -119,7 +120,7 @@ const OrderManagement = () => {
                   <td className="primary-cell">{o.order_number}</td>
                   <td>{o.User?.full_name || o.User?.email || '—'}</td>
                   <td>{o.OrderItems?.length || 0}</td>
-                  <td className="primary-cell">₹{o.total_amount}</td>
+                  <td className="primary-cell">{formatCurrency(o.total_amount ?? o.totalAmount ?? o.grandTotal, { context: 'Admin Table Order Total' })}</td>
                   <td><span className={`admin-badge admin-badge-${statusColors[o.status] || 'gray'}`}>{o.status}</span></td>
                   <td><span className={`admin-badge admin-badge-${paymentColors[o.payment_status] || 'gray'}`}>{o.payment_status}</span></td>
                   <td>{new Date(o.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</td>

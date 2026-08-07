@@ -1,11 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import useAuthStore from '../store/authStore';
 import { getAdminToken } from './authHelper';
-
-const rawApiUrl = import.meta.env.VITE_API_URL || '';
-const API_URL = (rawApiUrl && !rawApiUrl.includes('REPLACE_WITH') && (!rawApiUrl.includes('localhost') || import.meta.env.DEV))
-  ? rawApiUrl
-  : (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+import { API_URL } from './config';
 
 const buildQueryString = (params = {}) => {
   const cleanParams = {};

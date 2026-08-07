@@ -19,41 +19,58 @@ import {
   CheckoutSkeleton,
 } from './components/common/Skeleton';
 
+// Robust lazy loading with automatic chunk load failure recovery (e.g. mobile network drops or new deployment deployment hash shifts)
+const lazyWithRetry = (componentImport) =>
+  lazy(async () => {
+    const pageHasAlreadyBeenReloaded = sessionStorage.getItem('elesene_chunk_reloaded');
+    try {
+      const component = await componentImport();
+      sessionStorage.removeItem('elesene_chunk_reloaded');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenReloaded) {
+        sessionStorage.setItem('elesene_chunk_reloaded', 'true');
+        window.location.reload();
+        return new Promise(() => {}); // Pause while page reloads
+      }
+      throw error;
+    }
+  });
+
 // Public Routes
-const HomePage = lazy(() => import('./pages/home/HomePage'));
-const ShopPage = lazy(() => import('./pages/shop/ShopPage'));
-const LookbookPage = lazy(() => import('./pages/lookbook/LookbookPage'));
-const AboutPage = lazy(() => import('./pages/about/AboutPage'));
-const ContactPage = lazy(() => import('./pages/contact/ContactPage'));
-const ProductDetailPage = lazy(() => import('./pages/product/ProductDetailPage'));
-const CheckoutPage = lazy(() => import('./pages/checkout/CheckoutPage'));
-const AuthPage = lazy(() => import('./pages/auth/AuthPage'));
-const NotFoundPage = lazy(() => import('./pages/common/NotFoundPage'));
+const HomePage = lazyWithRetry(() => import('./pages/home/HomePage'));
+const ShopPage = lazyWithRetry(() => import('./pages/shop/ShopPage'));
+const LookbookPage = lazyWithRetry(() => import('./pages/lookbook/LookbookPage'));
+const AboutPage = lazyWithRetry(() => import('./pages/about/AboutPage'));
+const ContactPage = lazyWithRetry(() => import('./pages/contact/ContactPage'));
+const ProductDetailPage = lazyWithRetry(() => import('./pages/product/ProductDetailPage'));
+const CheckoutPage = lazyWithRetry(() => import('./pages/checkout/CheckoutPage'));
+const AuthPage = lazyWithRetry(() => import('./pages/auth/AuthPage'));
+const NotFoundPage = lazyWithRetry(() => import('./pages/common/NotFoundPage'));
 
 // Lazy Loaded Account Pages
-const AccountLayout = lazy(() => import('./pages/account/AccountLayout'));
-const ProfilePage = lazy(() => import('./pages/account/ProfilePage'));
-const OrdersPage = lazy(() => import('./pages/account/OrdersPage'));
-const AddressesPage = lazy(() => import('./pages/account/AddressesPage'));
-const WishlistPage = lazy(() => import('./pages/account/WishlistPage'));
-const PaymentMethodsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.PaymentMethodsTab })));
-const RewardsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.RewardsTab })));
-const LoyaltyPage = lazy(() => import('./pages/account/LoyaltyPage'));
-const AccountSettingsTab = lazy(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.AccountSettingsTab })));
-const NotificationsPage = lazy(() => import('./pages/account/NotificationsPage'));
+const AccountLayout = lazyWithRetry(() => import('./pages/account/AccountLayout'));
+const ProfilePage = lazyWithRetry(() => import('./pages/account/ProfilePage'));
+const OrdersPage = lazyWithRetry(() => import('./pages/account/OrdersPage'));
+const AddressesPage = lazyWithRetry(() => import('./pages/account/AddressesPage'));
+const WishlistPage = lazyWithRetry(() => import('./pages/account/WishlistPage'));
+const PaymentMethodsTab = lazyWithRetry(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.PaymentMethodsTab })));
+const LoyaltyPage = lazyWithRetry(() => import('./pages/account/LoyaltyPage'));
+const AccountSettingsTab = lazyWithRetry(() => import('./pages/account/DashboardTabs').then(m => ({ default: m.AccountSettingsTab })));
+const NotificationsPage = lazyWithRetry(() => import('./pages/account/NotificationsPage'));
 
 // Lazy Loaded Admin Pages
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const ProductManagement = lazy(() => import('./pages/admin/ProductManagement'));
-const CategoryManagement = lazy(() => import('./pages/admin/CategoryManagement'));
-const OrderManagement = lazy(() => import('./pages/admin/OrderManagement'));
-const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
-const CouponManagement = lazy(() => import('./pages/admin/CouponManagement'));
-const FeaturedProductsTab = lazy(() => import('./pages/admin/FeaturedProductsTab'));
-const LoyaltyManagement = lazy(() => import('./pages/admin/LoyaltyManagement'));
-const FlaggedAccounts = lazy(() => import('./pages/admin/FlaggedAccounts'));
+const AdminLogin = lazyWithRetry(() => import('./pages/admin/AdminLogin'));
+const AdminLayout = lazyWithRetry(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/admin/AdminDashboard'));
+const ProductManagement = lazyWithRetry(() => import('./pages/admin/ProductManagement'));
+const CategoryManagement = lazyWithRetry(() => import('./pages/admin/CategoryManagement'));
+const OrderManagement = lazyWithRetry(() => import('./pages/admin/OrderManagement'));
+const UserManagement = lazyWithRetry(() => import('./pages/admin/UserManagement'));
+const CouponManagement = lazyWithRetry(() => import('./pages/admin/CouponManagement'));
+const FeaturedProductsTab = lazyWithRetry(() => import('./pages/admin/FeaturedProductsTab'));
+const LoyaltyManagement = lazyWithRetry(() => import('./pages/admin/LoyaltyManagement'));
+const FlaggedAccounts = lazyWithRetry(() => import('./pages/admin/FlaggedAccounts'));
 
 
 const queryClient = new QueryClient({
@@ -76,11 +93,13 @@ const AppBootstrapper = ({ children }) => {
       // Trigger curtain split reveal after initial mount
       const fadeTimer = setTimeout(() => {
         loader.classList.add('fade-out');
-      }, 300);
+      }, 150);
 
       const removeTimer = setTimeout(() => {
-        loader.remove();
-      }, 1100);
+        if (loader && loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }, 900);
 
       return () => {
         clearTimeout(fadeTimer);

@@ -10,6 +10,8 @@ import SEO from '../../components/layout/SEO';
 import EmptyState from '../../components/common/EmptyState';
 import { AddressSkeletonGrid } from '../../components/common/Skeleton';
 import { getImageUrl } from '../../utils/imageUrl';
+import { formatCurrency } from '../../utils/currency';
+
 import useFormValidation from '../../hooks/useFormValidation';
 import CelebrationModal from '../../components/investment/CelebrationModal';
 
@@ -529,7 +531,7 @@ const CheckoutPage = () => {
                       className="w-full py-4 bg-ivory hover:bg-gold text-white hover:text-noir font-futura font-bold rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300 flex justify-center items-center gap-2 text-xs uppercase tracking-widest disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold select-none"
                       style={{ minHeight: '52px' }}
                     >
-                  {loading ? 'Processing Transaction...' : `Pay ₹${total.toLocaleString()} securely with Razorpay`}
+                  {loading ? 'Processing Transaction...' : `Pay ${formatCurrency(total, { context: 'Checkout Payment Button' })} securely with Razorpay`}
                 </button>
                 <button 
                   onClick={() => setStep(1)} 
@@ -551,6 +553,9 @@ const CheckoutPage = () => {
               {items.map(item => {
                 const primaryImage = item.Product?.images?.[0]?.image_url || '';
                 const imageUrl = getImageUrl(primaryImage);
+                const itemTotalPrice = (item.ProductVariant?.additional_price 
+                  ? Number(item.Product.base_price) + Number(item.ProductVariant.additional_price)
+                  : Number(item.Product.base_price)) * item.quantity;
                 
                 return (
                   <div key={item.id} className="flex gap-4 items-center">
@@ -569,9 +574,7 @@ const CheckoutPage = () => {
                       <p className="text-ivory/70 font-medium">Qty: {item.quantity}</p>
                     </div>
                     <span className="text-xs font-futura text-ivory/80 font-bold">
-                      ₹{((item.ProductVariant?.additional_price 
-                        ? Number(item.Product.base_price) + Number(item.ProductVariant.additional_price)
-                        : Number(item.Product.base_price)) * item.quantity).toLocaleString()}
+                      {formatCurrency(itemTotalPrice, { context: 'Checkout Item Summary' })}
                     </span>
                   </div>
                 );
@@ -607,7 +610,7 @@ const CheckoutPage = () => {
                   <div>
                     <span className="text-xs font-futura font-bold text-gold-light tracking-wider uppercase block">{appliedCoupon.code}</span>
                     <span className="text-[10px] text-green-600 font-futura font-bold">
-                      Saved ₹{discountAmount.toLocaleString()}
+                      Saved {formatCurrency(discountAmount, { context: 'Checkout Coupon Savings' })}
                     </span>
                   </div>
                   <button
@@ -626,30 +629,30 @@ const CheckoutPage = () => {
             <div className="space-y-3 text-xs font-futura">
               <div className="flex justify-between text-ivory/70">
                 <span>Subtotal</span>
-                <span className="text-ivory font-bold">₹{subtotal.toLocaleString()}</span>
+                <span className="text-ivory font-bold">{formatCurrency(subtotal, { context: 'Checkout Subtotal' })}</span>
               </div>
 
               {discountAmount > 0 && (
                 <div className="flex justify-between text-green-600 font-bold">
                   <span>Discount ({appliedCoupon?.code})</span>
-                  <span>- ₹{discountAmount.toLocaleString()}</span>
+                  <span>- {formatCurrency(discountAmount, { context: 'Checkout Discount' })}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-ivory/70">
                 <span>Shipping</span>
-                <span className="text-ivory font-bold">{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+                <span className="text-ivory font-bold">{shipping === 0 ? 'Free' : formatCurrency(shipping, { context: 'Checkout Shipping' })}</span>
               </div>
               
               <div className="flex justify-between text-ivory/70">
                 <span>Estimated Tax (18% GST)</span>
-                <span className="text-ivory font-medium">₹{tax.toLocaleString()}</span>
+                <span className="text-ivory font-medium">{formatCurrency(tax, { context: 'Checkout Tax' })}</span>
               </div>
             </div>
 
             <div className="flex justify-between text-base font-display font-bold uppercase tracking-wider text-ivory pt-4 mt-4 border-t border-black/5">
               <span>Total</span>
-              <span className="text-gold">₹{total.toLocaleString()}</span>
+              <span className="text-gold">{formatCurrency(total, { context: 'Checkout Grand Total' })}</span>
             </div>
 
             {/* BRAND INVESTMENT CHECKOUT SUMMARY WIDGET */}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Award, Zap, ChevronRight } from 'lucide-react';
 
@@ -39,11 +38,11 @@ const TIER_THEMES = {
     badge: 'bg-cyan-100 text-cyan-900 border-cyan-300',
   },
   Diamond: {
-    bg: 'from-purple-50 via-indigo-50/40 to-white',
-    accent: 'from-indigo-400 to-purple-600',
-    border: 'border-purple-200',
-    text: 'text-purple-700',
-    badge: 'bg-purple-100 text-purple-900 border-purple-300',
+    bg: 'from-amber-100/60 via-amber-50 to-white',
+    accent: 'from-[#B99246] to-[#D4AF6A]',
+    border: 'border-[#B99246]/30',
+    text: 'text-[#B99246]',
+    badge: 'bg-[#B99246]/15 text-[#B99246] border-[#B99246]/40',
   },
 };
 
@@ -60,7 +59,7 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
   const nextTier = progress?.nextTier;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-stone-200/90 bg-white p-6 md:p-8 shadow-sm text-stone-900">
+    <div className="relative overflow-hidden rounded-2xl border border-[#E8E5DF] bg-white p-6 md:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-[#141414]">
       {/* Subtle Background Accent Mesh */}
       <div className={`absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br ${theme.accent} opacity-15 blur-3xl`} />
 
@@ -72,13 +71,13 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
               <Award className="h-4 w-4" />
               {tierName} Tier
             </span>
-            <span className="text-xs text-stone-500 uppercase tracking-widest font-mono font-semibold">
+            <span className="text-xs text-[#6F6F6F] uppercase tracking-widest font-mono font-semibold">
               ELESENE INVESTMENT LEVEL {metrics?.investmentLevel || 1}
             </span>
           </div>
 
-          <div className="rounded-lg bg-stone-100 border border-stone-200 px-3 py-1.5 text-[11px] text-stone-700 font-medium flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+          <div className="rounded-lg bg-[#FAF9F7] border border-[#E8E5DF] px-3 py-1.5 text-[11px] text-[#141414] font-medium flex items-center gap-1.5">
+            <ShieldCheck className="h-4 w-4 text-[#2E8B57] shrink-0" />
             <span>Lifetime Brand Standing</span>
           </div>
         </div>
@@ -87,36 +86,36 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
           {/* Lifetime Investment */}
           <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">Total Lifetime Investment</span>
-            <span className="text-3xl font-light tracking-tight text-stone-900 mt-1 font-mono">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#6F6F6F]">Total Lifetime Investment</span>
+            <span className="text-3xl font-light tracking-tight text-[#141414] mt-1 font-mono">
               ₹{Number(lifetime).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
             </span>
-            <span className="text-[11px] text-stone-400 mt-1">Lifetime Brand Purchase & Engagement Contribution</span>
+            <span className="text-[11px] text-[#909090] mt-1">Lifetime Brand Purchase & Engagement Contribution</span>
           </div>
 
           {/* Investment Points */}
-          <div className="flex flex-col border-t md:border-t-0 md:border-l border-stone-200/80 pt-4 md:pt-0 md:pl-6">
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-amber-500" />
+          <div className="flex flex-col border-t md:border-t-0 md:border-l border-[#EFECE7] pt-4 md:pt-0 md:pl-6">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#6F6F6F] flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-[#B99246]" />
               Investment Points (IP)
             </span>
             <span className={`text-3xl font-light tracking-tight mt-1 font-mono ${theme.text}`}>
               {ip.toLocaleString()} IP
             </span>
-            <span className="text-[11px] text-stone-400 mt-1">Never expires • Determines Tier</span>
+            <span className="text-[11px] text-[#909090] mt-1">Never expires • Determines Tier</span>
           </div>
 
           {/* Spendable Loyalty Points */}
-          <div className="flex flex-col border-t md:border-t-0 md:border-l border-stone-200/80 pt-4 md:pt-0 md:pl-6 justify-between">
+          <div className="flex flex-col border-t md:border-t-0 md:border-l border-[#EFECE7] pt-4 md:pt-0 md:pl-6 justify-between">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">Spendable Loyalty Points (LP)</span>
-              <span className="text-3xl font-light tracking-tight text-emerald-600 mt-1 block font-mono">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#6F6F6F]">Spendable Loyalty Points (LP)</span>
+              <span className="text-3xl font-light tracking-tight text-[#2E8B57] mt-1 block font-mono">
                 {lp.toLocaleString()} LP
               </span>
             </div>
             <button
               onClick={onRedeemClick}
-              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#141414] hover:bg-[#B99246] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer uppercase tracking-wider font-futura"
             >
               <span>Redeem Rewards</span>
               <ChevronRight className="h-3.5 w-3.5" />
@@ -126,16 +125,16 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
 
         {/* Progress Bar to Next Tier */}
         {nextTier ? (
-          <div className="mt-2 flex flex-col gap-2 rounded-xl bg-stone-50 p-4 border border-stone-200/80">
+          <div className="mt-2 flex flex-col gap-2 rounded-xl bg-[#FAF9F7] p-4 border border-[#E8E5DF]">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-stone-800 font-semibold">
+              <span className="text-[#141414] font-semibold">
                 Progress to <span className={theme.text}>{nextTier}</span> Tier
               </span>
-              <span className="text-stone-500 font-mono font-medium">
+              <span className="text-[#6F6F6F] font-mono font-medium">
                 {pointsToNext.toLocaleString()} IP Remaining ({progressPct}%)
               </span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-stone-200 p-0.5 border border-stone-300/60">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#EFECE7] p-0.5 border border-[#E8E5DF]">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
@@ -145,8 +144,8 @@ export default function InvestmentTierCard({ metrics, progress, onRedeemClick })
             </div>
           </div>
         ) : (
-          <div className="mt-2 rounded-xl bg-purple-50 p-3 border border-purple-200 text-center text-xs text-purple-900 font-medium">
-            👑 You have reached the pinnacle <span className="font-bold">{tierName} Tier</span> status! Enjoy executive brand privileges.
+          <div className="mt-2 rounded-xl bg-[#B99246]/10 p-3 border border-[#B99246]/30 text-center text-xs text-[#141414] font-medium">
+            👑 You have reached the pinnacle <span className="font-bold text-[#B99246]">{tierName} Tier</span> status! Enjoy executive brand privileges.
           </div>
         )}
 

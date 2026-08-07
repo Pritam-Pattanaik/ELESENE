@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-noir: #FAF9F6;
-  --color-ivory: #1C1C1C;
-  --color-gold: #C9A84C;
-  --color-gold-light: #B8963A;
+  --color-noir: #FAF9F7;            /* Application Background */
+  --color-card: #FFFFFF;            /* Primary Card */
+  --color-surface-sec: #F5F4F2;     /* Secondary Surface */
+  --color-surface-soft: #F9F8F6;    /* Soft Surface */
+  --color-border-subtle: #E8E5DF;   /* Border */
+  --color-divider-subtle: #EFECE7;  /* Divider */
+  --color-ivory: #141414;           /* Primary Text */
+  --color-secondary-text: #6F6F6F;  /* Secondary Text */
+  --color-muted: #909090;           /* Muted Text */
+  --color-gold: #B99246;            /* Luxury Gold */
+  --color-gold-light: #C9A84C;
   --color-gold-muted: #B89553;
   --color-gold-dark: #856404;
-  --color-noir-deep: #111111;
-  --color-lavender-light: #FAF5FF;
-  --color-ice-blue: #F0F4FA;
+  --color-noir-deep: #0F0F10;
   --color-accent: #E04000;
-  --color-muted: #666666;
-  --color-glass: rgba(255, 255, 255, 0.55);
-  --color-glass-border: rgba(255, 255, 255, 0.18);
-  --color-glass-dark: rgba(15, 15, 15, 0.55);
-  --color-glass-dark-border: rgba(255, 255, 255, 0.08);
-  --color-rose: #C36E87;
-  --color-slate: #F1F1F5;
-  --color-cream: #FAF9F6;
-  --color-deep-purple: #F5F0FB;
-  --color-cyber-pink: #D6185D;
-  --color-neon-gold: #B8963A;
+  --color-success: #2E8B57;         /* Success Green */
+  --color-danger: #D14343;          /* Danger Red */
+  --color-info: #2F6BFF;            /* Info Blue */
+  --color-hover-surface: #F3F3F3;   /* Hover Surface */
+  --color-glass: rgba(255, 255, 255, 0.70);
+  --color-glass-border: rgba(232, 229, 223, 0.60);
 
   --font-display: 'Playfair Display', 'Georgia', serif;
   --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;

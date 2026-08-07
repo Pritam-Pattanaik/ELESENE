@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getMyInvestmentSummary, getMyInvestmentHistory, engageActivity, askLoyaltyAI } from '../../api/loyalty';
 import InvestmentTierCard from '../../components/investment/InvestmentTierCard';
 import InvestmentTimeline from '../../components/investment/InvestmentTimeline';
 import RewardRedemptionModal from '../../components/investment/RewardRedemptionModal';
 import InvestmentJourney from '../../components/investment/InvestmentJourney';
-import { Sparkles, Trophy, Gift, RefreshCw, Send, Star, Share2, UserCheck } from 'lucide-react';
+import { Sparkles, Trophy, Gift, RefreshCw, Send, Star, Share2, UserCheck, HelpCircle } from 'lucide-react';
 
 const LoyaltyPage = () => {
   const [summary, setSummary] = useState(null);
@@ -23,6 +23,13 @@ const LoyaltyPage = () => {
       text: 'Greetings! I am your ELESENE Investment Concierge. Ask me anything about your lifetime brand standing, tier perks, or reward redemptions.',
     },
   ]);
+
+  const suggestedQuestions = [
+    { label: '💎 Loyalty Points (LP)', query: 'How do I earn and redeem spendable Loyalty Points (LP)?' },
+    { label: '👑 Tier Privileges', query: 'What privileges do I unlock at Gold and Platinum tiers?' },
+    { label: '🚀 Campaign Multipliers', query: 'How do promotional campaign multipliers boost my points?' },
+    { label: '🎁 Voucher Redemption', query: 'How do I redeem my Loyalty Points for reward vouchers?' },
+  ];
 
   const loadData = async (silent = false) => {
     if (!silent) { setLoading(true); setError(null); }
@@ -64,10 +71,9 @@ const LoyaltyPage = () => {
     }
   };
 
-  const handleAskAI = async (e) => {
-    e.preventDefault();
-    if (!aiQuery.trim() || aiLoading) return;
-    const userText = aiQuery.trim();
+  const executeAskAI = async (textToAsk) => {
+    if (!textToAsk.trim() || aiLoading) return;
+    const userText = textToAsk.trim();
     setAiQuery('');
     setChatMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setAiLoading(true);
@@ -79,6 +85,11 @@ const LoyaltyPage = () => {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const handleAskAI = (e) => {
+    e.preventDefault();
+    executeAskAI(aiQuery);
   };
 
   if (loading) {
@@ -106,16 +117,16 @@ const LoyaltyPage = () => {
 
   const engagementActions = [
     { type: 'review',             label: 'Write Product Review', bonus: '+20 IP Bonus',  icon: <Star className="h-4 w-4" />,     color: 'amber'  },
-    { type: 'referral',           label: 'Invite Ambassador',    bonus: '+300 IP Bonus', icon: <UserCheck className="h-4 w-4" />, color: 'purple' },
+    { type: 'referral',           label: 'Invite Ambassador',    bonus: '+300 IP Bonus', icon: <UserCheck className="h-4 w-4" />, color: 'gold'   },
     { type: 'profile_completion', label: 'Complete Persona',     bonus: '+50 IP Bonus',  icon: <UserCheck className="h-4 w-4" />, color: 'cyan'   },
     { type: 'social_share',       label: 'Social Media Share',   bonus: '+25 IP Bonus',  icon: <Share2 className="h-4 w-4" />,    color: 'blue'   },
   ];
 
   const colorMap = {
-    amber:  { ring: 'hover:border-amber-500/40',  bg: 'bg-amber-500/15',  text: 'text-amber-400'  },
-    purple: { ring: 'hover:border-purple-500/40', bg: 'bg-purple-500/15', text: 'text-purple-400' },
-    cyan:   { ring: 'hover:border-cyan-500/40',   bg: 'bg-cyan-500/15',   text: 'text-cyan-400'   },
-    blue:   { ring: 'hover:border-blue-500/40',   bg: 'bg-blue-500/15',   text: 'text-blue-400'   },
+    amber:  { ring: 'hover:border-[#B99246]/40',  bg: 'bg-[#B99246]/10',  text: 'text-[#B99246]' },
+    gold:   { ring: 'hover:border-[#B99246]/40',  bg: 'bg-[#B99246]/15',  text: 'text-[#B99246]' },
+    cyan:   { ring: 'hover:border-cyan-500/40',   bg: 'bg-cyan-500/15',   text: 'text-cyan-600'  },
+    blue:   { ring: 'hover:border-[#2F6BFF]/40',  bg: 'bg-[#2F6BFF]/10',  text: 'text-[#2F6BFF]' },
   };
 
   return (
@@ -129,7 +140,7 @@ const LoyaltyPage = () => {
             ELESENE Brand Investment Dashboard
           </h1>
           <p className="text-[11px] text-stone-500 mt-1.5 font-futura italic leading-relaxed">
-            "You're not purchasing. You're investing in the ELESENE brand." — Lifetime Recognition &amp; Privileges
+            &quot;You&apos;re not purchasing. You&apos;re investing in the ELESENE brand.&quot; — Lifetime Recognition &amp; Privileges
           </p>
         </div>
 
@@ -189,21 +200,24 @@ const LoyaltyPage = () => {
       <InvestmentTimeline transactions={history} />
 
       {/* ── AI Concierge ── */}
-      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm text-stone-900">
-        <div className="flex items-center gap-3 mb-5">
+      <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm text-stone-900 space-y-4">
+        <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
           <div className="p-2.5 rounded-xl bg-amber-100 text-amber-700 shrink-0 border border-amber-200">
             <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-sm font-display font-semibold text-stone-900 tracking-wide">AI Investment Concierge</h2>
-            <p className="text-[11px] text-stone-500 font-futura mt-0.5">Ask questions about your brand standing, tier perks, or campaign multipliers.</p>
+            <h2 className="text-sm font-display font-semibold text-stone-900 tracking-wide">
+              AI Investment Concierge
+            </h2>
+            <p className="text-[11px] text-stone-500 font-futura mt-0.5">Ask questions about tier privileges, point balances, or reward redemptions.</p>
           </div>
         </div>
 
-        <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 h-52 overflow-y-auto space-y-3 text-xs mb-4">
+        {/* Chat History Window */}
+        <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 h-56 overflow-y-auto space-y-3 text-xs">
           {chatMessages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-xl px-4 py-2.5 leading-relaxed font-futura ${
+              <div className={`max-w-[85%] rounded-xl px-4 py-2.5 leading-relaxed font-futura ${
                 msg.sender === 'user'
                   ? 'bg-amber-500 text-white font-semibold shadow-2xs'
                   : 'bg-white text-stone-700 border border-stone-200 shadow-2xs'
@@ -222,7 +236,29 @@ const LoyaltyPage = () => {
           )}
         </div>
 
-        <form onSubmit={handleAskAI} className="flex gap-2">
+        {/* Suggested Messages Chips */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1">
+            <HelpCircle className="h-3 w-3" />
+            Suggested Questions:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {suggestedQuestions.map((sq, idx) => (
+              <button
+                key={idx}
+                type="button"
+                disabled={aiLoading}
+                onClick={() => executeAskAI(sq.query)}
+                className="rounded-lg border border-stone-200 bg-stone-50/90 px-3 py-1.5 text-[11px] font-medium text-stone-700 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-900 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {sq.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Input Form */}
+        <form onSubmit={handleAskAI} className="flex gap-2 pt-1">
           <input
             type="text"
             value={aiQuery}
@@ -233,7 +269,7 @@ const LoyaltyPage = () => {
           <button
             type="submit"
             disabled={aiLoading || !aiQuery.trim()}
-            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
           >
             <span>Ask</span>
             <Send className="h-3.5 w-3.5" />

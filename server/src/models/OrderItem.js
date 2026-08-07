@@ -27,4 +27,17 @@ const OrderItem = sequelize.define('OrderItem', {
   timestamps: false
 });
 
+OrderItem.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  const unitPrice = values.unit_price != null ? Number(values.unit_price) : 0;
+  const totalPrice = values.total_price != null ? Number(values.total_price) : 0;
+  values.unit_price = unitPrice;
+  values.price = unitPrice;
+  values.total_price = totalPrice;
+  values.totalPrice = totalPrice;
+  values.quantity = values.quantity != null ? Number(values.quantity) : 1;
+  return values;
+};
+
 module.exports = OrderItem;
+

@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const AdminCardSkeleton = () => (
   <div className="bg-[#18181b] border border-white/10 rounded-2xl p-6 shadow-sm animate-pulse space-y-4">

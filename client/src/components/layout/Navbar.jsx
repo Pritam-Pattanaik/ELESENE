@@ -160,6 +160,13 @@ const Navbar = () => {
     }
   };
 
+  const handleNavLinkHover = (to) => {
+    if (to.startsWith('/shop')) import('../../pages/shop/ShopPage');
+    else if (to.startsWith('/lookbook')) import('../../pages/lookbook/LookbookPage');
+    else if (to.startsWith('/about')) import('../../pages/about/AboutPage');
+    else if (to.startsWith('/contact')) import('../../pages/contact/ContactPage');
+  };
+
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/shop', label: 'Shop' },
@@ -208,6 +215,7 @@ const Navbar = () => {
                   key={link.label}
                   to={link.to}
                   onClick={(e) => handleNavLinkClick(e, link.to)}
+                  onMouseEnter={() => handleNavLinkHover(link.to)}
                   className={`text-[11px] font-futura font-medium tracking-[0.2em] uppercase transition-colors duration-300 relative py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm ${
                     isActive ? 'text-gold' : 'text-ivory/70 hover:text-gold'
                   }`}

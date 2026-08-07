@@ -151,13 +151,13 @@ const AddressesPage = () => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-[#252340] border border-white/[0.07] rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
+            <div className="bg-white border border-[#E8E5DF] rounded-2xl p-6 md:p-8 mb-8 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-display font-bold text-ivory">{editingId ? 'Edit Shipping Address' : 'New Shipping Address'}</h3>
+                <h3 className="text-base font-display font-bold text-[#141414]">{editingId ? 'Edit Shipping Address' : 'New Shipping Address'}</h3>
                 <button 
                   onClick={() => setShowForm(false)} 
                   aria-label="Close address form"
-                  className="text-ivory/70 hover:text-gold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-md"
+                  className="text-[#6F6F6F] hover:text-[#B99246] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B99246] rounded-md"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -170,23 +170,23 @@ const AddressesPage = () => {
               <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="addr-label" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Label (e.g. Home, Work)</label>
+                    <label htmlFor="addr-label" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Label (e.g. Home, Work)</label>
                     <input 
                       type="text" 
                       {...getFieldProps('label', 'addr-label')}
                       placeholder="e.g. Home"
-                      className="w-full bg-noir border border-black/10 rounded-xl px-4 py-3 text-ivory text-sm font-futura placeholder:text-ivory/40 focus:outline-none focus:border-gold transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gold" 
+                      className="w-full bg-[#FAF9F7] border border-[#E8E5DF] rounded-xl px-4 py-3 text-[#141414] text-sm font-futura placeholder:text-[#909090] focus:outline-none focus:border-[#B99246] transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#B99246]" 
                     />
                   </div>
                   <div className="hidden md:block"></div>
                   
                   <div>
-                    <label htmlFor="addr-fullname" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Full Name *</label>
+                    <label htmlFor="addr-fullname" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Full Name *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('full_name', 'addr-fullname')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.full_name && touched.full_name ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.full_name && touched.full_name ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.full_name && touched.full_name && (
@@ -194,12 +194,12 @@ const AddressesPage = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="addr-phone" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Phone Number *</label>
+                    <label htmlFor="addr-phone" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Phone Number *</label>
                     <input 
                       type="tel" 
                       {...getFieldProps('phone', 'addr-phone')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.phone && touched.phone ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.phone && touched.phone ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.phone && touched.phone && (
@@ -208,12 +208,12 @@ const AddressesPage = () => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="addr-line1" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Address Line 1 *</label>
+                    <label htmlFor="addr-line1" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Address Line 1 *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('address_line1', 'addr-line1')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.address_line1 && touched.address_line1 ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.address_line1 && touched.address_line1 ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.address_line1 && touched.address_line1 && (
@@ -222,21 +222,21 @@ const AddressesPage = () => {
                   </div>
                   
                   <div className="md:col-span-2">
-                    <label htmlFor="addr-line2" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Address Line 2 (Optional)</label>
+                    <label htmlFor="addr-line2" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Address Line 2 (Optional)</label>
                     <input 
                       type="text" 
                       {...getFieldProps('address_line2', 'addr-line2')}
-                      className="w-full bg-noir border border-black/10 rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none focus:border-gold transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gold" 
+                      className="w-full bg-[#FAF9F7] border border-[#E8E5DF] rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none focus:border-[#B99246] transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#B99246]" 
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="addr-city" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">City *</label>
+                    <label htmlFor="addr-city" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">City *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('city', 'addr-city')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.city && touched.city ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.city && touched.city ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.city && touched.city && (
@@ -244,12 +244,12 @@ const AddressesPage = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="addr-state" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">State / Province *</label>
+                    <label htmlFor="addr-state" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">State / Province *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('state', 'addr-state')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.state && touched.state ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.state && touched.state ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.state && touched.state && (
@@ -258,12 +258,12 @@ const AddressesPage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="addr-pincode" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Pincode *</label>
+                    <label htmlFor="addr-pincode" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Pincode *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('pincode', 'addr-pincode')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.pincode && touched.pincode ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.pincode && touched.pincode ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.pincode && touched.pincode && (
@@ -271,12 +271,12 @@ const AddressesPage = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="addr-country" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-ivory/70 mb-2 font-bold">Country *</label>
+                    <label htmlFor="addr-country" className="block text-[9px] font-futura tracking-[0.2em] uppercase text-[#6F6F6F] mb-2 font-bold">Country *</label>
                     <input 
                       type="text" 
                       {...getFieldProps('country', 'addr-country')}
-                      className={`w-full bg-noir border rounded-xl px-4 py-3 text-ivory text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-gold ${
-                        errors.country && touched.country ? 'border-red-500' : 'border-black/10 focus:border-gold'
+                      className={`w-full bg-[#FAF9F7] border rounded-xl px-4 py-3 text-[#141414] text-sm font-futura focus:outline-none font-futura focus-visible:ring-2 focus-visible:ring-[#B99246] ${
+                        errors.country && touched.country ? 'border-red-500' : 'border-[#E8E5DF] focus:border-[#B99246]'
                       }`}
                     />
                     {errors.country && touched.country && (
@@ -292,18 +292,18 @@ const AddressesPage = () => {
                     name="is_default"
                     checked={values.is_default}
                     onChange={handleChange}
-                    className="w-4 h-4 rounded border-black/20 bg-noir text-gold focus:ring-gold cursor-pointer"
+                    className="w-4 h-4 rounded border-[#E8E5DF] bg-[#FAF9F7] text-[#B99246] focus:ring-[#B99246] cursor-pointer"
                   />
-                  <label htmlFor="is_default" className="text-xs font-futura text-ivory/80 select-none cursor-pointer font-medium">
+                  <label htmlFor="is_default" className="text-xs font-futura text-[#141414] select-none cursor-pointer font-medium">
                     Set as default shipping address
                   </label>
                 </div>
 
-                <div className="flex items-center gap-4 pt-6 border-t border-black/5">
-                  <button type="submit" className="px-6 py-2.5 bg-ivory text-white border border-ivory font-futura font-bold text-xs tracking-widest uppercase rounded-xl hover:bg-gold hover:border-gold hover:text-noir transition-colors duration-300 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
+                <div className="flex items-center gap-4 pt-6 border-t border-[#EFECE7]">
+                  <button type="submit" className="px-6 py-2.5 bg-[#141414] text-white border border-[#141414] font-futura font-bold text-xs tracking-widest uppercase rounded-xl hover:bg-[#B99246] hover:border-[#B99246] transition-colors duration-300 cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B99246]">
                     Save Address
                   </button>
-                  <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 bg-white/50 border border-black/5 text-ivory font-futura text-xs tracking-widest uppercase rounded-xl hover:bg-white/85 transition-all duration-300 cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold">
+                  <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 bg-white border border-[#E8E5DF] text-[#141414] font-futura text-xs tracking-widest uppercase rounded-xl hover:bg-[#F5F4F2] transition-all duration-300 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B99246]">
                     Cancel
                   </button>
                 </div>
@@ -337,43 +337,43 @@ const AddressesPage = () => {
               </div>
             ) : (
               addresses.map((addr) => (
-                <div key={addr.id} className="relative bg-[#252340] border border-white/[0.07] rounded-2xl p-6 group hover:border-amber-500/30 hover:shadow-md transition-all duration-300">
+                <div key={addr.id} className="relative bg-white border border-[#E8E5DF] rounded-2xl p-6 group hover:border-[#B99246]/40 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300">
                   {addr.is_default && (
-                    <div className="absolute top-0 right-0 px-3 py-1 bg-gold/15 border-b border-l border-gold/10 rounded-bl-lg rounded-tr-2xl">
-                      <span className="text-[8px] font-futura font-bold tracking-widest uppercase text-gold-light">Default</span>
+                    <div className="absolute top-0 right-0 px-3 py-1 bg-[#B99246]/10 border-b border-l border-[#B99246]/20 rounded-bl-lg rounded-tr-2xl">
+                      <span className="text-[8px] font-futura font-bold tracking-widest uppercase text-[#B99246]">Default</span>
                     </div>
                   )}
                   
                   <div className="mb-4 pr-16">
-                    <h4 className="text-ivory font-display font-bold text-base mb-1.5 flex items-center gap-2">
+                    <h4 className="text-[#141414] font-display font-bold text-base mb-1.5 flex items-center gap-2">
                       {addr.full_name}
                       {addr.label && (
-                        <span className="px-2 py-0.5 text-[8px] font-futura tracking-widest uppercase border border-black/5 bg-white rounded-full text-ivory/70 font-bold">
+                        <span className="px-2 py-0.5 text-[8px] font-futura tracking-widest uppercase border border-[#E8E5DF] bg-[#FAF9F7] rounded-full text-[#6F6F6F] font-bold">
                           {addr.label}
                         </span>
                       )}
                     </h4>
-                    <p className="text-ivory/70 font-futura text-xs font-medium">{addr.phone}</p>
+                    <p className="text-[#6F6F6F] font-futura text-xs font-medium">{addr.phone}</p>
                   </div>
                   
-                  <div className="text-ivory/70 font-futura text-xs space-y-1 mb-6 min-h-[72px] leading-relaxed">
+                  <div className="text-[#6F6F6F] font-futura text-xs space-y-1 mb-6 min-h-[72px] leading-relaxed">
                     <p>{addr.address_line1}</p>
                     {addr.address_line2 && <p>{addr.address_line2}</p>}
                     <p>{addr.city}, {addr.state} {addr.pincode}</p>
                     <p>{addr.country}</p>
                   </div>
                   
-                  <div className="flex items-center gap-4 pt-4 border-t border-black/5">
+                  <div className="flex items-center gap-4 pt-4 border-t border-[#EFECE7]">
                     <button 
                       onClick={() => handleEdit(addr)}
-                      className="text-[10px] font-futura tracking-wider text-ivory/70 hover:text-gold uppercase transition-colors font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm"
+                      className="text-[10px] font-futura tracking-wider text-[#6F6F6F] hover:text-[#B99246] uppercase transition-colors font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B99246] rounded-sm"
                     >
                       Edit
                     </button>
-                    <span className="text-black/10">•</span>
+                    <span className="text-[#E8E5DF]">•</span>
                     <button 
                       onClick={() => handleDelete(addr.id)}
-                      className="text-[10px] font-futura tracking-wider text-red-500/80 hover:text-red-600 uppercase transition-colors font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm"
+                      className="text-[10px] font-futura tracking-wider text-[#D14343] hover:text-red-700 uppercase transition-colors font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B99246] rounded-sm"
                     >
                       Delete
                     </button>

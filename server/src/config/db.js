@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-require('../config/env')
+require('../config/env');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const useNeon = isProduction || process.env.USE_NEON === 'true';
