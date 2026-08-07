@@ -105,24 +105,16 @@ const ScrollFrameAnimation = ({
 
   const isInView = useInView(containerRef, { once: true, margin: '200% 0px' });
 
-  /* ─── Draw frame on canvas with nearest-loaded fallback ─── */
+  /* ─── Draw frame on canvas ─── */
   const drawFrame = useCallback((frameIndex) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    let img = imagesRef.current[frameIndex];
-    if (!img || !img.complete || img.naturalWidth === 0) {
-      // Fallback to nearest loaded frame to avoid any black/empty canvas
-      for (let offset = 1; offset < 25; offset++) {
-        const prev = imagesRef.current[frameIndex - offset];
-        if (prev && prev.complete && prev.naturalWidth > 0) { img = prev; break; }
-        const next = imagesRef.current[frameIndex + offset];
-        if (next && next.complete && next.naturalWidth > 0) { img = next; break; }
-      }
-    }
-    if (!img || !img.complete || img.naturalWidth === 0) return;
+    if (!canvas || !imagesRef.current[frameIndex]) return;
 
     const ctx = canvas.getContext('2d');
+    const img = imagesRef.current[frameIndex];
+
+    if (!img.complete || img.naturalWidth === 0) return;
+
     if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
@@ -132,68 +124,31 @@ const ScrollFrameAnimation = ({
     ctx.drawImage(img, 0, 0);
   }, []);
 
-  /* ─── Progressive step preloading (key-frames first, then intermediate frames) ─── */
+  /* ─── Preload all frames ─── */
   useEffect(() => {
     if (!isInView) return;
 
-    let active = true;
-    const images = new Array(totalFrames);
+    let loaded = 0;
+    const images = [];
 
-    const loadSingleImage = (index) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        const num = String(index + 1).padStart(3, '0');
-        img.src = `${framePath}${num}.jpg`;
-        img.onload = img.onerror = () => {
-          images[index] = img;
-          resolve(img);
-        };
-      });
-    };
-
-    // Phase 1: Load frame 1 immediately for instant initial display
-    loadSingleImage(0).then(() => {
-      if (!active) return;
-      if (loaderRef.current) loaderRef.current.style.display = 'none';
-      drawFrame(0);
-
-      // Phase 2: Load keyframes (every 4th frame) for instant smooth scroll response
-      const keyframeIndices = [];
-      for (let i = 1; i < totalFrames; i += 4) keyframeIndices.push(i);
-
-      let keyIdx = 0;
-      const loadKeyframeBatch = () => {
-        if (!active || keyIdx >= keyframeIndices.length) {
-          // Phase 3: Fill remaining intermediate frames in background idle time
-          let fillIdx = 0;
-          const loadFillBatch = () => {
-            if (!active || fillIdx >= totalFrames) return;
-            const batch = [];
-            for (let b = 0; b < 10 && fillIdx < totalFrames; b++, fillIdx++) {
-              if (!images[fillIdx]) batch.push(loadSingleImage(fillIdx));
-            }
-            Promise.all(batch).then(() => {
-              if (active && fillIdx < totalFrames) setTimeout(loadFillBatch, 20);
-            });
-          };
-          loadFillBatch();
-          return;
+    for (let i = 1; i <= totalFrames; i++) {
+      const img = new Image();
+      const num = String(i).padStart(3, '0');
+      img.src = `${framePath}${num}.jpg`;
+      const onDone = () => {
+        loaded++;
+        if (loaded === totalFrames) {
+          // Hide loader via DOM ref — no setState needed
+          if (loaderRef.current) loaderRef.current.style.display = 'none';
+          drawFrame(0);
         }
-
-        const batch = [];
-        for (let b = 0; b < 8 && keyIdx < keyframeIndices.length; b++, keyIdx++) {
-          batch.push(loadSingleImage(keyframeIndices[keyIdx]));
-        }
-        Promise.all(batch).then(() => {
-          if (active) setTimeout(loadKeyframeBatch, 15);
-        });
       };
-
-      loadKeyframeBatch();
-    });
+      img.onload = onDone;
+      img.onerror = onDone;
+      images[i - 1] = img;
+    }
 
     imagesRef.current = images;
-    return () => { active = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalFrames, framePath, isInView]);
 

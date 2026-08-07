@@ -89,26 +89,16 @@ const HeroSection = () => {
       }}
     >
       
-      {/* Background Poster & Video Layer — Poster displays immediately for instant LCP, video cross-fades smoothly when ready */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-noir">
-        <img
-          src="/video_1_frames/ezgif-frame-001.jpg"
-          alt="ELESENE Hero Visual"
-          className="absolute inset-0 w-full h-full object-cover opacity-80"
-          fetchPriority="high"
-          decoding="async"
-        />
+      {/* Background Video — fades in only once ready, no image flash */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <video
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
-          poster="/video_1_frames/ezgif-frame-001.jpg"
+          fetchPriority="high"
           onCanPlay={() => setVideoReady(true)}
-          onLoadedData={() => setVideoReady(true)}
-          onError={() => setVideoReady(false)}
           className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
           style={{
             opacity: videoReady ? 0.9 : 0,
